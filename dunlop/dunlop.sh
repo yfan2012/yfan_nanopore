@@ -64,3 +64,14 @@ if [ $1 == illumina_marcc ] ; then
     mkdir -p ~/work/180714_dunlop_3ecoli/illumina
     scp -r smaug:/dilithium/Data/NGS/Raw/180722_dunlop_3ecoli/* ~/work/180714_dunlop_3ecoli/illumina/
 fi
+
+if [ $1 == pilon ] ; then
+    sbatch --output=$datadir/batch_logs/ecoli1_pilon.out --job-name=ecoli1 pilon.scr ecoli1
+    sbatch --output=$datadir/batch_logs/ecoli2_pilon.out --job-name=ecoli2 pilon.scr ecoli2
+    sbatch --output=$datadir/batch_logs/ecoli3_pilon.out --job-name=ecoli3 pilon.scr ecoli3
+fi
+
+
+if [ $1 == copyassembly ] ; then
+    scp -r $datadir/ecoli* smaug:/dilithium/Data/Nanopore/projects/dunlop_ecoli/
+fi

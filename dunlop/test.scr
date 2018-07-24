@@ -1,0 +1,17 @@
+#!/bin/bash -l 
+
+#SBATCH --account=mschatz1
+#SBATCH --time=14:00:00
+#SBATCH --nodes=1
+#SBATCH --exclusive
+#SBATCH --ntasks-per-node=1
+
+ml samtools
+
+prefix=`echo $1 | rev | cut -d / -f 1 | rev`
+if [ -z $prefix ] ; then
+    prefix=`echo $1 | rev | cut -d / -f 2 | rev`
+fi
+
+echo $prefix
+
