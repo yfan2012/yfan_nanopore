@@ -95,3 +95,20 @@ if [ $1 == parsnp ] ; then
     parsnp -r $assembledir/ecoli_k12.fasta -d $assembledir/pilon17 -p 12 -o $parsdir/pilon17_parsnp -c
     harvesttools -i $parsdir/pilon17_parsnp/parsnp.ggr -V $parsdir/pilon17_parsnp/pilon17.vcf
 fi
+
+if [ $1 == spades] ; then
+    ml python/2.7
+    for i in ecoli1 ecoli2 ecoli3 ;
+    do
+	fastqdir=~/work/180714_dunlop_3ecoli/illumina
+	sampdir=$datadir/${i}_spades
+	mkdir $sampdir
+	mkdir $fastqdir/trimmed
+	
+	java -jar ~/software/Trimmomatic-0.38/trimmomatic-0.38.jar PE -threads 36 -phred33 $fastqdir/$i*R1* $fastqdir/$i*R2* $fastqdir/trimmed/${i}_forward_paired.fq.gz $fastqdir/trimmed/${i}_forward_unpaired.fq.gz $fastqdir/trimmed/${i}_reverse_paired.fq.gz $fastqdir/trimmed/${i}_reverse_unpaired.fq.gz ILLUMINACLIP:NexteraPE-PE.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:36
+
+	spades.py -1 $fastqdir/trimmed/${i}_forward_paired.fq.gz -2 $fastqdir/trimmed/${i}_reverse_paired.fq.gz -t 36 -m 300 -o $datadir/${i}_spades
+    done
+fi
+	
+	
