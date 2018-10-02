@@ -58,12 +58,29 @@ if [ $1 == align_gridfqs ] ; then
     for i in antibody mock infected ;
     do
 	mkdir -p $datadir/$i/align
-	minimap2 -a -x map-ont -t 36 $datadir/sindbis.fasta $datadir/$i/gridfqs/*.fq  | samtools view -b | samtools sort -o $datadir/$i/align/$i.gridfq.sorted.bam -T $datadir/$i/align/reads.tmp -
-
+	minimap2 -a -x map-ont -t 36 $datadir/sindbis_jane.fasta $datadir/$i/gridfqs/*.fq  | samtools view -b | samtools sort -o $datadir/$i/align/$i.gridfq.sorted.bam -T $datadir/$i/align/reads.tmp -
 	samtools index $datadir/$i/align/$i.gridfq.sorted.bam
     done
 fi
 
-##if [ $1 == fqs ] ; then
+
+if [ $1 == alignfqs ] ; then
+    ml samtools
     ##gatherfq
-##fi
+    for i in antibody mock infected ;
+    do
+	mkdir -p $datadir/$i/fqs
+	cat $datadir/$i/called/*/workspace/pass/*fastq > $datadir/$i/fqs/$i.fq
+	minimap2 -a -x map-ont -t 36 $datadir/sindbis_jane.fasta $datadir/$i/fqs/$i.fq  | samtools view -b | samtools sort -o $datadir/$i/align/$i.sorted.bam -T $datadir/$i/align/reads.tmp -
+	samtools index $datadir/$i/align/$i.sorted.bam
+    done
+fi
+
+
+if [ $1 == cpaligntolocal ] ; then
+    ##copy alignments back to local
+    for i in antibody mock infected ;
+    do
+	scp -r $datadir/$i/align smaug:/dilithium/Data/Nanopore/sindbis/$i/
+    done
+fi
