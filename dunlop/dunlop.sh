@@ -96,7 +96,7 @@ if [ $1 == parsnp ] ; then
     harvesttools -i $parsdir/pilon17_parsnp/parsnp.ggr -V $parsdir/pilon17_parsnp/pilon17.vcf
 fi
 
-if [ $1 == spades] ; then
+if [ $1 == spades ] ; then
     ml python/2.7
     for i in ecoli1 ecoli2 ecoli3 ;
     do
@@ -106,9 +106,70 @@ if [ $1 == spades] ; then
 	mkdir $fastqdir/trimmed
 	
 	java -jar ~/software/Trimmomatic-0.38/trimmomatic-0.38.jar PE -threads 36 -phred33 $fastqdir/$i*R1* $fastqdir/$i*R2* $fastqdir/trimmed/${i}_forward_paired.fq.gz $fastqdir/trimmed/${i}_forward_unpaired.fq.gz $fastqdir/trimmed/${i}_reverse_paired.fq.gz $fastqdir/trimmed/${i}_reverse_unpaired.fq.gz ILLUMINACLIP:NexteraPE-PE.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:36
-
+	
 	spades.py -1 $fastqdir/trimmed/${i}_forward_paired.fq.gz -2 $fastqdir/trimmed/${i}_reverse_paired.fq.gz -t 36 -m 300 -o $datadir/${i}_spades
     done
 fi
+
+
+
+if [ $1 == reorg ] ; then
+    for i in ecoli1 ecoli2 ecoli3 ;
+    do
+	mv -p $datadir/$i
+	mv $datadir/${i}_* $datadir/$i
+	mv $datadir/$i/*assembly $datadir/$i/assembly
+	mv $datadir/$i/*assembly17 $datadir/$i/assembly17
+	mv $datadir/$i/*pilon $datadir/$i/pilon
+	mv $datadir/$i/*pilon17 $datadir/$i/pilon17
+    done
+fi
 	
+if [ $1 == align_pilon17diff ] ; then
+    ##look at persistent CCWGG snp in ecoli 3 by alignment
+    ml samtools
+    for i in ecoli1 ecoli2 ecoli3 ;
+    do
+	fastqdir=~/work/180714_dunlop_3ecoli/illumina
+	bamdir=$datadir/$i/align
+	pilonill=$datadir/$i/align/pilonill
 	
+	mkdir -p $bamdir
+	mkdir -p $pilonill
+	mkdir -p $pilonill/btidx
+	
+	cp $datadir/$i/pilon17/$i.pilon17.10.fasta $pilonill/btidx/
+	bowtie2-build -q $pilonill/btidx/$i.pilon17.10.fasta $pilonill/btidx/ecoli3.pilon17.10
+	bowtie2 -p 24 -x $pilonill/btidx/ecoli3.pilon17.10 -1 $datadir/illumina/$i*R1_001.fastq.gz -2 $datadir/illumina/$i*R2_001.fastq.gz | samtools view -bS - | samtools sort -o $pilonill/$i.sorted.bam
+	samtools index $pilonill/$i.sorted.bam
+    done
+fi
+
+	
+if [ $1 == cppilonill ] ; then
+   for i in ecoli1 ecoli2 ecoli3 ;
+   do
+       pilonill=$datadir/$i/align/pilonill
+       scp -r $pilonill/$i.sorted.bam* smaug:~/Dropbox/yfan/dunlop/align/pilonill/
+   done
+fi
+       
+if [ $1 == align_pilondiff ] ; then
+    ##look at persistent CCWGG snp in ecoli 3 by alignment
+    ml samtools
+    for i in ecoli1 ecoli2 ecoli3 ;
+    do
+	fastqdir=~/work/180714_dunlop_3ecoli/illumina
+	bamdir=$datadir/$i/align
+	pilonill=$datadir/$i/align/pilonill
+	
+	mkdir -p $bamdir
+	mkdir -p $pilonill
+	mkdir -p $pilonill/btidx
+	
+	cp $datadir/$i/pilon/$i.pilon.10.fasta $pilonill/btidx/
+	bowtie2-build -q $pilonill/btidx/$i.pilon.10.fasta $pilonill/btidx/ecoli3.pilon.10
+	bowtie2 -p 24 -x $pilonill/btidx/ecoli3.pilon.10 -1 $datadir/illumina/$i*R1_001.fastq.gz -2 $datadir/illumina/$i*R2_001.fastq.gz | samtools view -bS - | samtools sort -o $pilonill/$i.sorted.bam
+	samtools index $pilonill/$i.sorted.bam
+    done
+fi

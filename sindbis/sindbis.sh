@@ -84,3 +84,22 @@ if [ $1 == cpaligntolocal ] ; then
 	scp -r $datadir/$i/align smaug:/dilithium/Data/Nanopore/sindbis/$i/
     done
 fi
+
+
+if [ $1 == alignrat ] ; then
+    ml samtools
+    for i in antibody mock infected ;
+    do
+	minimap2 -a -x map-ont -t 36 $datadir/rattus_norvegicus.fa $datadir/$i/fqs/$i.fq  | samtools view -b | samtools sort -o $datadir/$i/align/$i.rat.sorted.bam -T $datadir/$i/align/reads.tmp -
+	samtools index $datadir/$i/align/$i.rat.sorted.bam
+    done
+fi
+
+if [ $1 == splicealignrat ] ; then
+    ml samtools
+    for i in antibody mock infected ;
+    do
+	minimap2 -a -x splice -uf -k14 -t 36 $datadir/rattus_norvegicus.fa $datadir/$i/fqs/$i.fq  | samtools view -b | samtools sort -o $datadir/$i/align/$i.rat.splicealn.sorted.bam -T $datadir/$i/align/reads.tmp -
+	samtools index $datadir/$i/align/$i.rat.sorted.bam
+    done
+fi
