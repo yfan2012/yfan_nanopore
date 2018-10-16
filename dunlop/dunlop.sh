@@ -86,13 +86,13 @@ if [ $1 == parsnp ] ; then
     mkdir -p $parsdir/pilon_parsnp
     mkdir -p $parsdir/pilon17_parsnp
 
-    parsnp -r $assembledir/ecoli_k12.fasta -d $assembledir/raw -p 12 -o $parsdir/raw_parsnp -c
+    parsnp -r $assembledir/bw25311.fasta -d $assembledir/raw -p 12 -o $parsdir/raw_parsnp -c
     harvesttools -i $parsdir/raw_parsnp/parsnp.ggr -V $parsdir/raw_parsnp/raw.vcf
-    parsnp -r $assembledir/ecoli_k12.fasta -d $assembledir/canu17 -p 12 -o $parsdir/canu17_parsnp -c
+    parsnp -r $assembledir/bw25311.fasta -d $assembledir/canu17 -p 12 -o $parsdir/canu17_parsnp -c
     harvesttools -i $parsdir/canu17_parsnp/parsnp.ggr -V $parsdir/canu17_parsnp/canu17.vcf
-    parsnp -r $assembledir/ecoli_k12.fasta -d $assembledir/pilon -p 12 -o $parsdir/pilon_parsnp -c
+    parsnp -r $assembledir/bw25311.fasta -d $assembledir/pilon -p 12 -o $parsdir/pilon_parsnp -c
     harvesttools -i $parsdir/pilon_parsnp/parsnp.ggr -V $parsdir/pilon_parsnp/pilon.vcf
-    parsnp -r $assembledir/ecoli_k12.fasta -d $assembledir/pilon17 -p 12 -o $parsdir/pilon17_parsnp -c
+    parsnp -r $assembledir/bw25311.fasta -d $assembledir/pilon17 -p 12 -o $parsdir/pilon17_parsnp -c
     harvesttools -i $parsdir/pilon17_parsnp/parsnp.ggr -V $parsdir/pilon17_parsnp/pilon17.vcf
 fi
 
