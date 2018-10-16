@@ -35,13 +35,13 @@ if [ $1 == unzip ] ; then
 fi
 
 if [ $1 == centrifuge ] ; then
+    ml gcc
     for i in antibody mock infected ;
     do
 	dbdir=~/scratch/centrifuge_db
 	mkdir -p $datadir/$i/classification
 
-	~/scratch/centrifuge/centrifuge -p 36 -x $dbdir/abv -U $datadir/$i/gridfqs/*.fq -S $datadir/$i/classification/${i}_classification.txt --report-file $datadir/$i/classification/${i}_report.tsv
-
+	~/scratch/centrifuge/centrifuge -p 36 -x $dbdir/abvm -U $datadir/$i/fqs/*.fq -S $datadir/$i/classification/${i}_classification.txt --report-file $datadir/$i/classification/${i}_report.tsv
     done
 fi
 
