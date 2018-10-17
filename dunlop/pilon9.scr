@@ -1,0 +1,45 @@
+#!/bin/bash -l 
+
+#SBATCH --account=mschatz1
+#SBATCH --time=3:00:00
+#SBATCH --nodes=1
+#SBATCH --exclusive
+#SBATCH --ntasks-per-node=1
+
+ml samtools
+
+prefix=`echo $1 | rev | cut -d / -f 1 | rev`
+if [ -z $prefix ] ; then
+    prefix=`echo $1 | rev | cut -d / -f 2 | rev`
+fi
+
+datadir=~/work/181004_dunlop_9ecoli/$1
+mkdir -p $datadir/pilon/btidx
+mkdir -p $datadir/pilon/btbam
+
+##copy the raw assembly into the index dir
+cp $datadir/assembly/$1.contigs.fasta $datadir/pilon/btidx/$1.fasta
+
+for i in 1 2 3 4 5 6 7 8 9 10 ;
+do
+    ##build the index and align
+    echo building btidx and aligning for round $i
+    bowtie2-build -q $datadir/pilon/btidx/$1.fasta $datadir/pilon/btidx/$1
+    bowtie2 -p 36 --mp 3 --rdg 4,3 --rfg 4,3 -x $datadir/pilon/btidx/$1 -1 $datadir/pilon/*R1_001.fastq.gz -2 $datadir/pilon/*R2_001.fastq.gz | samtools view -bS - | samtools sort -o $datadir/pilon/btbam/$1.sorted.bam
+    samtools index $datadir/pilon/btbam/$1.sorted.bam
+    
+    ##do the correction
+    echo correcting for round $i
+    java -Xmx100G -jar ~/software/pilon/pilon-1.22.jar --threads 36 --fix bases --changes --tracks --genome $datadir/pilon/btidx/$1.fasta --frags $datadir/pilon/btbam/$1.sorted.bam --outdir $datadir/pilon --output $1.pilon.$i
+    
+    ##newly corrected genome replaces the old genome in the index dir
+    echo clearing old
+    rm $datadir/pilon/btidx/*
+    rm $datadir/pilon/btbam/*
+
+    echo copying $i to empty index folder
+    cp $datadir/pilon/$1.pilon.$i.fasta $datadir/pilon/btidx/$1.fasta
+
+done
+    ##sed -i -e 's/_pilon//g' $1/pilon/btidx/$prefix.fasta
+

@@ -18,6 +18,12 @@ if [ $1 == call ] ; then
     sbatch --array=0-365 --job-name=call_dunlop --output=$datadir/call_logs/dunlop_ecoli3.%A_%a.out $srcdir/bc_call.scr $datadir
 fi
 
+if [ $1 == rmraw ] ; then
+    for i in $datadir/raw/* ;
+    do
+	(rm -r $i) &
+    done
+fi
 
 if [ $1 == fastq ] ; then
     mkdir -p $datadir/fastqs
@@ -28,7 +34,8 @@ if [ $1 == fastq ] ; then
 fi
     
 if [ $1 == assemble ] ; then
-    mkdir $datadir/assemblies
+    ##everything uses canu 1.7 by default now
+    mkdir -p $datadir/assemblies
     for i in 1 2 3 4 5 6 7 8 9 ;
     do
 	mkdir $datadir/assemblies/ecoli${i}
@@ -36,35 +43,33 @@ if [ $1 == assemble ] ; then
     done
 fi
 
-if [ $1 == assemble17 ] ; then
-    mkdir $datadir/ecoli1_assembly17
-    bash assemble_bacteria.sh $datadir/fastqs/ecoli1_sub200k.fastq $datadir/ecoli1_assembly17
-    mkdir $datadir/ecoli2_assembly17
-    bash assemble_bacteria.sh $datadir/fastqs/ecoli2_sub200k.fastq $datadir/ecoli2_assembly17
-    mkdir $datadir/ecoli3_assembly17
-    bash assemble_bacteria.sh $datadir/fastqs/ecoli3_sub200k.fastq $datadir/ecoli3_assembly17
+    
+if [ $1 == illumina_marcc ] ; then
+    mkdir -p ~/work/181004_dunlop_9ecoli/illumina
+    scp -r smaug:/dilithium/Data/NGS/Raw/181013_dunlop9_GEOB/ecoli* ~/work/181004_dunlop_9ecoli/illumina/
 fi
 
-    
-if [ $1 == illumina_dilith ] ; then
-    ##copy illumina data to dilithium
-    mkdir -p /dilithium/Data/NGS/Raw/180722_dunlop_3ecoli
-    for i in `find ~/BaseSpace/Projects/180722_dunlop_3ecoli/ -name *fastq.gz` ;
+if [ $1 == reorg ] ; then
+    for i in 1 2 3 4 5 6 7 8 9 ;
     do
-	cp $i /dilithium/Data/NGS/Raw/180722_dunlop_3ecoli/
+	mkdir -p $datadir/ecoli${i}
+	mv $datadir/assemblies/ecoli${i} $datadir/ecoli${i}/assembly
+	mv $datadir/fastqs/ecoli${i}.fastq $datadir/ecoli${i}/
+	mkdir -p $datadir/ecoli${i}/pilon
+	mv $datadir/illumina/ecoli9-${i}* $datadir/ecoli${i}/pilon/
+    done
+fi
+	
+
+if [ $1 == pilon ] ; then
+    for i in 1 2 3 4 5 6 7 8 9 ;
+    do
+	mkdir -p $datadir/ecoli${i}/pilon
+	sbatch --output=$datadir/batch_logs/ecoli${i}_pilon.out --job-name=ecoli${i} pilon9.scr ecoli${i}
     done
 fi
 
-if [ $1 == illumina_marcc ] ; then
-    mkdir -p ~/work/180714_dunlop_3ecoli/illumina
-    scp -r smaug:/dilithium/Data/NGS/Raw/180722_dunlop_3ecoli/* ~/work/180714_dunlop_3ecoli/illumina/
-fi
 
-if [ $1 == pilon ] ; then
-    sbatch --output=$datadir/batch_logs/ecoli1_pilon.out --job-name=ecoli1 pilon.scr ecoli1
-    sbatch --output=$datadir/batch_logs/ecoli2_pilon.out --job-name=ecoli2 pilon.scr ecoli2
-    sbatch --output=$datadir/batch_logs/ecoli3_pilon.out --job-name=ecoli3 pilon.scr ecoli3
-fi
 
 
 if [ $1 == copyassembly ] ; then

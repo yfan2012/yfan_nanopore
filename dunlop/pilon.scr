@@ -1,7 +1,7 @@
 #!/bin/bash -l 
 
 #SBATCH --account=mschatz1
-#SBATCH --time=14:00:00
+#SBATCH --time=3:00:00
 #SBATCH --nodes=1
 #SBATCH --exclusive
 #SBATCH --ntasks-per-node=1
