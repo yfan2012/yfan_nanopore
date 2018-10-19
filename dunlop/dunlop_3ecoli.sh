@@ -1,6 +1,6 @@
 #!/bin/bash
 
-datadir=~/work/180714_dunlop_3ecoli
+datadir=/scratch/groups/mschatz1/cpowgs/dunlop/180714_dunlop_3ecoli
 srcdir=~/Code/utils/marcc
 
 mkdir -p $datadir/batch_logs
@@ -10,7 +10,6 @@ if [ $1 == untar ] ; then
     sbatch --output=$datadir/batch_logs/untar.out --job-name=ut_dunlop $srcdir/untar.scr $datadir/180714_dunlop_3ecoli.tar.gz $datadir
 fi
 
-   
 if [ $1 == call ] ; then
     mkdir -p $datadir/called
     mkdir -p $datadir/call_logs
@@ -20,37 +19,28 @@ fi
 
 
 if [ $1 == fastq ] ; then
-    mkdir -p $datadir/fastqs
-    cat $datadir/called/*/workspace/pass/barcode01/*fastq > $datadir/fastqs/ecoli1.fastq
-    cat $datadir/called/*/workspace/pass/barcode02/*fastq > $datadir/fastqs/ecoli2.fastq
-    cat $datadir/called/*/workspace/pass/barcode03/*fastq > $datadir/fastqs/ecoli3.fastq
+    for i in 1 2 3 ;
+    do
+	mkdir -p $datadir/ecoli${i}
+	cat $datadir/called/*/workspace/pass/barcode0${i}/*fastq > $datadir/ecoli${i}/fastqs/ecoli${i}.fastq
+    done
 fi
     
 if [ $1 == downsamp ] ; then
-    head -800000 $datadir/fastqs/ecoli1.fastq > $datadir/fastqs/ecoli1_sub200k.fastq
-    head -800000 $datadir/fastqs/ecoli2.fastq > $datadir/fastqs/ecoli2_sub200k.fastq
-    head -800000 $datadir/fastqs/ecoli3.fastq > $datadir/fastqs/ecoli3_sub200k.fastq
+    for i in 1 2 3 ;
+    do
+	head -800000 $datadir/ecoli${i}/fastqs/ecoli${i}.fastq > $datadir/ecoli${i}/fastqs/ecoli${i}_sub200k.fastq
+    done
 fi
 
 if [ $1 == assemble ] ; then
-    mkdir $datadir/ecoli1_assembly
-    bash assemble_bacteria.sh $datadir/fastqs/ecoli1.fastq $datadir/ecoli1_assembly
-    mkdir $datadir/ecoli2_assembly
-    bash assemble_bacteria.sh $datadir/fastqs/ecoli2.fastq $datadir/ecoli2_assembly
-    mkdir $datadir/ecoli3_assembly
-    bash assemble_bacteria.sh $datadir/fastqs/ecoli3.fastq $datadir/ecoli3_assembly
+    for i in 1 2 3 ;
+    do
+	mkdir $datadir/ecoli${i}/assembly
+	bash assemble_bacteria.sh $datadir/ecoli${i}/fastqs/ecoli${i}_sub200k.fastq $datadir/ecoli${i}/assembly
+    done
 fi
 
-if [ $1 == assemble17 ] ; then
-    mkdir $datadir/ecoli1_assembly17
-    bash assemble_bacteria.sh $datadir/fastqs/ecoli1_sub200k.fastq $datadir/ecoli1_assembly17
-    mkdir $datadir/ecoli2_assembly17
-    bash assemble_bacteria.sh $datadir/fastqs/ecoli2_sub200k.fastq $datadir/ecoli2_assembly17
-    mkdir $datadir/ecoli3_assembly17
-    bash assemble_bacteria.sh $datadir/fastqs/ecoli3_sub200k.fastq $datadir/ecoli3_assembly17
-fi
-
-    
 if [ $1 == illumina_dilith ] ; then
     ##copy illumina data to dilithium
     mkdir -p /dilithium/Data/NGS/Raw/180722_dunlop_3ecoli
@@ -61,14 +51,16 @@ if [ $1 == illumina_dilith ] ; then
 fi
 
 if [ $1 == illumina_marcc ] ; then
-    mkdir -p ~/work/180714_dunlop_3ecoli/illumina
-    scp -r smaug:/dilithium/Data/NGS/Raw/180722_dunlop_3ecoli/* ~/work/180714_dunlop_3ecoli/illumina/
+    mkdir -p $datadir/illumina
+    scp -r smaug:/dilithium/Data/NGS/Raw/180722_dunlop_3ecoli/* $datadir/illumina/
 fi
 
 if [ $1 == pilon ] ; then
-    sbatch --output=$datadir/batch_logs/ecoli1_pilon.out --job-name=ecoli1 pilon.scr ecoli1
-    sbatch --output=$datadir/batch_logs/ecoli2_pilon.out --job-name=ecoli2 pilon.scr ecoli2
-    sbatch --output=$datadir/batch_logs/ecoli3_pilon.out --job-name=ecoli3 pilon.scr ecoli3
+    for i in 1 2 3 ;
+    do
+	cp $datadir/illumina/ecoli${i}*.fastq.gz $datadir/ecoli${i}/pilon/
+	sbatch --output=$datadir/batch_logs/ecoli${i}_pilon.out --job-name=ecoli${i} pilon.scr $datadir/ecoli${i}	
+    done
 fi
 
 

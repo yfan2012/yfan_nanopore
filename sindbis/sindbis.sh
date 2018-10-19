@@ -103,3 +103,13 @@ if [ $1 == splicealignrat ] ; then
 	samtools index $datadir/$i/align/$i.rat.sorted.bam
     done
 fi
+
+
+if [ $1 == transcript_alignrat ] ; then
+    ml samtools
+    for i in antibody mock infected ;
+    do
+	minimap2 -a -x splice -uf -k14 -t 24 $datadir/rattus_norvegicus.rna.fa $datadir/$i/fqs/$i.fq  | samtools view -b | samtools sort -o $datadir/$i/align/$i.rat.transcriptaln.sorted.bam -T $datadir/$i/align/reads.tmp -
+	samtools index $datadir/$i/align/$i.rat.transcriptaln.sorted.bam
+    done
+fi

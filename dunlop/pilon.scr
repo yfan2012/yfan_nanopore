@@ -13,52 +13,34 @@ if [ -z $prefix ] ; then
     prefix=`echo $1 | rev | cut -d / -f 2 | rev`
 fi
 
-illumina=~/work/180714_dunlop_3ecoli/illumina
-
-datadir=~/work/180714_dunlop_3ecoli/$1
-mkdir -p ${datadir}_pilon
-mkdir -p ${datadir}_pilon/btidx
-mkdir -p ${datadir}_pilon/btbam
-
-mkdir -p ${datadir}_pilon17
-mkdir -p ${datadir}_pilon17/btidx
-mkdir -p ${datadir}_pilon17/btbam
-
-
 ##copy the raw assembly into the index dir
-cp ${datadir}_assembly/$1.contigs.fasta ${datadir}_pilon/btidx/$1.fasta
-cp ${datadir}_assembly17/$1_sub200k.contigs.fasta ${datadir}_pilon17/btidx/$1.fasta
+cp $1/assembly/$prefix.contigs.fasta $1/pilon/$prefix.fasta
 
 for i in 1 2 3 4 5 6 7 8 9 10 ;
 do
+    mkdir -p $1/pilon/round_$i
+    mkdir -p $1/pilon/round_$i/btidx
+    mkdir -p $1/pilon/round_$i/btbam
+    cp $1/pilon/$prefix.fasta $1/pilon/round_$i/btidx
+    
     ##build the index and align
     echo building btidx and aligning for round $i
-    bowtie2-build -q ${datadir}_pilon/btidx/$1.fasta ${datadir}_pilon/btidx/$1
-    bowtie2 -p 24 -x ${datadir}_pilon/btidx/$1 -1 $illumina/$1*R1_001.fastq.gz -2 $illumina/$1*R2_001.fastq.gz | samtools view -bS - | samtools sort -o ${datadir}_pilon/btbam/$1.sorted.bam
-    samtools index ${datadir}_pilon/btbam/$1.sorted.bam
-
-    bowtie2-build -q ${datadir}_pilon17/btidx/$1.fasta ${datadir}_pilon17/btidx/$1
-    bowtie2 -p 24 -x ${datadir}_pilon17/btidx/$1 -1 $illumina/$1*R1_001.fastq.gz -2 $illumina/$1*R2_001.fastq.gz | samtools view -bS - | samtools sort -o ${datadir}_pilon17/btbam/$1.sorted.bam
-    samtools index ${datadir}_pilon17/btbam/$1.sorted.bam
-
+    bowtie2-build -q $1/pilon/round_$i/btidx/$prefix.fasta $1/pilon/round_$i/btidx/$prefix
+    bowtie2 -p 24 -x $1/pilon/round_$i/btidx/$prefix -1 $1/pilon/*R1_001.fastq.gz -2 $1/pilon/*R2_001.fastq.gz | samtools view -bS - | samtools sort -o $1/pilon/round_$i/btbam/$prefix.sorted.bam
+    samtools index $1/pilon/round_$i/btbam/$prefix.sorted.bam
     
     ##do the correction
     echo correcting for round $i
-    java -Xmx100G -jar ~/software/pilon/pilon-1.22.jar --threads 12 --changes --tracks --genome ${datadir}_pilon/btidx/$1.fasta --frags ${datadir}_pilon/btbam/$1.sorted.bam --outdir ${datadir}_pilon --output $1.pilon.$i
-    java -Xmx100G -jar ~/software/pilon/pilon-1.22.jar --threads 12 --changes --tracks --genome ${datadir}_pilon17/btidx/$1.fasta --frags ${datadir}_pilon17/btbam/$1.sorted.bam --outdir ${datadir}_pilon17 --output $1.pilon17.$i
-    
+    java -Xmx100G -jar ~/software/pilon/pilon-1.22.jar --threads 24 --fix bases --changes --tracks --genome $1/pilon/round_$i/btidx/$prefix.fasta --frags $1/pilon/round_$i/btbam/$prefix.sorted.bam --outdir $1/pilon/round_$i --output $prefix.pilon.$i
     
     ##newly corrected genome replaces the old genome in the index dir
-    echo clearing old
-    rm ${datadir}_pilon/btidx/*
-    rm ${datadir}_pilon/btbam/*
-
-    rm ${datadir}_pilon17/btidx/*
-    rm ${datadir}_pilon17/btbam/*
 
     echo copying $i to empty index folder
-    cp ${datadir}_pilon/$1.pilon.$i.fasta ${datadir}_pilon/btidx/$1.fasta
-    cp ${datadir}_pilon17/$1.pilon17.$i.fasta ${datadir}_pilon17/btidx/$1.fasta
+    cp $1/pilon/round_$i/$prefix.pilon.$i.fasta $1/pilon/$prefix.fasta
+
 done
     ##sed -i -e 's/_pilon//g' $1/pilon/btidx/$prefix.fasta
 
+
+##try different align params in the later rounds (eventually auto detect when no more changes are made with while loop)
+##bowtie2 -p 24 --mp 3 --rdg 4,3 --rfg 4,3 -x $datadir/pilon/btidx/$1 -1 $datadir/pilon/*R1_001.fastq.gz -2 $datadir/pilon/*R2_001.fastq.gz | samtools view -bS - | samtools sort -o $datadir/pilon/btbam/$1.sorted.bam

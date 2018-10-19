@@ -89,33 +89,20 @@ fi
 
 if [ $1 == spades ] ; then
     ml python/2.7
-    for i in ecoli1 ecoli2 ecoli3 ;
+    for i in 1 2 3 4 5 6 7 8 9 ;
     do
-	fastqdir=~/work/180714_dunlop_3ecoli/illumina
-	sampdir=$datadir/${i}_spades
-	mkdir $sampdir
-	mkdir $fastqdir/trimmed
+	fastqdir=$datadir/ecoli${i}/pilon
+	sampdir=$datadir/ecoli${i}/spades
+	mkdir -p $sampdir
+	mkdir -p $sampdir/trimmed
 	
-	java -jar ~/software/Trimmomatic-0.38/trimmomatic-0.38.jar PE -threads 36 -phred33 $fastqdir/$i*R1* $fastqdir/$i*R2* $fastqdir/trimmed/${i}_forward_paired.fq.gz $fastqdir/trimmed/${i}_forward_unpaired.fq.gz $fastqdir/trimmed/${i}_reverse_paired.fq.gz $fastqdir/trimmed/${i}_reverse_unpaired.fq.gz ILLUMINACLIP:NexteraPE-PE.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:36
+	java -jar ~/software/Trimmomatic-0.38/trimmomatic-0.38.jar PE -threads 36 -phred33 $fastqdir/*R1* $fastqdir/*R2* $sampdir/trimmed/ecoli${i}_forward_paired.fq.gz $sampdir/trimmed/ecoli${i}_forward_unpaired.fq.gz $sampdir/trimmed/ecoli${i}_reverse_paired.fq.gz $sampdir/trimmed/ecoli${i}_reverse_unpaired.fq.gz ILLUMINACLIP:NexteraPE-PE.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:36
 	
-	spades.py -1 $fastqdir/trimmed/${i}_forward_paired.fq.gz -2 $fastqdir/trimmed/${i}_reverse_paired.fq.gz -t 36 -m 300 -o $datadir/${i}_spades
+	spades.py -1 $sampdir/trimmed/ecoli${i}_forward_paired.fq.gz -2 $sampdir/trimmed/ecoli${i}_reverse_paired.fq.gz -t 36 -m 300 -o $sampdir
     done
 fi
 
 
-
-if [ $1 == reorg ] ; then
-    for i in ecoli1 ecoli2 ecoli3 ;
-    do
-	mv -p $datadir/$i
-	mv $datadir/${i}_* $datadir/$i
-	mv $datadir/$i/*assembly $datadir/$i/assembly
-	mv $datadir/$i/*assembly17 $datadir/$i/assembly17
-	mv $datadir/$i/*pilon $datadir/$i/pilon
-	mv $datadir/$i/*pilon17 $datadir/$i/pilon17
-    done
-fi
-	
 if [ $1 == align_pilon17diff ] ; then
     ##look at persistent CCWGG snp in ecoli 3 by alignment
     ml samtools
