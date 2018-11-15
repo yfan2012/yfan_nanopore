@@ -3,6 +3,13 @@
 datadir=/scratch/groups/mschatz1/cpowgs/sindbis
 srcdir=~/Code/utils/marcc
 
+if [ $1 == backup ] ; then
+    for i in antibody mock infected;
+    do
+	aws s3 cp $datadir/$i/*.tar.gz s3://yfan-seqruns/griffin/
+    done
+fi
+
 if [ $1 == untar ] ; then
    for i in antibody mock infected ;
    do
@@ -35,7 +42,6 @@ if [ $1 == unzip ] ; then
 fi
 
 if [ $1 == centrifuge ] ; then
-    ml gcc
     for i in antibody mock infected ;
     do
 	dbdir=~/scratch/centrifuge_db
@@ -49,7 +55,7 @@ if [ $1 == kreport ] ; then
     for i in antibody mock infected ;
     do
 	dbdir=~/scratch/centrifuge_db
-	~/scratch/centrifuge/centrifuge-kreport -x $dbdir/abv $datadir/$i/classification/${i}_classification.txt > $datadir/$i/classification/${i}_kreport.txt
+	~/scratch/centrifuge/centrifuge-kreport -x $dbdir/abvm $datadir/$i/classification/${i}_classification.txt > $datadir/$i/classification/${i}_kreport.txt
     done
 fi
 
@@ -85,6 +91,14 @@ if [ $1 == cpaligntolocal ] ; then
     done
 fi
 
+if [ $1 == cpclasstolocal ] ; then
+    ##copy alignments back to local
+    for i in antibody mock infected ;
+    do
+	scp -r $datadir/$i/classification smaug:/dilithium/Data/Nanopore/sindbis/$i/
+    done
+fi
+
 
 if [ $1 == alignrat ] ; then
     ml samtools
@@ -113,3 +127,24 @@ if [ $1 == transcript_alignrat ] ; then
 	samtools index $datadir/$i/align/$i.rat.transcriptaln.sorted.bam
     done
 fi
+
+
+if [ $1 == get_primary_only ] ; then
+    ml samtools
+    for i in antibody mock infected ;
+	do
+	(samtools view -b -F 0x100 $datadir/$i/align/$i.rat.splicealn.sorted.bam | samtools sort -o $datadir/$i/align/$i.rat.splicealn.primary.sorted.bam
+	samtools view -b -F 0x100 $datadir/$i/align/$i.rat.transcriptaln.sorted.bam | samtools sort -o $datadir/$i/align/$i.rat.transcriptaln.primary.sorted.bam
+	samtools view -b -F 0x100 $datadir/$i/align/$i.sorted.bam | samtools sort -o $datadir/$i/align/$i.primary.sorted.bam) &
+    done
+fi
+
+
+if [ $1 == count_rat_transcripts ] ; then
+    for i in antibody mock infected ;
+    do
+	mkdir -p $datadir/$i/rat_transcripts
+	python rat_expression.py -i $datadir/$i/align/$i.rat.transcriptaln.primary.sorted.bam -r $datadir/rattus_norvegicus.rna.fa -o $datadir/$i/rat_transcripts/$i.rat_transcript_counts.csv
+    done
+fi
+
