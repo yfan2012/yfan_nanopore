@@ -59,29 +59,66 @@ if [ $1 == kreport ] ; then
     done
 fi
 
-if [ $1 == align_gridfqs ] ; then
+if [ $1 == align_all ] ; then
     ml samtools
     for i in antibody mock infected ;
     do
+	##regular sindbis alignment using grid reads
 	mkdir -p $datadir/$i/align
-	minimap2 -a -x map-ont -t 36 $datadir/sindbis_jane.fasta $datadir/$i/gridfqs/*.fq  | samtools view -b | samtools sort -o $datadir/$i/align/$i.gridfq.sorted.bam -T $datadir/$i/align/reads.tmp -
+	rm $datadir/$i/align/*
+	
+	minimap2 -a -x map-ont -t 36 $datadir/refs/sindbis_jane.fasta $datadir/$i/gridfqs/*.fq  | samtools view -b | samtools sort -o $datadir/$i/align/$i.gridfq.sorted.bam -T $datadir/$i/align/reads.tmp -
 	samtools index $datadir/$i/align/$i.gridfq.sorted.bam
-    done
-fi
 
-
-if [ $1 == alignfqs ] ; then
-    ml samtools
-    ##gatherfq
-    for i in antibody mock infected ;
-    do
 	mkdir -p $datadir/$i/fqs
 	cat $datadir/$i/called/*/workspace/pass/*fastq > $datadir/$i/fqs/$i.fq
-	minimap2 -a -x map-ont -t 36 $datadir/sindbis_jane.fasta $datadir/$i/fqs/$i.fq  | samtools view -b | samtools sort -o $datadir/$i/align/$i.sorted.bam -T $datadir/$i/align/reads.tmp -
+
+	##regular sindbis alignment, using direct rna setting -k14
+	minimap2 -a -k14 -uf -t 36 $datadir/refs/sindbis_jane.fasta $datadir/$i/fqs/$i.fq  | samtools view -b | samtools sort -o $datadir/$i/align/$i.sorted.bam -T $datadir/$i/align/reads.tmp -
 	samtools index $datadir/$i/align/$i.sorted.bam
+	samtools view -b -F 0x100 $datadir/$i/align/$i.sorted.bam | samtools sort -o $datadir/$i/align/$i.primary.sorted.bam
+
+	
+	##spliced sindbis alignment, using direct rna setting -k14
+	minimap2 -a -x splice -uf -k14 -t 36 $datadir/refs/sindbis_jane.fasta $datadir/$i/fqs/$i.fq  | samtools view -b | samtools sort -o $datadir/$i/align/$i.splicealn.sorted.bam -T $datadir/$i/align/reads.tmp -
+	samtools index $datadir/$i/align/$i.splicealn.sorted.bam
+	samtools view -b -F 0x100 $datadir/$i/align/$i.splicealn.sorted.bam | samtools sort -o $datadir/$i/align/$i.splicealn.primary.sorted.bam
+
+	
+	##regular rat genome alignment, using direct rna setting -k14
+	minimap2 -a -k14 -uf -t 36 $datadir/refs/rattus_norvegicus.fa $datadir/$i/fqs/$i.fq  | samtools view -b | samtools sort -o $datadir/$i/align/$i.rat.sorted.bam -T $datadir/$i/align/reads.tmp -
+	samtools index $datadir/$i/align/$i.rat.sorted.bam
+	samtools view -b -F 0x100 $datadir/$i/align/$i.rat.sorted.bam | samtools sort -o $datadir/$i/align/$i.rat.primary.sorted.bam
+
+	
+	##spliced rat genome alignment, using direct rna setting -k14
+	minimap2 -a -x splice -uf -k14 -t 36 $datadir/refs/rattus_norvegicus.fa $datadir/$i/fqs/$i.fq  | samtools view -b | samtools sort -o $datadir/$i/align/$i.rat.splicealn.sorted.bam -T $datadir/$i/align/reads.tmp -
+	samtools index $datadir/$i/align/$i.rat.splicealn.sorted.bam
+	samtools view -b -F 0x100 $datadir/$i/align/$i.rat.splicealn.sorted.bam | samtools sort -o $datadir/$i/align/$i.rat.splicealn.primary.sorted.bam
+
+	
+	##regular rat transcriptome alignment, using direct rna setting -k14
+	minimap2 -a -k14 -uf -t 36 $datadir/refs/rattus_norvegicus.rna.fa $datadir/$i/fqs/$i.fq  | samtools view -b | samtools sort -o $datadir/$i/align/$i.rat.transcriptaln.sorted.bam -T $datadir/$i/align/reads.tmp -
+	samtools index $datadir/$i/align/$i.rat.transcriptaln.sorted.bam
+	samtools view -b -F 0x100 $datadir/$i/align/$i.rat.transcriptaln.sorted.bam | samtools sort -o $datadir/$i/align/$i.rat.transcriptaln.primary.sorted.bam
+
+	
+	##spliced rat transcriptome alignment, using direct rna setting -k14
+	minimap2 -a -x splice -k14 -uf -t 36 $datadir/refs/rattus_norvegicus.rna.fa $datadir/$i/fqs/$i.fq  | samtools view -b | samtools sort -o $datadir/$i/align/$i.rat.transcript.splicealn.sorted.bam -T $datadir/$i/align/reads.tmp -
+	samtools index $datadir/$i/align/$i.rat.transcript.splicealn.sorted.bam
+	samtools view -b -F 0x100 $datadir/$i/align/$i.rat.transcript.splicealn.sorted.bam | samtools sort -o $datadir/$i/align/$i.rat.transcript.splicealn.primary.sorted.bam
     done
 fi
 
+
+
+if [ $1 == count_rat_transcripts ] ; then
+    for i in antibody mock infected ;
+    do
+	mkdir -p $datadir/$i/rat_transcripts
+	python rat_expression.py -i $datadir/$i/align/$i.rat.transcriptaln.primary.sorted.bam -r $datadir/rattus_norvegicus.rna.fa -o $datadir/$i/rat_transcripts/$i.rat_transcript_counts.csv
+    done
+fi
 
 if [ $1 == cpaligntolocal ] ; then
     ##copy alignments back to local
@@ -98,53 +135,3 @@ if [ $1 == cpclasstolocal ] ; then
 	scp -r $datadir/$i/classification smaug:/dilithium/Data/Nanopore/sindbis/$i/
     done
 fi
-
-
-if [ $1 == alignrat ] ; then
-    ml samtools
-    for i in antibody mock infected ;
-    do
-	minimap2 -a -x map-ont -t 36 $datadir/rattus_norvegicus.fa $datadir/$i/fqs/$i.fq  | samtools view -b | samtools sort -o $datadir/$i/align/$i.rat.sorted.bam -T $datadir/$i/align/reads.tmp -
-	samtools index $datadir/$i/align/$i.rat.sorted.bam
-    done
-fi
-
-if [ $1 == splicealignrat ] ; then
-    ml samtools
-    for i in antibody mock infected ;
-    do
-	minimap2 -a -x splice -uf -k14 -t 36 $datadir/rattus_norvegicus.fa $datadir/$i/fqs/$i.fq  | samtools view -b | samtools sort -o $datadir/$i/align/$i.rat.splicealn.sorted.bam -T $datadir/$i/align/reads.tmp -
-	samtools index $datadir/$i/align/$i.rat.sorted.bam
-    done
-fi
-
-
-if [ $1 == transcript_alignrat ] ; then
-    ml samtools
-    for i in antibody mock infected ;
-    do
-	minimap2 -a -x splice -uf -k14 -t 24 $datadir/rattus_norvegicus.rna.fa $datadir/$i/fqs/$i.fq  | samtools view -b | samtools sort -o $datadir/$i/align/$i.rat.transcriptaln.sorted.bam -T $datadir/$i/align/reads.tmp -
-	samtools index $datadir/$i/align/$i.rat.transcriptaln.sorted.bam
-    done
-fi
-
-
-if [ $1 == get_primary_only ] ; then
-    ml samtools
-    for i in antibody mock infected ;
-	do
-	(samtools view -b -F 0x100 $datadir/$i/align/$i.rat.splicealn.sorted.bam | samtools sort -o $datadir/$i/align/$i.rat.splicealn.primary.sorted.bam
-	samtools view -b -F 0x100 $datadir/$i/align/$i.rat.transcriptaln.sorted.bam | samtools sort -o $datadir/$i/align/$i.rat.transcriptaln.primary.sorted.bam
-	samtools view -b -F 0x100 $datadir/$i/align/$i.sorted.bam | samtools sort -o $datadir/$i/align/$i.primary.sorted.bam) &
-    done
-fi
-
-
-if [ $1 == count_rat_transcripts ] ; then
-    for i in antibody mock infected ;
-    do
-	mkdir -p $datadir/$i/rat_transcripts
-	python rat_expression.py -i $datadir/$i/align/$i.rat.transcriptaln.primary.sorted.bam -r $datadir/rattus_norvegicus.rna.fa -o $datadir/$i/rat_transcripts/$i.rat_transcript_counts.csv
-    done
-fi
-

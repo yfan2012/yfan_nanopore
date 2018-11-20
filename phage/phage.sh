@@ -26,5 +26,13 @@ fi
 
 
 if [ $1 == vanilla_centrifuge ] ; then
-    mkdir -p $datadir/centrifuge
-    
+    ml gcc
+    dbdir=~/scratch/centrifuge_db
+    mkdir -p $datadir/classification
+    for i in $datadir/fastqs/*.fq ;
+    do
+	prefix=`basename $i .fq`
+	##~/scratch/centrifuge/centrifuge -p 36 -x $dbdir/abvm -U $i -S $datadir/classification/${prefix}_classification.txt --report-file $datadir/classification/${prefix}_report.tsv
+	~/scratch/centrifuge/centrifuge-kreport -x $dbdir/abvm $datadir/classification/${prefix}_classification.txt > $datadir/classification/${prefix}_kreport.txt
+    done
+fi
