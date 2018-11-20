@@ -3,7 +3,7 @@
 datadir=/scratch/groups/mschatz1/cpowgs/dunlop/180714_dunlop_3ecoli
 srcdir=~/Code/utils/marcc
 
-mkdir -p $datadir/batch_logs
+##mkdir -p $datadir/batch_logs
 
 if [ $1 == untar ] ; then
     mkdir -p $datadir/raw
@@ -165,3 +165,39 @@ if [ $1 == align_pilondiff ] ; then
 	samtools index $pilonill/$i.sorted.bam
     done
 fi
+
+
+if [ $1 == kleb_grant ] ; then
+    ##mummer klpn_70 to show insertion element
+    datadir=~/Dropbox/Timplab_Data/cpowgs/mummer/KLPN_70
+    asmdir=~/Dropbox/Timplab_Data/cpowgs/assemblies/pilon
+    
+    nucmer -p $datadir/KLPN_70 $asmdir/KLPN_139.pilon.10.fasta $asmdir/KLPN_70.pilon.10.fasta 
+    mummerplot --png -p $datadir/KLPN_70.layout $datadir/KLPN_70.delta -R $asmdir/KLPN_139.pilon.10.fasta -Q $asmdir/KLPN_70.pilon.10.fasta
+    mummerplot --png -p $datadir/KLPN_70 $datadir/KLPN_70.delta
+fi
+
+
+if [ $1 == kleb_mgrb ] ; then
+    srcdir=~/Code/carbapenem_r21/mutations
+        
+    datadir=/atium/Data/Nanopore/cpowgs
+    contigs=$datadir/assemblies/spades/KLPN_70.spades.fasta
+    genedir=$datadir/References/ref_gene_seqs
+    genes=$genedir/klpn_genes.fasta
+    
+    blastdbdir=$datadir/blastdb
+    qual=spades
+    name=KLPN_70
+    
+    mkdir -p $blastdbdir/$qual
+    mkdir -p $datadir/blast_hits/$qual
+    mkdir -p $datadir/geneseqs/$qual
+    
+    makeblastdb -in $contigs -out $blastdbdir/$qual/$name.db -dbtype nucl
+    blastn -query $genedir/klpn_genes.fasta -db $blastdbdir/$qual/$name.db -outfmt 7 -out $datadir/blast_hits/$qual/$name.tsv
+    python $srcdir/make_gene_fa.py -t $datadir/blast_hits/$qual/$name.tsv -a $contigs -g $genes -o $datadir/geneseqs/$qual > $datadir/geneseqs/$qual/$name.short.tsv
+    Rscript $srcdir/plot_shortalign.R -s $datadir/geneseqs/$qual/$name.short.tsv -o ~/Dropbox/yfan/carbapenem_r21/mutations/gene_cov/KLPN_70_spades.pdf
+    Rscript $srcdir/plot_shortalign.R -s $datadir/geneseqs/polished/$name.short.tsv -o ~/Dropbox/yfan/carbapenem_r21/mutations/gene_cov/KLPN_70.pdf
+fi
+   
