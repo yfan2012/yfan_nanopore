@@ -1,6 +1,6 @@
 #!/bin/bash
 
-datadir=~/work/180809_phage
+datadir=/scratch/groups/mschatz1/cpowgs/phage
 srcdir=~/Code/utils/marcc
 
 if [ $1 == untar ] ; then
@@ -36,3 +36,17 @@ if [ $1 == vanilla_centrifuge ] ; then
 	~/scratch/centrifuge/centrifuge-kreport -x $dbdir/abvm $datadir/classification/${prefix}_classification.txt > $datadir/classification/${prefix}_kreport.txt
     done
 fi
+
+
+if [ $1 == align ] ; then
+    ml samtools
+    mkdir -p $datadir/180809_phage/align
+    for i in $datadir/180809_phage/fastqs/*.fq ;
+    do
+	prefix=` basename $i .fq `
+	minimap2 -a -x map-ont -t 36 $datadir/Mycobacteriophages-All.fasta $i | samtools view -b | samtools sort -o $datadir/180809_phage/align/$prefix.sorted.bam -T $datadir/180809_phage/align/$prefix.reads.tmp - 
+	samtools index $datadir/180809_phage/align/$prefix.sorted.bam
+    done
+fi
+
+    
