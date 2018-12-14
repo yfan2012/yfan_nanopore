@@ -50,3 +50,38 @@ if [ $1 == align ] ; then
 fi
 
     
+
+if [ $1 == unique ] ; then
+    datadir=/kyber/Data/Nanopore/phage/align
+    for i in $datadir/*hrs.sorted.bam ;
+    do
+	prefix=`basename $i .sorted.bam`
+	python ~/Code/yfan_nanopore/phage/exactly_one.py -i $i -o $datadir/$prefix.unique.bam
+	samtools sort $datadir/$prefix.unique.bam -o $datadir/$prefix.unique.sorted.bam
+	samtools index $datadir/$prefix.unique.sorted.bam
+    done
+fi
+
+if [ $1 == primary ] ; then
+    datadir=/kyber/Data/Nanopore/phage/align
+    for i in $datadir/*hrs.sorted.bam ;
+    do
+	prefix=`basename $i .sorted.bam`
+	samtools view -b -F 0x100 $i | samtools sort -o $datadir/$prefix.primary.sorted.bam
+	samtools index $datadir/$prefix.primary.sorted.bam
+    done
+fi
+
+	     
+if [ $1 == count ] ; then
+    datadir=/kyber/Data/Nanopore/phage
+    outdir=~/Dropbox/Timplab_Data/phage/counts
+    ref=$datadir/Mycobacteriophages-All.fasta
+    for i in $datadir/align/*primary*.sorted.bam ;
+    do
+	prefix=`basename $i .sorted.bam`
+	python ~/Code/yfan_nanopore/phage/genome_counts.py -i $i -o $outdir/$prefix.csv -r $ref
+    done
+fi
+
+	
