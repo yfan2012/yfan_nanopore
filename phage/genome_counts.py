@@ -17,27 +17,12 @@ def viral_counts(bampath):
     return list_counts
 
 
-def genome_names(refpath):
-    seqname={}
-    seqname[None]='unaligned'
-    with open(refpath, 'r') as f:
-        for line in f:
-            if line[0] == '>':
-                words=line.split(' ')
-                seqname[words[0][1:]]=' '.join(words[1:]).rstrip()
-    return seqname
-
-
 def main(bampath, refpath, outpath):
-    seqfunc=genome_names(refpath)
     counts=viral_counts(bampath)
-
-    ##there should be a better way to do this:
-    countsinfo=[[str(x[0]), seqfunc[x[0]], str(x[1]), str(x[2])] for x in counts]
-        
+    countsinfo=[[str(x[0]), str(x[1]), str(x[2])] for x in counts]
     
     with open(outpath, 'w') as f:
-        f.write(','.join(['seq_accession', 'function', 'counts', 'percent_of_aligned'])+ '\n')
+        f.write(','.join(['phage', 'counts', 'percent_of_aligned'])+ '\n')
         for i in countsinfo:
             f.write(','.join(i)+'\n')
 

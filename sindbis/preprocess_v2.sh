@@ -26,3 +26,12 @@ if [ $1 == call ] ; then
 	sbatch --array=0-$maxdir --output=$datadir/$i/batch_logs/call.txt --job-name=call_$i $srcdir/call_rna.scr $datadir/$i
     done
 fi
+
+
+if [ $1 == fastqs ] ; then
+    for i in Antibody_3dpi Antibody_2dpi Sindbis_2dpi Sindbis_3dpi ;
+    do
+	mkdir -p $datadir/$i/fqs
+	cat $datadir/$i/called/*/workspace/pass/*fastq > $datadir/$i/fqs/$i.fq
+    done
+fi

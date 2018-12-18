@@ -74,10 +74,10 @@ fi
 
 	     
 if [ $1 == count ] ; then
-    datadir=/kyber/Data/Nanopore/phage
-    outdir=~/Dropbox/Timplab_Data/phage/counts
+    ##outdir=~/Dropbox/Timplab_Data/phage/counts
+    outdir=~/scratch/plots/phage/180809_phage
     ref=$datadir/Mycobacteriophages-All.fasta
-    for i in $datadir/align/*primary*.sorted.bam ;
+    for i in $datadir/180809_phage/align/*.sorted.bam ;
     do
 	prefix=`basename $i .sorted.bam`
 	python ~/Code/yfan_nanopore/phage/genome_counts.py -i $i -o $outdir/$prefix.csv -r $ref

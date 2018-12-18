@@ -31,7 +31,7 @@ if [ $1 == call_v2 ] ; then
     mkdir -p $datadir/181108_nina_v2/called
     mkdir -p $datadir/181108_nina_v2/call_logs
     mkdir -p $datadir/181108_nina_v2/call_done
-    sbatch --array=0-1901 --job-name=nina_call --output=$datadir/181108_nina_v2call_logs/nina_call.%A_%a.out $srcdir/bc_call_LSK109.scr $datadir/181108_nina_v2
+    sbatch --array=0-1901 --job-name=nina_call --output=$datadir/181108_nina_v2/call_logs/nina_call.%A_%a.out $srcdir/bc_call_LSK109.scr $datadir/181108_nina_v2
 fi
 
 
