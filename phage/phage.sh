@@ -41,6 +41,7 @@ fi
 if [ $1 == align ] ; then
     ml samtools
     mkdir -p $datadir/180809_phage/align
+    rm $datadir/180809_phage/align/*
     for i in $datadir/180809_phage/fastqs/*.fq ;
     do
 	prefix=` basename $i .fq `
