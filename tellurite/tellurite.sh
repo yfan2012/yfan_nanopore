@@ -104,6 +104,7 @@ if [ $1 == prokka ] ; then
 fi
 
 
+
 if [ $1 == isolate_plas ] ; then
     for gene in terC terD ;
     do
@@ -158,3 +159,4 @@ if [ $1 == prokka_dumb ] ; then
 	done < "$i"
     done
 fi
+
