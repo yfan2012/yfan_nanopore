@@ -59,3 +59,9 @@ if [ $1 == troubleshoot_dl ] ; then
     fastq-dump -O $illrawdir/ -A SRR7128313
     mv $illrawdir/SRR7128313.fastq $illrawdir/KLPN_2156.fastq
 fi
+
+datadir=/scratch/groups/mschatz1/cpowgs/tellurite
+if [ $1 == circlator ] ; then
+    for i in $datadir/KLPN* ;
+    do
+	

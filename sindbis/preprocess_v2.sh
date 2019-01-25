@@ -54,3 +54,5 @@ if [ $1 == align ] ; then
 	samtools view -b -F 0x100 $datadir/$i/align/$i.rat.splicealn.sorted.bam | samtools sort -o $datadir/$i/align/$i.rat.splicealn.primary.sorted.bam
     done
 fi
+
+
