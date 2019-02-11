@@ -51,7 +51,7 @@ fi
 if [ $1 == assemble_90853_v2 ] ; then
     mkdir -p $datadir/181108_nina_v2/st90853_assembly
     canu \
-	-p st90853 -d $datadir/181108_nina_v2/assembly \
+	-p st90853 -d $datadir/181108_nina_v2/st90853_assembly \
 	-gridOptions="--time=22:00:00 --account=mschatz1 --partition=parallel" \
 	genomeSize=39m \
 	stopOnReadQuality=false \
