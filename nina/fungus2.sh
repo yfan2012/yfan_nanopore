@@ -40,7 +40,7 @@ if [ $1 == assemble_90853_v2 ] ; then
 	-gridOptions="--time=22:00:00 --account=mschatz1 --partition=parallel" \
 	genomeSize=39m \
 	stopOnReadQuality=false \
-	-nanopore-raw $datadir/181108_nina_v2/fastqs/st90853.fastq
+	-nanopore-raw $datadir/181108_nina_v2/fastqs/st90853_bothruns_over3kb.fastq
 fi
 
 

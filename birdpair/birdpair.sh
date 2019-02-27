@@ -52,3 +52,14 @@ if [ $1 == pilon ] ; then
     sbatch --output=$datadir/batch_logs/bird_pilon.out --job-name=bird ./pilon.scr $datadir/pilon_bird $datadir/bird_wtdbg2/bird_wtdbg2.contigs.fasta bird wtdbg2
     sbatch --output=$datadir/batch_logs/patient_pilon.out --job-name=patient ./pilon.scr $datadir/pilon_patient $datadir/patient_wtdbg2/patient_wtdbg2.contigs.fasta patient wtdbg2
 fi
+
+if [ $1 == spades ] ; then
+    mkdir $datadir/patient_spades
+    mkdir $datadir/bird_spades
+
+    spades.py -1 $datadir/pilon_patient/*R1*.gz -2 $datadir/pilon_patient/*R2*.gz -t 36 -m 300 -o $datadir/patient_spades
+    spades.py -1 $datadir/pilon_bird/*R1*.gz -2 $datadir/pilon_bird/*R2*.gz -t 36 -m 300 -o $datadir/patient_bird
+fi
+    
+if [ $1 == long ] ; then
+    
