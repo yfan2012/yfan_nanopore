@@ -106,3 +106,61 @@ if [ $1 == pilon2 ] ; then
     sbatch --output=$datadir/181108_nina_v2/batch_logs/st31_wtdbg2.out --job-name=st31_wtdbg2 ./pilon2.scr $datadir/181108_nina_v2/pilon_st31 $datadir/181108_nina_v2/st31_wtdbg2/st31.wtdbg2.contigs.fasta st31 wtdbg2
     sbatch --output=$datadir/181108_nina_v2/batch_logs/st90853_wtdbg2.out --job-name=st90853_wtdbg2 ./pilon2.scr $datadir/181108_nina_v2/pilon_st90853 $datadir/181108_nina_v2/st90853_wtdbg2/st90853.wtdbg2.contigs.fasta st90853 wtdbg2
 fi
+
+
+if [ $1 == canu_pilon ] ; then
+    ##sed -i -e 's/ /_/g' $datadir/181108_nina_v2/st31_wtdbg2/st31.wtdbg2.contigs.fasta
+    ##sed -i -e 's/ /_/g' $datadir/181108_nina_v2/st90853_wtdbg2/st90853.wtdbg2.contigs.fasta
+    
+    mkdir -p $datadir/181108_nina_v2/canu_pilon_st90853
+    mkdir -p $datadir/181108_nina_v2/canu_pilon_st31
+
+    cp /work-zfs/mschatz1/cpowgs/fungus/illumina/st31* $datadir/181108_nina_v2/canu_pilon_st31/
+    cp /work-zfs/mschatz1/cpowgs/fungus/illumina/st90853* $datadir/181108_nina_v2/canu_pilon_st90853/
+    
+    sbatch --output=$datadir/181108_nina_v2/batch_logs/st31_canu.out --job-name=st31_pilon ./pilon.scr $datadir/181108_nina_v2/canu_pilon_st31 $datadir/181108_nina_v2/st31_assembly/st31.contigs.fasta st31 canu
+    sbatch --output=$datadir/181108_nina_v2/batch_logs/st90853_canu.out --job-name=st90853_pilon ./pilon.scr $datadir/181108_nina_v2/canu_pilon_st90853 $datadir/181108_nina_v2/st90853_assembly/st90853.contigs.fasta st90853 canu
+fi
+
+
+if [ $1 == trim ] ; then
+    for i in st31 st90853 ;
+    do
+	mkdir -p $datadir/181108_nina_v2/${i}_trimmed
+	
+	java -jar ~/software/Trimmomatic-0.38/trimmomatic-0.38.jar PE -threads 36 -phred33 \
+	     $datadir/181108_nina_v2/canu_pilon_${i}/*R1*.gz $datadir/181108_nina_v2/canu_pilon_${i}/*R2*.gz \
+	     $datadir/181108_nina_v2/${i}_trimmed/${i}_forward_paired.fq.gz $datadir/181108_nina_v2/${i}_trimmed/${i}_forward_unpaired.fq.gz \
+	     $datadir/181108_nina_v2/${i}_trimmed/${i}_reverse_paired.fq.gz $datadir/181108_nina_v2/${i}_trimmed/${i}_reverse_unpaired.fq.gz \
+	     ILLUMINACLIP:NexteraPE-PE.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:30 MINLEN:36
+    done
+fi
+
+if [ $1 == canu_pilon_trimmed ] ; then
+    ##sed -i -e 's/ /_/g' $datadir/181108_nina_v2/st31_wtdbg2/st31.wtdbg2.contigs.fasta
+    ##sed -i -e 's/ /_/g' $datadir/181108_nina_v2/st90853_wtdbg2/st90853.wtdbg2.contigs.fasta
+    
+    mkdir -p $datadir/181108_nina_v2/canu_pilon_trimmed_st90853
+    mkdir -p $datadir/181108_nina_v2/canu_pilon_trimmed_st31
+
+    cp $datadir/181108_nina_v2/st31_trimmed/st31*paired*gz $datadir/181108_nina_v2/canu_pilon_trimmed_st31/
+    cp $datadir/181108_nina_v2/st90853_trimmed/st90853*paired*gz* $datadir/181108_nina_v2/canu_pilon_trimmed_st90853/
+    
+    sbatch --output=$datadir/181108_nina_v2/batch_logs/st31_canu.out --job-name=st31_pilon ./pilon.scr $datadir/181108_nina_v2/canu_pilon_trimmed_st31 $datadir/181108_nina_v2/st31_assembly/st31.contigs.fasta st31 canu
+    sbatch --output=$datadir/181108_nina_v2/batch_logs/st90853_canu.out --job-name=st90853_pilon ./pilon.scr $datadir/181108_nina_v2/canu_pilon_trimmed_st90853 $datadir/181108_nina_v2/st90853_assembly/st90853.contigs.fasta st90853 canu
+fi
+
+if [ $1 == pilon_trimmed ] ; then
+    ##sed -i -e 's/ /_/g' $datadir/181108_nina_v2/st31_wtdbg2/st31.wtdbg2.contigs.fasta
+    ##sed -i -e 's/ /_/g' $datadir/181108_nina_v2/st90853_wtdbg2/st90853.wtdbg2.contigs.fasta
+    
+    mkdir -p $datadir/181108_nina_v2/pilon_trimmed_st90853
+    mkdir -p $datadir/181108_nina_v2/pilon_trimmed_st31
+
+    ##cp $datadir/181108_nina_v2/st31_trimmed/st31*paired*gz $datadir/181108_nina_v2/pilon_trimmed_st31/
+    ##cp $datadir/181108_nina_v2/st90853_trimmed/st90853*paired*gz* $datadir/181108_nina_v2/pilon_trimmed_st90853/
+    
+    ##sbatch --output=$datadir/181108_nina_v2/batch_logs/st31_wtdbg2.out --job-name=st31_wtdbg2 ./pilon.scr $datadir/181108_nina_v2/pilon_trimmed_st31 $datadir/181108_nina_v2/st31_wtdbg2/st31.wtdbg2.contigs.fasta st31 wtdbg2
+    ##sbatch --output=$datadir/181108_nina_v2/batch_logs/st90853_wtdbg2.out --job-name=st90853_wtdbg2 ./pilon.scr $datadir/181108_nina_v2/pilon_trimmed_st90853 $datadir/181108_nina_v2/st90853_wtdbg2/st90853.wtdbg2.contigs.fasta st90853 wtdbg2
+    sbatch --output=$datadir/181108_nina_v2/batch_logs/st90853_wtdbg2.out --job-name=st90853_wtdbg2 ./pilon2.scr $datadir/181108_nina_v2/pilon_trimmed_st90853 $datadir/181108_nina_v2/st90853_wtdbg2/st90853.wtdbg2.contigs.fasta st90853 wtdbg2
+fi
