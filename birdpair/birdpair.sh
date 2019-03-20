@@ -112,4 +112,15 @@ if [ $1 == trim ] ; then
 fi
 
 
+if [ $1 == canu_pilon_trim ] ; then
+    
+    mkdir -p $datadir/patient_canu_pilon_trim
+    mkdir -p $datadir/bird_canu_pilon_trim
+
+    cp $datadir/patient_trimmed/*paired* $datadir/patient_canu_pilon_trim
+    cp $datadir/bird_trimmed/*paired* $datadir/bird_canu_pilon_trim
+    
+    sbatch --output=$datadir/batch_logs/bird_pilon.out --job-name=bird ./pilon.scr $datadir/canu_pilon_bird $datadir/bird_assembly/bird.contigs.fasta bird canu
+    sbatch --output=$datadir/batch_logs/patient_pilon.out --job-name=patient ./pilon.scr $datadir/canu_pilon_patient $datadir/patient_assembly/patient.contigs.fasta patient canu
+fi
     
