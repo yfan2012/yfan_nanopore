@@ -30,12 +30,12 @@ do
     ##build the index and align
     echo building btidx and aligning for round $i
     bowtie2-build -q $1/btidx/$prefix.fasta $1/btidx/$prefix
-    bowtie2 -p 24 -x $1/btidx/$prefix -1 $1/$3*R1_001.fastq.gz -2 $1/$3*R2_001.fastq.gz | samtools view -bS - | samtools sort -o $1/btbam/$prefix.sorted.bam
+    bowtie2 -p 36 -x $1/btidx/$prefix -1 $1/*forward.paired.fq.gz -2 $1/*reverse.paired.fq.gz | samtools view -bS - | samtools sort -o $1/btbam/$prefix.sorted.bam
     samtools index $1/btbam/$prefix.sorted.bam
 
     ##do the correction
     echo correcting for round $i
-    java -Xmx100G -jar ~/software/pilon/pilon-1.22.jar --threads 12 --changes --tracks --genome $1/btidx/$prefix.fasta --frags $1/btbam/$prefix.sorted.bam --outdir $1 --output $prefix.pilon.$i
+    java -Xmx100G -jar ~/software/pilon/pilon-1.22.jar --threads 36 --changes --tracks --genome $1/btidx/$prefix.fasta --frags $1/btbam/$prefix.sorted.bam --outdir $1 --output $prefix.pilon.$i
 
     ##newly corrected genome replaces the old genome in the index dir
     echo clearing old

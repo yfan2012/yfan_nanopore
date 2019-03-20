@@ -30,20 +30,28 @@ if [ $1 == assembly ] ; then
 	-nanopore-raw $datadir/fastqs/zymo_r9.fq.gz
 fi
 
-if [ $1 == ecoli_align ] ; then
+
+if [ $1 == align ] ; then
     ml samtools
 
-    ref=$datadir/Reference/ecoli_k12.fa
-    
-    mkdir -p $datadir/align_r10
-    mkdir -p $datadir/align_r9
+    for i in $datadir/Reference/zymo_refs/Genomes/*fasta ;
+    do
 
-    minimap2 -a -x map-ont -t 36 $ref $datadir/fastqs/zymo_r10.fq.gz | samtools view -b | samtools sort -o $datadir/align_r10/r10.sorted.bam -T $datadir/align_r10/reads.tmp
-    samtools index $datadir/align_r10/r10.sorted.bam
-    
-    minimap2 -a -x map-ont -t 36 $ref $datadir/fastqs/zymo_r9.fq.gz | samtools view -b | samtools sort -o $datadir/align_r9/r9.sorted.bam -T $datadir/align_r9/reads.tmp
-    samtools index $datadir/align_r9/r9.sorted.bam
+	prefix=`basename $i .fasta | cut -d _ -f 1`
+	mkdir -p $datadir/align_r10
+	mkdir -p $datadir/align_r9
+
+	if [ ! -f $datadir/align_r10/r10_$prefix.sorted.bam ] ; then
+	    minimap2 -a -x map-ont -t 36 $i $datadir/fastqs/zymo_r10.fq.gz | samtools view -b | samtools sort -o $datadir/align_r10/r10_$prefix.sorted.bam -T $datadir/align_r10/reads_$prefix.tmp
+	    samtools index $datadir/align_r10/r10_$prefix.sorted.bam
+	    
+	    minimap2 -a -x map-ont -t 36 $i $datadir/fastqs/zymo_r9.fq.gz | samtools view -b | samtools sort -o $datadir/align_r9/r9_$prefix.sorted.bam -T $datadir/align_r9/reads_$prefix.tmp
+	    samtools index $datadir/align_r9/r9_$prefix.sorted.bam
+	fi
+	
+    done
 fi
+
 
 if [ $1 == cons ] ; then
     ml samtools
@@ -54,9 +62,11 @@ if [ $1 == cons ] ; then
     ref=$datadir/Reference/ecoli_k12.fa
     
     ##bcftools mpileup -f $ref $datadir/align_r10/r10_ecoli_sub30.sorted.bam | bcftools call --ploidy 1 -mv -Ob -o $datadir/cons/r10_calls.bcf
-    bcftools mpileup -f $ref $datadir/align_r10/r10_ecoli_sub10.sorted.bam | bcftools call --ploidy 1 -mv -Ob -o $datadir/cons/r10_sub10_calls.bcf 
+    ##bcftools mpileup -f $ref $datadir/align_r10/r10_ecoli_sub10.sorted.bam | bcftools call --ploidy 1 -mv -Ob -o $datadir/cons/r10_sub10_calls.bcf 
     ##bcftools mpileup -f $ref $datadir/align_r9/r9_ecoli.sorted.bam | bcftools call --ploidy 1 -mv -Ob -o $datadir/cons/r9_calls.bcf 
-    
+    bcftools mpileup -B -f $ref $datadir/align_r10/r10_ecoli_sub30.sorted.bam -O v -o $datadir/cons/r10_ecoli.vcf &
+    bcftools mpileup -B -f $ref $datadir/align_r10/r10_ecoli_sub10.sorted.bam -O v -o $datadir/cons/r10_ecoli_sub10.vcf &
+    bcftools mpileup -B -f $ref $datadir/align_r9/r9_ecoli.sorted.bam -O v -o $datadir/cons/r9_ecoli.vcf
 fi
 
 if [ $1 == bcfidx ] ; then
@@ -71,11 +81,13 @@ fi
 if [ $1 == seqcons ] ; then
     ml samtools
 
-    bcftools view $datadir/cons/r10_calls.bcf | vcfutils.pl vcf2fq > $datadir/cons/r10_ecoli.cons.fq
-    bcftools view $datadir/cons/r9_calls.bcf | vcfutils.pl vcf2fq > $datadir/cons/r9_ecoli.cons.fq
+    ref=$datadir/Reference/ecoli_k12.fa
 
-    seqtk seq -a $datadir/cons/r10_ecoli.cons.fq > $datadir/cons/r10_ecoli.cons.fa
-    seqtk seq -a $datadir/cons/r9_ecoli.cons.fq > $datadir/cons/r9_ecoli.cons.fa
+    ##bcftools view $datadir/cons/r10_calls.bcf | vcfutils.pl vcf2fq > $datadir/cons/r10_ecoli.cons.fq
+    vcfutils.pl vcf2fq -f $ref $datadir/cons/r9_ecoli.vcf > $datadir/cons/r9_ecoli.cons.fq
+
+    ##seqtk seq -a $datadir/cons/r10_ecoli.cons.fq > $datadir/cons/r10_ecoli.cons.fa
+    ##seqtk seq -a $datadir/cons/r9_ecoli.cons.fq > $datadir/cons/r9_ecoli.cons.fa
 fi
 
 if [ $1 == parsnp ] ; then
