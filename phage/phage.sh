@@ -76,7 +76,7 @@ fi
 	     
 if [ $1 == count ] ; then
     ##outdir=~/Dropbox/Timplab_Data/phage/counts
-    outdir=~/scratch/plots/phage/180809_phage
+    outdir=$datadir/180809_phage/counts
     ref=$datadir/Mycobacteriophages-All.fasta
     for i in $datadir/180809_phage/align/*.sorted.bam ;
     do

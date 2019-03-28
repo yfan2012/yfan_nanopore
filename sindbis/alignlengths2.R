@@ -28,22 +28,10 @@ for (i in samps[2:length(samps)]) {
     path=paste0(aligndir, i, '/align/', i, '.primary.sorted.bam')
     lengths=bam2df(path)
     lengths$samp=i
-    rbind(lengths, allsamps)
+    allsamps=rbind(lengths, allsamps)
 }
 
-
-abbam=file.path('/dilithium/Data/Nanopore/sindbis/antibody/align/antibody.primary.sorted.bam')
-mockbam=file.path('/dilithium/Data/Nanopore/sindbis/mock/align/mock.primary.sorted.bam')
-TEbam=file.path('/dilithium/Data/Nanopore/sindbis/infected/align/infected.primary.sorted.bam')
-ab=bam2df(abbam)
-ab$samp='antibody'
-mock=bam2df(mockbam)
-mock$samp='mock'
-TE=bam2df(TEbam)
-TE$samp='infected'
-allsamps=rbind(ab, mock, TE)
-
-pdf(file.path('~/Dropbox/Timplab_Data/sindbis/sindbis_align_lengths.pdf'), width=11, height=8.5)
+pdf(file.path('~/Dropbox/Timplab_Data/sindbis/sindbis_align_lengths_v2.pdf'), width=11, height=8.5)
 print(ggplot(allsamps, aes(x=samp, y=rlength, fill=samp)) +
       geom_violin(scale="width") +
       ggtitle('Sindbis Primary Alignment Lengths') +
@@ -57,6 +45,8 @@ print(ggplot(allsamps, aes(x=samp, y=rlength, fill=samp)) +
       ylab('Read Length') +
       theme_bw())
 dev.off()
+
+
 
 
 ##look at the spliced alignments to the genome to count the rat rna

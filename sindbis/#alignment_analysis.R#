@@ -18,7 +18,7 @@ for (samp in samps) {
     
     cov=read_tsv(covfile, col_names=c('chr', 'pos', 'cov')) %>%
         mutate(sample=samp) %>%
-        mutate(cov=cov/numreads)
+        mutate(normcov=cov/numreads)
     
     allcov=bind_rows(allcov, cov)
     
@@ -26,7 +26,7 @@ for (samp in samps) {
     yheight=max(cov$cov)
     
     pdf(paste0(outdir,'/', samp, '/cov/', samp, '.primary.cov.pdf'), width=20, height=5)
-    print(ggplot(cov, aes(x=pos, y=cov)) +
+    print(ggplot(cov, aes(x=pos, y=normcov)) +
         geom_line() +
         xlab('Sindbis Genome Position') +
         ylab('Depth') +
@@ -36,8 +36,8 @@ for (samp in samps) {
 }
 
 
-pdf(paste0(outdir,'/allcov.primary.cov.v2.pdf'), width=20, height=5)
-print(ggplot(allcov, aes(x=pos, y=cov, colour=sample)) +
+pdf(paste0(outdir,'/allcov.primary.normcov.v2.pdf'), width=20, height=5)
+print(ggplot(allcov, aes(x=pos, y=normcov, colour=sample)) +
       geom_line() +
       xlab('Sindbis Genome Position') +
       ylab('Depth') +

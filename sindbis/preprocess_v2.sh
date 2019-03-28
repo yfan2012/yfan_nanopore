@@ -44,15 +44,24 @@ if [ $1 == align ] ; then
 	mkdir -p $datadir/$i/align
 
 	##sindbis alignment
-	minimap2 -a -k14 -uf -t 36 $datadir/refs/sindbis_jane.fasta $datadir/$i/align/$i.fq | samtools view -b | samtools sort -o $datadir/$i/align/$i.sorted.bam -T $datadir/$i/align/reads.tmp -
+	minimap2 -a -k14 -uf -t 36 $datadir/refs/sindbis_jane.fasta $datadir/$i/fqs/$i.fq | samtools view -b | samtools sort -o $datadir/$i/align/$i.sorted.bam -T $datadir/$i/align/reads.tmp -
 	samtools index $datadir/$i/align/$i.sorted.bam
 	samtools view -b -F 0x100 $datadir/$i/align/$i.sorted.bam | samtools sort -o $datadir/$i/align/$i.primary.sorted.bam
 	
 	##rat spliced alignment
-	minimap2 -a -x splice -uf -k14 -t 36 $datadir/refs/rattus_norvegicus.fa $datadir/$i/fqs/$i.fq  | samtools view -b | samtools sort -o $datadir/$i/align/$i.rat.splicealn.sorted.bam -T $datadir/$i/align/reads.tmp -
-	samtools index $datadir/$i/align/$i.rat.splicealn.sorted.bam
-	samtools view -b -F 0x100 $datadir/$i/align/$i.rat.splicealn.sorted.bam | samtools sort -o $datadir/$i/align/$i.rat.splicealn.primary.sorted.bam
+	##minimap2 -a -x splice -uf -k14 -t 36 $datadir/refs/rattus_norvegicus.fa $datadir/$i/fqs/$i.fq  | samtools view -b | samtools sort -o $datadir/$i/align/$i.rat.splicealn.sorted.bam -T $datadir/$i/align/reads.tmp -
+	##samtools index $datadir/$i/align/$i.rat.splicealn.sorted.bam
+	##samtools view -b -F 0x100 $datadir/$i/align/$i.rat.splicealn.sorted.bam | samtools sort -o $datadir/$i/align/$i.rat.splicealn.primary.sorted.bam
     done
 fi
 
 
+if [ $1 == transfer ] ; then
+    for i in Antibody_3dpi Antibody_2dpi Sindbis_2dpi Sindbis_3dpi ;
+    do
+	scp $datadir/$i/align/$i.primary.sorted.bam smaug:~/Dropbox/Timplab_Data/sindbis/$i/align/$i.primary.sorted.bam
+	scp $datadir/$i/align/$i.sorted.bam smaug:~/Dropbox/Timplab_Data/sindbis/$i/align/$i.sorted.bam
+    done
+fi
+
+	
