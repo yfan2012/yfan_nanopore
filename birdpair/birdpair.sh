@@ -124,3 +124,12 @@ if [ $1 == canu_pilon_trim ] ; then
     sbatch --output=$datadir/batch_logs/patient_pilon.out --job-name=patient ./pilon.scr $datadir/canu_pilon_patient $datadir/patient_assembly/patient.contigs.fasta patient canu
 fi
     
+if [ $1 == canu_ptonly ] ; then
+    mkdir -p $datadir/patient_assembly
+    canu \
+	-p patient -d $datadir/patient_assembly \
+	-gridOptions="--time=22:00:00 --account=mschatz1 --partition=parallel" \
+	genomeSize=20m \
+	stopOnReadQuality=false \
+	-nanopore-raw $datadir/fastqs/patient_over5kb.fastq
+fi
