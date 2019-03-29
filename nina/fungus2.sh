@@ -164,3 +164,15 @@ if [ $1 == pilon_trimmed ] ; then
     ##sbatch --output=$datadir/181108_nina_v2/batch_logs/st90853_wtdbg2.out --job-name=st90853_wtdbg2 ./pilon.scr $datadir/181108_nina_v2/pilon_trimmed_st90853 $datadir/181108_nina_v2/st90853_wtdbg2/st90853.wtdbg2.contigs.fasta st90853 wtdbg2
     sbatch --output=$datadir/181108_nina_v2/batch_logs/st90853_wtdbg2.out --job-name=st90853_wtdbg2 ./pilon2.scr $datadir/181108_nina_v2/pilon_trimmed_st90853 $datadir/181108_nina_v2/st90853_wtdbg2/st90853.wtdbg2.contigs.fasta st90853 wtdbg2
 fi
+
+
+if [ $1 == bender_asm_assess ] ; then
+    dboxdir=~/Dropbox/yfan/nina_fungus/assemblies
+    echo assembly,num_contigs,n50,longest,shortest,total > $dboxdir/asmstats.csv
+    for i in $dboxdir/*/*fasta ;
+    do
+	prefix=`basename $i .fasta`
+	stats=`python2 ~/Code/utils/qc/asm_assess.py -i $i`
+	echo $prefix,$stats >> $dboxdir/asmstats.csv
+    done
+fi
