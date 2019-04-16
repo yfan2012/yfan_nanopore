@@ -30,7 +30,7 @@ do
     ##build the index and align
     echo building btidx and aligning for round $i
     bowtie2-build -q $1/btidx/$prefix.fasta $1/btidx/$prefix
-    bowtie2 -p 36 -x $1/btidx/$prefix -1 $1/*forward.paired.fq.gz -2 $1/*reverse.paired.fq.gz | samtools view -bS - | samtools sort -o $1/btbam/$prefix.sorted.bam
+    bowtie2 -p 36 -x $1/btidx/$prefix -1 $1/*forward_paired.fq.gz -2 $1/*reverse_paired.fq.gz | samtools view -bS - | samtools sort -o $1/btbam/$prefix.sorted.bam
     samtools index $1/btbam/$prefix.sorted.bam
 
     ##do the correction
