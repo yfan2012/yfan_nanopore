@@ -1,7 +1,8 @@
 #!/bin/bash
 
-##datadir=/scratch/groups/mschatz1/cpowgs/sindbis
-datadir=~/Dropbox/Timplab_Data/sindbis
+srcdir=~/Code/utils
+outdir=~/Dropbox/timplab_data/sindbis
+datadir=/dilithium/Data/Nanopore/sindbis
 
 if [ $1 == genomecov ]; then
     ##coverage across the genome
@@ -9,6 +10,16 @@ if [ $1 == genomecov ]; then
     do
 	mkdir -p $datadir/$i/cov
 	bedtools genomecov -d -ibam $datadir/$i/align/$i.primary.sorted.bam > $datadir/$i/cov/$i.primary.cov
+    done
+fi
+
+if [ $1 == run_stats ] ; then
+    ##get run stats in a nice csv, so you can grab this info for better normalization
+    touch $outdir/runstats.csv
+    echo file,yield,numreads,avglen >> $outdir/runstats.csv
+    for i in mock infected antibody ;
+    do
+	bash $srcdir/qc/basic_run_assess.sh $datadir/$i/fqs/$i.fq >> $outdir/runstats.csv
     done
 fi
 

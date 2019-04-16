@@ -89,3 +89,16 @@ if [ $1 == seqcons ] ; then
     ##seqtk seq -a $datadir/cons/r10_ecoli.cons.fq > $datadir/cons/r10_ecoli.cons.fa
     ##seqtk seq -a $datadir/cons/r9_ecoli.cons.fq > $datadir/cons/r9_ecoli.cons.fa
 fi
+
+if [ $1 == parsnp ] ; then
+    datadir=/kyber/Data/Nanopore/projects/r10
+    outdir=~/Dropbox/Timplab_Data/r10/zymo/parsnp
+
+    mkdir -p $outdir
+    
+    ref=$datadir/cons/ecoli_k12.fa
+    
+    parsnp -r $ref -d $datadir/cons -p 12 -o $outdir -c
+    harvesttools -i $outdir/parsnp.ggr -V $outdir/parsnp.vcf
+fi
+
