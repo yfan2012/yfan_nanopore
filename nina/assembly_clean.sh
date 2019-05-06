@@ -28,3 +28,11 @@ if [ $1 == mum_assemblers ] ; then
 fi
 
     
+if [ $1 == repeats ] ; then
+    ##find repeat regions
+    mkdir -p $datadir/repeats
+    ~/software/RFsrc/RepeatFinder.pl -f $datadir/wtdbg2_pilon/st31_wtdbg2.pilon.20.fasta -i $datadir/repeats/st31.wtdbg2.repeats -d ./
+    ~/software/RFsrc/RepeatFinder.pl -f $datadir/wtdbg2_pilon/st90853_wtdbg2.pilon.25.fasta -i $datadir/repeats/st90853.wtdbg2.repeats -d ./
+fi
+
+	

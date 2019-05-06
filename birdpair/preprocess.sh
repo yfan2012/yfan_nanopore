@@ -132,3 +132,4 @@ if [ $1 == canu_ptonly ] ; then
 	stopOnReadQuality=false \
 	-nanopore-raw $datadir/fastqs/patient_over5kb.fastq
 fi
+
