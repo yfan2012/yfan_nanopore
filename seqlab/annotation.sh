@@ -22,4 +22,10 @@ if [ $1 == medusa ] ; then
     java -jar ~/software/medusa/medusa.jar -f $datadir/References -i $datadir/annotation/candida_nivariensis_canu.pilon.6.fasta -v -o $scadir/cani_scaffold.fasta
 fi
 
+if [ $1 == mito_blast ] ; then
+    ##downloaded http://mitofun.biol.uoa.gr/fasta/sCDS.fasta.zip to find mito seq in scaffolds
+    makeblastdb -in $datadir/medusa/cani_scaffold.fasta -out $datadir/blast/cani_scaffold_db -dbtype nucl
+    blastn -query $datadir/Reference/mito/all_genes.fasta -db $datadir/blast/cani_scaffold_db -outfmt 7 -out $datadir/blast/mitohits.tsv
+fi
+    
     
