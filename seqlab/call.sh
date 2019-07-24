@@ -34,3 +34,5 @@ fi
 if [ $1 == cat_fq ] ; then
     cat $datadir/run1/barcode09.fastq $datadir/run2/barcode09.fastq > $datadir/candida_nivariensis.fastq
 fi
+
+
