@@ -21,7 +21,7 @@ fi
 if [ $1 == mito_blast ] ; then
     ##downloaded http://mitofun.biol.uoa.gr/fasta/sCDS.fasta.zip to find mito seq in scaffolds
     makeblastdb -in $datadir/medusa/cani_scaffold.fasta -out $datadir/blast/cani_scaffold_db -dbtype nucl
-    blastn -query $datadir/Reference/mito/all_genes.fasta -db $datadir/blast/cani_scaffold_db -outfmt 7 -out $datadir/blast/mitohits.tsv
+    blastn -query $datadir/References/mito/all_genes.fa -db $datadir/blast/cani_scaffold_db -outfmt 7 -out $datadir/blast/mitohits.tsv
 fi
     
 if [ $1 == gather_mito ] ; then
