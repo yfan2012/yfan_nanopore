@@ -176,3 +176,15 @@ if [ $1 == bender_asm_assess ] ; then
 	echo $prefix,$stats >> $dboxdir/asmstats.csv
     done
 fi
+
+
+if [ $1 == align ] ; then
+    ml samtools
+    ##align nanopore reads to see if ctg14 in st31 needs to be broken
+    mkdir -p $datadir/181108_nina_v2/align
+    for i in st31 st90853 ;
+    do
+	minimap2 -a -x map-ont -t 36 $datadir/181108_nina_v2/$i/pilon_trimmed_${i}/${i}_wtdbg2.pilon.20.fasta $datadir/181108_nina_v2/fastqs/${i}_bothruns_over3kb.fastq | samtools view -bS | samtools sort -o $datadir/181108_nina_v2/align/$i.sorted.bam -T $datadir/181108_nina_v2/align/reads_$i.tmp
+	samtools index $datadir/181108_nina_v2/align/$i.sorted.bam
+    done
+fi
