@@ -28,6 +28,7 @@ if [ $1 == mum_assemblers ] ; then
 fi
 
     
+<<<<<<< HEAD
 if [ $1 == align_np ] ; then
     ##align nanopore reads to check misassembly
     datadir=/scratch/groups/mschatz1/cpowgs/fungus/181108_nina_v2
@@ -46,3 +47,13 @@ if [ $1 == align_np ] ; then
     minimap2 -a -x map-ont -t 36 $datadir/st90853/pilon_trimmed_st90853/st90853_wtdbg2.pilon.25.fasta $datadir/fastqs/st90853_bothruns_over3kb.fastq | samtools view -b | samtools sort -o $datadir/align/st90853_wtdbg2.pilon.25.sorted.bam -T $datadir/align/reads.tmp -
     samtools index $datadir/align/st90853_wtdbg2.pilon.25.sorted.bam
 fi
+=======
+if [ $1 == repeats ] ; then
+    ##find repeat regions
+    mkdir -p $datadir/repeats
+    ~/software/RFsrc/RepeatFinder.pl -f $datadir/wtdbg2_pilon/st31_wtdbg2.pilon.20.fasta -i $datadir/repeats/st31.wtdbg2.repeats -d ./
+    ~/software/RFsrc/RepeatFinder.pl -f $datadir/wtdbg2_pilon/st90853_wtdbg2.pilon.25.fasta -i $datadir/repeats/st90853.wtdbg2.repeats -d ./
+fi
+
+	
+>>>>>>> bcca870fbefbf4a9f7668b05f2c00a9e75579e82
