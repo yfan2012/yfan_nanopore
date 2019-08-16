@@ -22,14 +22,14 @@ do
 
     ##do the correction
     echo correcting for round $i
-    java -Xmx100G -jar ~/software/pilon-1.23.jar --threads 12 --changes --tracks --genome $1/index/$prefix.fasta --frags $1/bam/$prefix.sorted.bam --outdir $1 --output $prefix.pilon.$i
+    java -Xmx100G -jar ~/software/pilon-1.23.jar --threads 12 --changes --tracks --genome $1/index/$prefix.fasta --frags $1/bam/$prefix.sorted.bam --outdir $1 --output $prefix.pilon_bwa.$i
 
     ##newly corrected genome replaces the old genome in the index dir
     echo clearing old
     rm $1/index/*
     rm $1/bam/*
     echo copying $i to empty index folder
-    cp $1/$prefix.pilon.$i.fasta $1/index/$prefix.fasta
+    cp $1/$prefix.pilon_bwa.$i.fasta $1/index/$prefix.fasta
 done
 
 

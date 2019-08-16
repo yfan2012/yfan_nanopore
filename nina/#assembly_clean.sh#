@@ -31,7 +31,7 @@ fi
 if [ $1 == align_np ] ; then
     ##align nanopore reads to check misassembly
     datadir=/scratch/groups/mschatz1/cpowgs/fungus/181108_nina_v2
-
+    
     mkdir -p $datadir/align
 
     for i in st31 st90853 ;

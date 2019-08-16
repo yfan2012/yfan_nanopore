@@ -46,7 +46,15 @@ if [ $1 == pilon ] ; then
 
     bash ./pilon.sh $datadir/pilon $datadir/canu/nivar.contigs.fasta nivar
 fi
-    
+
+if [ $1 == pilon_bwa ] ; then
+    mkdir -p $datadir/pilon_bwa
+    cp $datadir/trimmed/CANI_gDNA_forward_paired.fq.gz $datadir/pilon_bwa
+    cp $datadir/trimmed/CANI_gDNA_reverse_paired.fq.gz $datadir/pilon_bwa
+
+    bash ./pilon_bwa.sh $datadir/pilon_bwa $datadir/canu/nivar.contigs.fasta nivar
+fi
+
     
 if [ $1 == racon ] ; then
     mkdir -p $datadir/racon
@@ -74,9 +82,29 @@ if [ $1 == freebayes ] ; then
     freebayes -f $datadir/canu/nivar.contigs.fasta $datadir/freebayes/nivar.sorted.bam > $datadir/freebayes/nivar.vcf
 fi
     
+if [ $1 == freebayes_bwa ] ; then
+    ##assumes you've already run the regular freebayes portion of stuff    
+    bwa index $datadir/freebayes/nivar.contigs.fasta
+    bwa mem $datadir/freebayes/nivar.contigs.fasta $datadir/trimmed/CANI_gDNA_forward_paired.fq.gz $datadir/trimmed/CANI_gDNA_reverse_paired.fq.gz  | samtools view -@ 24 -bS - | samtools sort -@ 24 -o $datadir/freebayes/nivar_bwa.sorted.bam
+    samtools index $datadir/freebayes/nivar_bwa.sorted.bam
+
+    freebayes -f $datadir/canu/nivar.contigs.fasta $datadir/freebayes/nivar_bwa.sorted.bam > $datadir/freebayes/nivar_bwa.vcf
+fi
     
+
 if [ $1 == racon_bwa ] ; then
     ##add to racon analysis
     rm $datadir/racon/all.fq.gz
     bash ./racon_bwa.sh $datadir/racon $datadir/canu/nivar.contigs.fasta nivar_bwa
+fi
+
+
+if [ $1 == medusa ] ; then
+    scadir=$datadir/medusa
+    olddir=/kyber/Data/seqlab/sp_2019/fungus_asm
+    mkdir -p $scadir
+
+    cp -r ~/software/medusa/medusa_scripts ./
+
+    java -jar ~/software/medusa/medusa.jar -f $olddir/References -i $datadir/canu/nivar.contigs.fasta -v -o $scadir/nivar_r10_scaffold.fasta
 fi
