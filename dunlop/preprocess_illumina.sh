@@ -86,21 +86,6 @@ if [ $2 == clean_bam ] ; then
     done
 fi
 
-if [ $2 == clean_bam2 ] ; then
-    for i in $datadir/align/NSS96.sorted.bam ;
-    do
-	samp=`basename $i .sorted.bam`
-	samtools sort -@ 36 -n -o - $i |\
-	    samtools fixmate -@ 36 -r -m - |\
-	    samtools sort -@ 36 -o - |\
-	    samtools markdup -@ 36 -r - |\
-	    samtools sort -@ 36 -o $datadir/align/$samp.sorted.mkdp.bam
-	samtools index $datadir/align/$samp.sorted.mkdp.bam
-    done
-fi
-
-
-
 if [ $2 == callvars ] ; then
     cd ~/software/freebayes/scripts
     mkdir -p $datadir/vars
