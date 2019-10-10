@@ -54,6 +54,7 @@ def assign_snps(positions, genes):
     return snps in gene regions, with gene info
     '''
     snpinfo=[]
+    noncoding=0
     for snp in positions:
         ##h8 this nested for lop nonsense, but i am too cranky to think of a better way rn
         pos=int(snp[1])
@@ -69,12 +70,13 @@ def assign_snps(positions, genes):
 def main(gfffile, vcffile, outfile):
     positions=find_snps(vcffile)
     genes=prep_gff(gfffile)
+    total=len(positions)
     a=assign_snps(positions, genes)
     with open(outfile, 'w') as f:
         for i in a:
             f.write(','.join(i)+'\n')
         f.close()
-
+    print('Total of '+str(total)+' snps')
         
 if __name__ == '__main__':
     import argparse

@@ -76,3 +76,62 @@ if [ $1 == maker_scaffold ] ; then
 	  -base scaffold \
 	  $datadir/maker/maker_opts.ctl $datadir/maker/maker_bopts.ctl $datadir/maker/maker_exe.ctl
 fi
+
+
+if [ $1 == trinity_dRNA ] ; then
+    datadir=/kyber/Data/seqlab/sp_2019/nivar_r9
+    mkdir -p $datadir/trinity_dRNA
+    Trinity --seqType fq \
+	    --single $datadir/nivar_dRNA.fq \
+	    --CPU 32 --max_memory 100G --output $datadir/trinity_dRNA
+fi
+
+
+if [ $1 == map_drna ] ; then
+    datadir=/kyber/Data/seqlab/sp_2019/nivar_r9
+    mkdir -p $datadir/rna_align
+    minimap2 -a -x splice -uf -k14 -t 36 $datadir/freebayes_bwa/nivar_fb15_bwa.fasta $datadir/nivar_dRNA.fq | \
+	samtools view -@ 36 -b | \
+	samtools sort -@ 36 -o $datadir/rna_align/nivar_fb15_dRNA.sorted.bam -T $datadir/rna_align/reads.tmp -
+    samtools index $datadir/rna_align/nivar_fb15_dRNA.sorted.bam
+fi
+    
+if [ $1 == augustus_fa ] ; then
+    datadir=/kyber/Data/seqlab/sp_2019/nivar_r9
+    anndir=$datadir/annotation
+    cp $datadir/freebayes_bwa/nivar_fb15_bwa.fasta $anndir/
+    augustus --species=candida_albicans $anndir/nivar_fb15_bwa.fasta > $anndir/augustus/cani_by_caal.gff
+    bedtools getfasta -fi $anndir/nivar_fb15_bwa.fasta -bed $anndir/augustus/cani_by_caal.gff -fo $anndir/augustus/cani_by_caal.fasta
+fi
+
+
+if [ $1 == map_cdna ] ; then
+    datadir=/kyber/Data/seqlab/sp_2019/nivar_r9
+
+    hisat2-build $datadir/freebayes_bwa/nivar_fb15_bwa.fasta $datadir/freebayes_bwa/nivar_fb15_bwa
+    hisat2 -p 36 -q -x $datadir/freebayes_bwa/nivar_fb15_bwa \
+	   -1 $datadir/trimmed/CANI_cDNA_forward_paired.fq.gz \
+	   -2 $datadir/trimmed/CANI_cDNA_reverse_paired.fq.gz | \
+	samtools view -@ 36 -bS | \
+	samtools sort -@ 36 -o $datadir/rna_align/nivar_fb15_cDNA.sorted.bam -T $datadir/rna_align/reads.tmp -
+    samtools index $datadir/rna_align/nivar_fb15_cDNA.sorted.bam
+fi
+
+
+if [ $1 == get_rna_regions ] ; then
+    datadir=/kyber/Data/seqlab/sp_2019/nivar_r9
+
+    bedtools genomecov -bg -ibam $datadir/rna_align/nivar_fb15_cDNA.sorted.bam | awk '$4 > 4' | bedtools merge -d 2 > $datadir/rna_align/nivar_fb15_cDNA.bed
+    bedtools genomecov -bg -ibam $datadir/rna_align/nivar_fb15_dRNA.sorted.bam | awk '$4 > 4' | bedtools merge -d 2 > $datadir/rna_align/nivar_fb15_dRNA.bed
+fi
+
+if [ $1 == find_intersects ] ; then
+    datadir=/kyber/Data/seqlab/sp_2019/nivar_r9
+    anndir=$datadir/annotation
+    
+    bedtools intersect -wa -a $anndir/augustus/cani_by_caal.gff -b $datadir/rna_align/nivar_fb15_dRNA.bed > $datadir/rna_align/nivar_fb15_dRNA_genes.bed
+    bedtools intersect -wa -a $anndir/augustus/cani_by_caal.gff -b $datadir/rna_align/nivar_fb15_cDNA.bed > $datadir/rna_align/nivar_fb15_cDNA_genes.bed
+fi
+
+ 
+     

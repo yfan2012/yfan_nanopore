@@ -32,3 +32,5 @@ if [ $1 == canuparnsp ] ; then
     harvesttools -i $outdir/parsnp_canu/parsnp.ggr -V $outdir/parsnp_canu/parsnp.vcf
     Rscript ~/Code/utils/count_snps.R -i $outdir/parsnp_canu/parsnp.vcf -o $outdir/parsnp_canu
 fi
+
+

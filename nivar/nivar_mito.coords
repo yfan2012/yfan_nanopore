@@ -1,5 +1,0 @@
-/kyber/Data/Nanopore/Analysis/190706_nivar_r10/canu/nivar.contigs.fasta /kyber/Data/seqlab/sp_2019/fungus_asm/References/mito
-NUCMER
-
-    [S1]     [E1]  |     [S2]     [E2]  |  [LEN 1]  [LEN 2]  |  [% IDY]  |  [LEN R]  [LEN Q]  |  [COV R]  [COV Q]  | [TAGS]
-===============================================================================================================================

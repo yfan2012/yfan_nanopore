@@ -1,11 +1,10 @@
 #!/bin/bash
 
 ##assemble on whack
-prefix=190706_nivar_r10
-datadir=/kyber/Data/Nanopore/Analysis/$prefix
+prefix=nivar_r9
+datadir=/kyber/Data/seqlab/sp_2019/$prefix
 
 ##called using guppy 3.2.1 in docker container
-
 
 if [ $1 == fqs ] ; then
     cat $datadir/called/*fastq > $datadir/$prefix.fq
@@ -18,8 +17,6 @@ fi
 
 
 if [ $1 == assemble ] ; then
-    ##kyber might get disconnected tonight, so I copied fqs to whack on board storage to run canu
-    datadir=~/data/nivar
     canu \
 	-p nivar -d $datadir/canu \
 	genomeSize=15m \
@@ -84,11 +81,12 @@ fi
     
 if [ $1 == freebayes_bwa ] ; then
     ##assumes you've already run the regular freebayes portion of stuff    
-    bwa index $datadir/freebayes/nivar.contigs.fasta
-    bwa mem $datadir/freebayes/nivar.contigs.fasta $datadir/trimmed/CANI_gDNA_forward_paired.fq.gz $datadir/trimmed/CANI_gDNA_reverse_paired.fq.gz  | samtools view -@ 24 -bS - | samtools sort -@ 24 -o $datadir/freebayes/nivar_bwa.sorted.bam
-    samtools index $datadir/freebayes/nivar_bwa.sorted.bam
+    mkdir -p $datadir/freebayes_bwa
+    cp $datadir/trimmed/CANI_gDNA_forward_paired.fq.gz $datadir/freebayes_bwa
+    cp $datadir/trimmed/CANI_gDNA_reverse_paired.fq.gz $datadir/freebayes_bwa
 
-    freebayes -f $datadir/canu/nivar.contigs.fasta $datadir/freebayes/nivar_bwa.sorted.bam > $datadir/freebayes/nivar_bwa.vcf
+    bash ./freebayes_bwa.sh $datadir/freebayes_bwa $datadir/canu/nivar.contigs.fasta nivar
+    
 fi
     
 
