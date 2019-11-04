@@ -71,7 +71,7 @@ fi
 if [ $2 == clean_bam ] ; then
     ##merge this into the align step if possible
     ##I think this crazy piping doesn't work because it needs the index of everyting besides the namesorted step 
-    for i in $datadir/align/NSS96.sorted.bam ;
+    for i in $datadir/align/*.sorted.bam ;
     do
 	samp=`basename $i .sorted.bam`
 	samtools sort -@ 36 -n -o $datadir/align/$samp.namesorted.bam $i 
@@ -101,8 +101,16 @@ if [ $2 == callvars ] ; then
 				   --min-alternate-count 1 \
 				   --min-alternate-fraction 0 \
 				   --pooled-continuous \
-				   $datadir/align/$samp.sorted.bam > $datadir/vars/$samp.vcf
+				   $datadir/align/$samp.sorted.mkdp.bam > $datadir/vars/$samp.vcf
     done
 fi
 
        
+if [ $2 == varsupport ] ; then
+    for i in $datadir/vars/*.vcf ;
+    do
+	samp=`basename $i .vcf`
+	touch $datadir/vars/total_vars.csv
+	python find_snps.py -v $i -g $refdir/bw_BW25113.gff3 -o $datadir/vars/$samp.csv >> $datadir/vars/total_vars.csv
+    done
+fi
