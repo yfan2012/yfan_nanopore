@@ -1,134 +1,75 @@
 #!/bin/bash
 
-
+datadir=/uru/Data/Nanopore/projects/nivar
 
 if [ $1 == yields ] ; then
+    
+    for i in $datadir/illumina/gDNA/nivar_gDNA_R*.fastq.gz ;
+    do
+	newfile=`basename $i .gz`
+	zcat $i > $datadir/illumina/gDNA/$newfile
+	bash ~/Code/utils/qc/basic_run_assess.sh $datadir/illumina/gDNA/$newfile
+    done
+    
+    for i in $datadir/illumina/gDNA_trimmed/nivar_gDNA_*_paired.fq.gz ;
+    do
+	newfile=`basename $i .gz`
+	zcat $i > $datadir/illumina/gDNA_trimmed/$newfile
+	bash ~/Code/utils/qc/basic_run_assess.sh $datadir/illumina/gDNA_trimmed/$newfile
+    done
+
+    for i in $datadir/illumina/cDNA/nivar_cDNA_R*.fastq.gz ;
+    do
+	newfile=`basename $i .gz`
+	zcat $i > $datadir/illumina/cDNA/$newfile
+	bash ~/Code/utils/qc/basic_run_assess.sh $datadir/illumina/cDNA/$newfile
+    done
+    
+    for i in $datadir/illumina/cDNA_trimmed/nivar_cDNA_*_paired.fq.gz ;
+    do
+	newfile=`basename $i .gz`
+	zcat $i > $datadir/illumina/cDNA_trimmed/$newfile
+	bash ~/Code/utils/qc/basic_run_assess.sh $datadir/illumina/cDNA_trimmed/$newfile
+    done
+
     ##get yield and trimmed yields for all data
-    npr9=`bash ~/Code/utils/qc/basic_run_assess.sh $r9dir/nivar_r9.fq`
-    npr9_filt=`bash ~/Code/utils/qc/basic_run_assess.sh $r9dir/nivar_r9_3k.fq`
-    npr9_filt=`bash ~/Code/utils/qc/basic_run_assess.sh $r9dir/nivar_dRNA.fq`
-    npr10=`bash ~/Code/utils/qc/basic_run_assess.sh $r10dir/190706_nivar_r10.fq`
-    npr10_filt=`bash ~/Code/utils/qc/basic_run_assess.sh $r10dir/190706_nivar_r10_3k.fq`
+    npr9=`bash ~/Code/utils/qc/basic_run_assess.sh $datadir/r9/r9.fq`
+    npr9_filt=`bash ~/Code/utils/qc/basic_run_assess.sh $datadir/r9/r9_3kb.fq`
+    drna=`bash ~/Code/utils/qc/basic_run_assess.sh $datadir/dRNA/dRNA.fq`
+    npr10=`bash ~/Code/utils/qc/basic_run_assess.sh $datadir/r10/r10.fq`
+    npr10_filt=`bash ~/Code/utils/qc/basic_run_assess.sh $datadir/r10/r10_3kb.fq`
+
     echo $npr9
     echo $npr9_filt
     echo $npr10
     echo $npr10_filt
-    for i in /kyber/Data/seqlab/sp_2019/nivar_r9/data/gDNA_illumina/CANI_gDNA_R*.fastq.gz ;
-    do
-	yield=`zcat $i | paste - - - - | cut -f 2 | tr -d '\n' | wc -c `
-	echo $i,$yield
-    done
-    for i in /kyber/Data/seqlab/sp_2019/nivar_r9/data/cDNA_illumina/CANI_cDNA_R*.fastq.gz ;
-    do
-	yield=`zcat $i | paste - - - - | cut -f 2 | tr -d '\n' | wc -c `
-	echo $i,$yield
-    done
-    for i in /kyber/Data/seqlab/sp_2019/nivar_r9/trimmed/CANI_*_paired.fq.gz ;
-    do
-	yield=`zcat $i | paste - - - - | cut -f 2 | tr -d '\n' | wc -c `
-	echo $i,$yield
-    done
-    
+    echo $drna
+
 fi
 
 if [ $1 == asm_stats ] ; then
-    ref=$r9dir/References/candida_nivariensis.fa
-
-    python ~/Code/utils/qc/asm_assess.py -i $ref
-    python ~/Code/utils/qc/asm_assess.py -i $r9asm
-    python ~/Code/utils/qc/asm_assess.py -i $r10asm
+    ref=`python ~/Code/utils/qc/asm_assess.py -i $datadir/reference/candida_nivariensis.fa`
+    echo $datadir/reference/candida_nivariensis.fa,$ref
+    r9=`python ~/Code/utils/qc/asm_assess.py -i $datadir/assemble/r9_assembly/nivar_r9.contigs.fasta`
+    echo $datadir/assemble/r9_assembly/nivar_r9.contigs.fasta,$r9
+    r10=`python ~/Code/utils/qc/asm_assess.py -i $datadir/assemble/r10_assembly/nivar_r10.contigs.fasta`
+    echo $datadir/assemble/r10_assembly/nivar_r10.contigs.fasta,$r10
 fi
 
 if [ $1 == busco ] ; then
-    r9asmdir=$r9dir/assemblies
-    r10asmdir=$r10dir/assemblies
 
-    ref=$r9dir/References/candida_nivariensis.fa
-
-    mkdir -p $r9dir/busco
-    for i in $r9asmdir/*fa* ;
+    for i in r9 r10 ;
     do
-	prefix=`basename $i .fasta`
-	python ~/software/busco/scripts/run_BUSCO.py -f -i $i -o r9_$prefix -l ~/software/busco/lineages/fungi_odb9 -sp candida_albicans -m genome
+	##pilon
+	python ~/software/busco/scripts/run_BUSCO.py -f -i $datadir/pilon/${i}_pilon/nivar_${i}.pilon_bwa.15.fasta -o ${i}_pilon -l ~/software/busco/lineages/fungi_odb9 -sp candida_albicans -m genome
+	##racon
+	python ~/software/busco/scripts/run_BUSCO.py -f -i $datadir/racon/${i}_racon/nivar_${i}.racon.15.fasta -o ${i}_racon -l ~/software/busco/lineages/fungi_odb9 -sp candida_albicans -m genome
+	##freebayes
+	python ~/software/busco/scripts/run_BUSCO.py -f -i $datadir/freebayes/${i}_freebayes/nivar_fb15_bwa.fasta -o ${i}_freebayes -l ~/software/busco/lineages/fungi_odb9 -sp candida_albicans -m genome
     done
-    mkdir -p $r10dir/busco
-    for i in $r10asmdir/*fa* ;
-    do
-	prefix=`basename $i .fasta`
-	python ~/software/busco/scripts/run_BUSCO.py -f -i $i -o r10_$prefix -l ~/software/busco/lineages/fungi_odb9 -sp candida_albicans -m genome
-    done
-fi
 
-
-if [ $1 == ref_busco ] ; then
-    ref=$r9dir/References/candida_nivariensis.fa
+    ref=$datadir/reference/candida_nivariensis.fa
     python ~/software/busco/scripts/run_BUSCO.py -f -i $ref -o ref_busco -l ~/software/busco/lineages/fungi_odb9 -sp candida_albicans -m genome
-fi
-
-
-if [ $1 == asmstats ] ; then
-    outfile=~/Dropbox/yfan/nivar/asm/asmstats.csv
-    echo asm,num,n50,longest,shortest,total > $outfile
-    refstats=`python ~/Code/utils/qc/asm_assess.py -i $r9dir/References/candida_nivariensis.fa`
-    echo ref,$refstats >> $outfile
-    r9stats=`python ~/Code/utils/qc/asm_assess.py -i $r9dir/canu/nivar.contigs.fasta`
-    echo r9,$r9stats >> $outfile
-    r10stats=`python ~/Code/utils/qc/asm_assess.py -i $r10dir/canu/nivar.contigs.fasta`
-    echo r10,$r10stats >> $outfile
-fi
-
-
-if [ $1 == mummer_corr ] ; then
-    mkdir -p $r9dir/mummer_corr
-
-    for i in $r9dir/assemblies/*fasta ;
-    do
-	rm ~/tmp/*
-	prefix=`basename $i .fasta`
-	mkdir -p $r9dir/mummer_corr/$prefix
-	cp $i ~/tmp/
-	cp $r9dir/canu/nivar.contigs.fasta ~/tmp/
-	nucmer -p ~/tmp/$prefix ~/tmp/nivar.contigs.fasta ~/tmp/$prefix.fasta 
-	mummerplot --filter --fat --png -p ~/tmp/$prefix ~/tmp/$prefix.delta
-	dnadiff -p ~/tmp/$prefix ~/tmp/nivar.contigs.fasta ~/tmp/$prefix.fasta 
-	cp ~/tmp/$prefix* $r9dir/mummer_corr/$prefix/
-    done
-
-    for i in $r10dir/assemblies/*fasta ;
-    do
-	rm ~/tmp/*
-	prefix=`basename $i .fasta`
-	mkdir -p $r10dir/mummer_corr/$prefix
-	cp $i ~/tmp/
-	cp $r10dir/canu/nivar.contigs.fasta ~/tmp/
-	nucmer -p ~/tmp/$prefix ~/tmp/nivar.contigs.fasta ~/tmp/$prefix.fasta 
-	mummerplot --filter --fat --png -p ~/tmp/$prefix ~/tmp/$prefix.delta
-	dnadiff -p ~/tmp/$prefix ~/tmp/nivar.contigs.fasta ~/tmp/$prefix.fasta 
-	cp ~/tmp/$prefix* $r10dir/mummer_corr/$prefix/
-    done
-fi
-
-
-
-
-if [ $1 == find_enrich ] ; then
-    dbxdir=~/Dropbox/yfan/nivar/error
-    mkdir -p $dbxdir
-
-    ref=$r9dir/canu/nivar.contigs.fasta
-    for i in $r9dir/assemblies/*fasta ;
-    do
-	prefix=`basename $i .fasta`
-	python2 ~/Code/utils/motif_enrich.py -s $r9dir/mummer_corr/$prefix/$prefix.snps -r $ref -m 6 -o $dbxdir/$prefix.r9.csv
-    done
-
-    
-    ref=$r10dir/canu/nivar.contigs.fasta
-    for i in $r10dir/assemblies/*fasta ;
-    do
-	prefix=`basename $i .fasta`
-	python2 ~/Code/utils/motif_enrich.py -s $r10dir/mummer_corr/$prefix/$prefix.snps -r $ref -m 6 -o $dbxdir/$prefix.r10.csv
-    done
 fi
 
 
