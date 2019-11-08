@@ -13,6 +13,35 @@ datadir='/uru/Data/Nanopore/projects/nivar/'
 
 countsdir=paste0(dbxdir, 'motif_enrich/counts/')
 
+##mismatch,ins,del per read
+ciginfo=tibble(
+    align.len = numeric(), 
+    mismatch = numeric(),
+    insert = numeric(),
+    delete = numeric(),
+    pore = character())
+for (i in c('r9', 'r10')) {
+    csv=paste0(datadir, 'align/', i, '/reference_' , i, '.md.sorted.csv')
+    cig=read_csv(csv) %>%
+        rowwise() %>%
+        select(align.len, mismatch, insert, delete) %>%
+        mutate(mismatch=mismatch/align.len) %>%
+        mutate(insert=insert/align.len) %>%
+        mutate(delete=delete/align.len) %>%
+        mutate(pore=i)
+    ciginfo=bind_rows(ciginfo, cig)
+}
+ciginfo=gather(ciginfo, key, value, -pore) %>%
+    filter(key!='align.len')
+pdf(paste0(dbxdir, 'read_errors.pdf'), width=12, height=8)
+ggplot(ciginfo, aes(x=pore, y=value, colour=key, fill=key, alpha=.8)) +
+    geom_violin() +
+    xlab('pore') +
+    ylim(0,.3) +
+    theme_bw()
+dev.off()
+
+
 
 ##compare number of corrections made
 mumdir=paste0(datadir,'mummer/')
@@ -42,8 +71,9 @@ dev.off()
 distances=read_csv(paste0(dbxdir,'neighbor.csv'))
 pdf(paste0(dbxdir,'neighbor.pdf'), height=8.5, width=11)
 ggplot(distances, aes(x=distance)) +
-    geom_histogram(data=distances[distances$pore=='r9',], fill='red', colour='red', alpha=.3) +
-    geom_histogram(data=distances[distances$pore=='r10',], fill='blue', colour='blue', alpha=.3) +
+    geom_histogram(data=distances[distances$pore=='r9',], fill='red', colour='red', alpha=.3, bins=40) +
+    geom_histogram(data=distances[distances$pore=='r10',], fill='blue', colour='blue', alpha=.3, bins=40) +
+    xlim(-10,100) +
     ggtitle('Nearest error in opposite pore') +
     xlab('Distance') +
     theme_bw()
@@ -57,7 +87,7 @@ for (i in countfiles) {
     counts=counts %>%
         arrange(-freq) %>%
         mutate(rank=c(1:dim(counts)[1]))
-
+pp
     name=substring(i, 1, nchar(i)-4)
 
     pdf(paste0(countsdir, name, '.pdf'), height=8.5, width=11)

@@ -116,3 +116,32 @@ if [ $1 == correction_types ] ; then
 	echo $pore,$alg,$deletion,$insertion,$snps >> $dbxdir/correction_types.csv
     done
 fi
+
+if [ $1 == align_np ] ; then
+
+    mkdir -p $datadir/align
+    ref=$datadir/reference/candida_nivariensis.fa
+    
+    for i in r9 r10 ;
+    do
+	mkdir -p $datadir/align/$i
+	minimap2 -t 36 -ax map-ont $ref $datadir/$i/${i}_3kb.fq |
+	    samtools view -@ 36 -b |
+	    samtools sort -@ 36 -o $datadir/align/$i/reference_${i}.sorted.bam -T $datadir/align/$i/reads.tmp
+	samtools index $datadir/align/$i/reference_${i}.sorted.bam
+
+	samtools calmd -@ 36 -b $datadir/align/$i/reference_${i}.sorted.bam $ref |
+	    samtools sort -@ 36 -o $datadir/align/$i/reference_${i}.md.sorted.bam
+	samtools index $datadir/align/$i/reference_${i}.md.sorted.bam
+    done
+fi
+
+
+if [ $1 == bamextract ] ; then
+
+    for i in r9 r10 ;
+    do
+	~/Code/timp_nanopore/oxford/bam_extract.py -i $datadir/align/$i/reference_${i}.md.sorted.bam -n 50000
+	gunzip $datadir/align/$i/reference_${i}.md.sorted.csv.gz
+    done
+fi
