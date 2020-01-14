@@ -104,13 +104,12 @@ if [ $2 == callvars ] ; then
 				   $datadir/align/$samp.sorted.mkdp.bam > $datadir/vars/$samp.vcf
     done
 fi
-
        
 if [ $2 == varsupport ] ; then
     for i in $datadir/vars/*.vcf ;
     do
 	samp=`basename $i .vcf`
 	touch $datadir/vars/total_vars.csv
-	python find_snps.py -v $i -g $refdir/bw_BW25113.gff3 -o $datadir/vars/$samp.csv >> $datadir/vars/total_vars.csv
+	python find_snps.py -v $i -g $refdir/bw_BW25113_withPromoters.gff3 -o $datadir/vars/$samp.csv >> $datadir/vars/total_vars.csv
     done
 fi

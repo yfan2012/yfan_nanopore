@@ -4,15 +4,14 @@ datadir=/uru/Data/Nanopore/projects/nivar
 dbxdir=~/Dropbox/yfan/nivar
 
 if [ $1 == find_enrich ] ; then
-    
     ref=$datadir/reference/candida_nivariensis.fa
-    mkdir -p $dbxdir/motif_enrich
+    mkdir -p $datadir/motif_enrich
     
-    for i in $datadir/mummer/*ref/*.snps ;
+    for i in $datadir/mummer/*ref/nivar*.snps ;
     do
 	prefix=`basename $i .snps`
 	echo $prefix
-	python2 ~/Code/utils/motif_enrich.py -s $i -r $ref -m 6 -o $dbxdir/motif_enrich/$prefix.csv
+	python2 ~/Code/utils/motif_enrich.py -s $i -r $ref -m 6 -o $datadir/motif_enrich/$prefix.csv
     done
 
     for i in $datadir/mummer/*raw/*.snps ;
@@ -24,9 +23,8 @@ if [ $1 == find_enrich ] ; then
 
 	refcorr=$datadir/mummer/${pore}_${corr}_raw/$corr.15.fasta
 
-	python2 ~/Code/utils/motif_enrich.py -s $i -r $refcorr -m 6 -o $dbxdir/motif_enrich/$prefix.csv
+	python2 ~/Code/utils/motif_enrich.py -s $i -r $refcorr -m 6 -o $datadir/motif_enrich/$prefix.csv
     done
-
 fi
 
 if [ $1 == venn_mummer ] ; then
@@ -61,10 +59,11 @@ if [ $1 == venn_mummer ] ; then
 fi
 
 if [ $1 == error_venn ] ; then
+    mkdir -p $datadir/error_venn
     python2 ~/Code/utils/meth/error_venn.py \
 	    -m1 $datadir/mummer/r9_raw_ref/nivar_r9_raw_ref.snps \
 	    -m2 $datadir/mummer/r10_raw_ref/nivar_r10_raw_ref.snps \
-	    -o $dbxdir/error_venn.csv
+	    -o $datadir/error_venn/nivar_error_venn.csv
 fi
 
 if [ $1 == correction_venn ] ; then
@@ -144,4 +143,15 @@ if [ $1 == bamextract ] ; then
 	~/Code/timp_nanopore/oxford/bam_extract.py -i $datadir/align/$i/reference_${i}.md.sorted.bam -n 50000
 	gunzip $datadir/align/$i/reference_${i}.md.sorted.csv.gz
     done
+fi
+
+if [ $1 == extract_quals ] ; then
+    python error_basequals.py -m $datadir/mummer/r9_raw_ref/nivar_r9_raw_ref.snps \
+	   -b1 $datadir/align/r9/reference_r9.sorted.bam \
+	   -b2 $datadir/align/r10/reference_r10.sorted.bam \
+	   -o $datadir/error_quals/r9_quals.csv
+    python error_basequals.py -m $datadir/mummer/r10_raw_ref/nivar_r10_raw_ref.snps \
+	   -b1 $datadir/align/r10/reference_r10.sorted.bam \
+	   -b2 $datadir/align/r9/reference_r9.sorted.bam \
+	   -o $datadir/error_quals/r10_quals.csv
 fi

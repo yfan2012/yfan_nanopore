@@ -1,5 +1,7 @@
 #!/bin/bash
 
+##annotate variants based on alignment
+
 datadir=/kyber/Data/Nanopore/projects/birdpair
 
 if [ $1 == align ] ; then
@@ -45,3 +47,15 @@ if [ $1 == freebayes ] ; then
     done
 fi
 	
+if [ $1 == annot ] ; then
+
+
+    for i in $datadir/vars/*vcf ;
+    do
+	prefix=`basename $i .vcf`
+	ref=`echo $prefix | cut -d _ -f 2,3`
+	python ~/Code/utils/find_snps.py -v $i -g $datadir/ref/$ref.gff -o $datadir/vars/$prefix.csv
+    done
+fi
+	     
+    

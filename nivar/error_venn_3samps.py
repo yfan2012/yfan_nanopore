@@ -1,15 +1,4 @@
-def tig_to_pos(mumsnps):
-    '''get a dictionary of tigs that map to list of its positions of error'''
-    with open(mumsnps, 'r') as f:
-        content=f.read().splitlines()
-    posdict={}
-    for i in content:
-        tig=i.split('\t')[10]
-        if tig not in posdict:
-            posdict[tig]=[int(i.split('\t')[0])]
-        else:
-            posdict[tig].append(int(i.split('\t')[0]))
-    return posdict
+from error_nearest import tig_to_pos
 
 def collapse(poslist):
     '''Scan through list of positions and return list of ranges'''

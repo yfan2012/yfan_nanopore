@@ -8,7 +8,6 @@ def find_snps(vcffile):
     '''
     input vcf file path
     return list of lists [refchr, refposition, refbase, newbase, numreads_ref, numreads_alt]
-    only includes positions where the two samp genomes aren't the same
     '''
     with open(vcffile) as f:
         content=f.read().split('\n')
@@ -38,6 +37,7 @@ def prep_gff(gfffile):
         if len(i)>0:
             if i[0]!='#':
                 info=i.split('\t')
+                ##each 'gene' is redundant info since there's usually
                 if info[3]!='region' and info[3]!='gene':
                     tags=info[8].split(';')
                     prodinfo=[x for x in tags if 'product=' in x]
@@ -51,7 +51,7 @@ def prep_gff(gfffile):
 def assign_snps(positions, genes):
     '''
     input snp positions and gene regions
-    return snps in gene regions, with gene info
+    return snps in gene regions with gene info
     '''
     snpinfo=[]
     noncoding=0
@@ -64,21 +64,21 @@ def assign_snps(positions, genes):
             if snp[0]==j[0] and pos>start and pos<end:
                 ##want [chr, pos, refbase, altbase, refreads, altreads, genename, geneprod, note]
                 if len(snp[3].split(','))==1:
-                    snpinfo.append([snp[0], snp[1], snp[2], snp[3], snp[4], snp[5], j[3], j[4]])
+                    snpinfo.append([snp[0], snp[1], snp[2], snp[3], snp[4], snp[5], j[3], j[4], str(start), str(end)])
                 else:
                     for alt in range(0,len(snp[3].split(','))):
                         altcount=snp[5].split(',')[alt]
                         altbase=snp[3].split(',')[alt]
-                        snpinfo.append([snp[0], snp[1], snp[2], altbase, snp[4], altcount, j[3], j[4]])
+                        snpinfo.append([snp[0], snp[1], snp[2], altbase, snp[4], altcount, j[3], j[4], str(start), str(end)])
         ##after iterating, check to see if a var has been added to the list. if not, then add it as an unknown
         if len(snpinfo)==oldlen:
             if len(snp[3].split(','))==1:
-                snpinfo.append([snp[0], snp[1], snp[2], snp[3], snp[4], snp[5], 'unk', 'unk'])
+                snpinfo.append([snp[0], snp[1], snp[2], snp[3], snp[4], snp[5], 'unk', 'unk', 'unk', 'unk'])
             else:
                 for alt in range(0,len(snp[3].split(','))):
                     altcount=snp[5].split(',')[alt]
                     altbase=snp[3].split(',')[alt]
-                    snpinfo.append([snp[0], snp[1], snp[2], altbase, snp[4], altcount, 'unk', 'unk'])
+                    snpinfo.append([snp[0], snp[1], snp[2], altbase, snp[4], altcount, 'unk', 'unk', 'unk', 'unk'])
     return(snpinfo)
 
 
@@ -96,9 +96,9 @@ def main(gfffile, vcffile, outfile):
     
 if __name__ == '__main__':
     import argparse
-    parser = argparse.ArgumentParser(description='find reads that aligned exactly one time')
-    parser.add_argument('--vcf','-v',  help='parsnp vcf file', type=str, required=True)
-    parser.add_argument('--gff','-g',  help='annotation of the ref genome thrown into parsnp', type=str, required=True)
+    parser = argparse.ArgumentParser(description='annotate snps in a vcf using a gff')
+    parser.add_argument('--vcf','-v',  help='vcf file made using like freebayes or something', type=str, required=True)
+    parser.add_argument('--gff','-g',  help='annotation of the ref genome', type=str, required=True)
     parser.add_argument('--out','-o',  help='final csv file', type=str, required=True)
     args = parser.parse_args()
 

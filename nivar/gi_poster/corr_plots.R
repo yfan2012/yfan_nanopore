@@ -13,6 +13,34 @@ datadir='/uru/Data/Nanopore/projects/nivar/'
 
 countsdir=paste0(dbxdir, 'motif_enrich/counts/')
 
+##qual scores stuff
+r9qualfile=paste0(datadir, 'error_quals/', 'r9_quals.csv')
+r10qualfile=paste0(datadir, 'error_quals/', 'r10_quals.csv')
+qualinfo=bind_rows(read_csv(r9qualfile) %>%
+                   mutate(samp='r9') %>%
+                   mutate(diff=sampqual-otherqual),
+                   read_csv(r10qualfile) %>%
+                   mutate(samp='r10') %>%
+                   mutate(diff=sampqual-otherqual))
+##need to know which positions don't share errors in order to compare
+errunique=distinct(qualinfo, tig, error_position, .keep_all=TRUE)
+pdf(paste0(dbxdir, 'qual_diffs.pdf'), width=12, height=8)
+ggplot(errunique, aes(x=samp, y=diff, colour=samp, fill=samp, alpha=.5)) +
+    geom_violin() +
+    xlab('Pore') +
+    ylab('Quality Score Difference') +
+    ggtitle('Qual Scores at error locations') + 
+    theme_bw()
+ggplot(qualinfo, aes(x=samp, y=sampqual, colour=samp, fill=samp, alpha=.5)) +
+    geom_violin() +
+    xlab('Pore') +
+    ylab('Quality Score') +
+    ggtitle('Qual Scores at error locations') + 
+    theme_bw()
+dev.off()
+
+
+
 ##mismatch,ins,del per read
 ciginfo=tibble(
     align.len = numeric(), 
@@ -20,6 +48,7 @@ ciginfo=tibble(
     insert = numeric(),
     delete = numeric(),
     pore = character())
+
 for (i in c('r9', 'r10')) {
     csv=paste0(datadir, 'align/', i, '/reference_' , i, '.md.sorted.csv')
     cig=read_csv(csv) %>%

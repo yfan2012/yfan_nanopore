@@ -1,6 +1,6 @@
 #!/bin/bash
 
-datadir=/scratch/groups/mschatz1/cpowgs/sindbis
+datadir=/dilithium/Data/Nanopore/sindbis
 srcdir=~/Code/utils/marcc
 
 if [ $1 == untar ] ; then
@@ -44,9 +44,12 @@ if [ $1 == align ] ; then
 	mkdir -p $datadir/$i/align
 
 	##sindbis alignment
-	minimap2 -a -k14 -uf -t 36 $datadir/refs/sindbis_jane.fasta $datadir/$i/fqs/$i.fq | samtools view -b | samtools sort -o $datadir/$i/align/$i.sorted.bam -T $datadir/$i/align/reads.tmp -
+	minimap2 -a -k14 -uf -t 36 $datadir/refs/sindbis_jane.fasta $datadir/$i/fqs/$i.fq | \
+	    samtools view -@ 36 -b | \
+	    samtools sort -@ 36 -o $datadir/$i/align/$i.sorted.bam -T $datadir/$i/align/reads.tmp -
 	samtools index $datadir/$i/align/$i.sorted.bam
-	samtools view -b -F 0x100 $datadir/$i/align/$i.sorted.bam | samtools sort -o $datadir/$i/align/$i.primary.sorted.bam
+	samtools view -@ 36 -b -F 0x100 $datadir/$i/align/$i.sorted.bam | \
+	    samtools sort -@ 36 -o $datadir/$i/align/$i.primary.sorted.bam
 	
 	##rat spliced alignment
 	##minimap2 -a -x splice -uf -k14 -t 36 $datadir/refs/rattus_norvegicus.fa $datadir/$i/fqs/$i.fq  | samtools view -b | samtools sort -o $datadir/$i/align/$i.rat.splicealn.sorted.bam -T $datadir/$i/align/reads.tmp -

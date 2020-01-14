@@ -23,10 +23,12 @@ if [ $1 == r9_call ] ; then
     guppy_basecaller -i $raw/run2 -s $raw/run2_called --flowcell FLO-MIN106 --kit SQK-LSK109 -x "cuda:0"
 fi
 
+
 if [ $1 == r10_call ] ; then
     raw=/media/r10/raw/190706_nivar_r10
     guppy_basecaller -i $raw/fast5 -s $raw/called --flowcell FLO-MIN110 --kit SQK-LSK109 -x "cuda:0"
 fi
+
 
 if [ $1 == dRNA_call ] ; then
     raw=/media/dRNA

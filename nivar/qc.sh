@@ -95,3 +95,14 @@ if [ $1 == raw_busco ] ; then
     python ~/software/busco/scripts/run_BUSCO.py -f -i $r9dir/canu/nivar.contigs.fasta -o r9raw_busco -l ~/software/busco/lineages/fungi_odb9 -sp candida_albicans -m tran
     python ~/software/busco/scripts/run_BUSCO.py -f -i $r10dir/canu/nivar.contigs.fasta -o r10raw_busco -l ~/software/busco/lineages/fungi_odb9 -sp candida_albicans -m tran
 fi
+
+if [ $1 == extract_quals ] ; then
+    python error_basequals.py -m $datadir/mummer/r9_raw_ref/nivar_r9_raw_ref.snps \
+	   -b1 $datadir/align/r9/reference_r9.sorted.bam \
+	   -b2 $datadir/align/r10/reference_r10.sorted.bam \
+	   -o $datadir/error_quals/r9_quals.csv
+    python error_basequals.py -m $datadir/mummer/r10_raw_ref/nivar_r10_raw_ref.snps \
+	   -b1 $datadir/align/r10/reference_r10.sorted.bam \
+	   -b2 $datadir/align/r9/reference_r9.sorted.bam \
+	   -o $datadir/error_quals/r10_quals.csv
+fi
