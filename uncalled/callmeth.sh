@@ -38,3 +38,9 @@ if [ $1 == methfreq ] ; then
 	sed -i "1i $header" ~/data/methcalls/methcalls.tsv
 	~/software/nanopolish/scripts/calculate_methylation_frequency.py ~/data/methcalls/methcalls.tsv > ~/data/methcalls/methcalls_freq.tsv
 fi	
+
+
+if [ $1 == methfreq_force ] ; then
+    datadir=/uru/Data/Nanopore/projects/uncalled
+    ~/software/nanopolish/scripts/calculate_methylation_frequency.py -c 0 $datadir/methcalls/methcalls.tsv > $datadir/methcalls/methcalls_freq_force.tsv
+fi
