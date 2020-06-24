@@ -29,6 +29,7 @@ mock$samp='mock'
 TE=bam2df(TEbam)
 TE$samp='infected'
 allsamps=rbind(ab, mock, TE)
+v3samps=rbind(ab, TE)
 
 pdf(file.path('~/Dropbox/Timplab_Data/sindbis/sindbis_align_lengths.pdf'), width=11, height=8.5)
 print(ggplot(allsamps, aes(x=samp, y=rlength, fill=samp)) +
@@ -43,6 +44,16 @@ print(ggplot(allsamps, aes(x=samp, y=rlength, fill=samp)) +
       xlab('Sample') +
       ylab('Read Length') +
       theme_bw())
+dev.off()
+
+pdf(file.path('~/Dropbox/timplab_data/sindbis/align/sindbis_pilot_align_lengths.pdf'), width=11, height=8.5)
+print(ggplot(v3samps, aes(x=samp, y=rlength, fill=samp)) +
+      geom_violin(scale="width") +
+      ggtitle('Sindbis Primary Alignment Lengths') +
+      xlab('Sample') +
+      ylab('Read Length') +
+      theme_bw() +
+      theme(axis.text=element_text(size=24), axis.title=element_text(size=24)))
 dev.off()
 
 

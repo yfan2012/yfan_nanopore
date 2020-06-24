@@ -54,3 +54,17 @@ if [ $1 == splitbam ] ; then
     done
 fi
 
+
+if [ $1 == bisulfite ] ; then
+    ##data from here unzipped:
+    ##https://ftp.ncbi.nlm.nih.gov/geo/samples/GSM2308nnn/GSM2308632/suppl/GSM2308632_ENCFF279HCL_methylation_state_at_CpG_GRCh38.bed.gz
+    ##https://ftp.ncbi.nlm.nih.gov/geo/samples/GSM2308nnn/GSM2308633/suppl/GSM2308633_ENCFF835NTC_methylation_state_at_CpG_GRCh38.bed.gz
+
+    for i in $datadir/bisulfite/*.bed ;
+    do
+	prefix=`basename $i .bed | cut -d _ -f 2`
+	bedtools intersect -wb -a $i -b $promos | \
+	    awk '$14 =="promoter" {print $0}' > $datadir/bisulfite/promoters_$prefix.tsv
+    done
+fi
+	    
