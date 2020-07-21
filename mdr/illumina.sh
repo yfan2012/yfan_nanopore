@@ -1,7 +1,7 @@
 #!/bin/bash
 
 prefix=181127_hiC_stool
-datadir=/uru/Data/Nanopore/projects/mdr/MDRstool_19
+datadir=/uru/Data/Nanopore/projects/mdr
 rawdir=/kyber/Data/NGS/Raw/${prefix}/FASTQ
 
 if [ $1 == orgname ] ; then
@@ -30,7 +30,7 @@ fi
 if [ $1 == assemble ] ; then
     ##spades on shotgun reads. probs not worth assembling hic reads
 
-    mkdir -p $datadir/metaspades
+    mkdir -p $datadir/illumina/metaspades
     cat $datadir/illumina/trimmed/*shotgun*unpaired* > $datadir/illumina/trimmed/${prefix}_shotgun_all_unpaired.fq.gz
     
     spades.py --meta \
@@ -42,7 +42,7 @@ if [ $1 == assemble ] ; then
 fi
 
 if [ $1 == rename ] ; then
-    mv $datadir/metaspades/contigs.fasta $datadir/metaspades/${prefix}_shotgun.contigs.fasta
+    mv $datadir/illumina/metaspades/contigs.fasta $datadir/illumina/metaspades/${prefix}_shotgun.contigs.fasta
 fi
    
 	      
