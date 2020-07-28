@@ -35,7 +35,8 @@ dev.off()
 
 
 
-##load distance matrix from clustalw and plot tree
+##load distance matrix from clustalw and compute tree tree
+
 library(ape)
 
 distfile='/uru/Data/Nanopore/projects/mdr/all/clustalw_dists.csv'
@@ -46,11 +47,33 @@ dists= dists %>%
     gather(key, value, -genes) %>%
     spread(genes, value) %>%
     select(-key)
-
 tree=nj(as.dist(dists))
-
 treefile='/uru/Data/Nanopore/projects/mdr/all/amrtree.nwk'
 write.tree(tree, treefile)
+
+
+
+
+
+##treeio to slice?
+library(treeio)
+treefile='/uru/Data/Nanopore/projects/mdr/all/amrtree_test.nwk'
+##had to get rid of single quotes in order to get the thing to read
+tree=read.newick(treefile)
+tblamr=as_tibble(tree)
+
+##try collapsing down one and two levels
+collapse1=tblamr %>%
+    group_by(parent) %>%
+    summarise(seq=label[1])
+collapse2=tblamr %>%
+    summarise(seq2=seq[1])
+
+
+
+
+
+
 
 
 
