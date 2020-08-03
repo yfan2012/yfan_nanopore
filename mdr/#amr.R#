@@ -67,7 +67,7 @@ grouphits <- function(abrifile, prefix){
         overlaps=findOverlaps(q,gr)
         ##should at least hit to itself, so shouldn't need to account for no indexes
         indexes=subjectHits(overlaps)
-        groupacc=names(gr[indexes])
+        groupacc=paste(sort(names(gr[indexes])), collapse=',')
 
         groupname=paste0(prefix, i)
         groups=rbind(groups, tibble(group=groupname, accs=groupacc))
@@ -83,4 +83,45 @@ natgroups=grouphits(natfile, 'nat')
 pcrfile=paste0(datadir, files[3])
 pcrgroups=grouphits(pcrfile, 'pcr')
 
-gr
+allgroups=rbind(illgroups, natgroups, pcrgroups)
+
+groupinfo=tibble(
+    group=as.character(),
+    ill=as.integer(),
+    nat=as.integer(),
+    pcr=as.integer())
+
+##this does not feel elegant, but i am suffering from menstrual pain atm, so will just go with it for now. 
+uniquegroups=unique(allgroups$accs)
+for (i in uniquegroups) {
+    ##check what it's in
+    ill=0
+    nat=0
+    pcr=0
+    if (i %in% illgroups$accs) {
+        ill=1
+    }
+    if (i %in% natgroups$accs) {
+        nat=1
+    }
+    if (i %in% pcrgroups$accs) {
+        pcr=1
+    }
+    newinfo=tibble(group=i, ill=ill, nat=nat, pcr=pcr)
+    groupinfo=rbind(groupinfo, newinfo)
+}
+
+outfile=paste0(dbxdir, 'amrgroups_upset.pdf')
+pdf(outfile, h=7, w=15)
+sets=colnames(groupinfo[-1])
+upset(as.data.frame(groupinfo), sets=sets, order.by = "freq", empty.intersections = "on")
+dev.off()
+
+
+##investigate some outgroups
+natout=groupinfo %>%
+    filter(ill==0 & nat==1 & pcr==0)
+illout=groupinfo %>%
+    filter(ill==1 & nat==0 & pcr==0)
+pcrout=groupinfo %>%
+    filter(ill==0 & nat==0 & pcr==1)

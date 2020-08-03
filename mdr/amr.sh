@@ -43,12 +43,13 @@ fi
 if [ $1 == cat_abricate ] ; then
     ##merge amr files
 
-    for i in MDRstool_19 MDRstool_16 illumina ;
+    ##for i in MDRstool_19 MDRstool_16 illumina ;
+    for i in MDRstool_19 MDRstool_16 ;
     do
 	for samp in $datadir/$i/amr/*card*.tsv ;
 	do
 	    prefix=` basename $samp .card.tsv `
-	    sed 1,1d $datadir/$i/amr/${prefix}*.tsv > $datadir/$i/amr/${prefix}.all.tsv
+	    sed -s 1d $datadir/$i/amr/${prefix}*.tsv > $datadir/$i/amr/${prefix}.all.tsv
 	done
     done
 fi
