@@ -26,14 +26,13 @@ if [ $1 == runkraken_ont ] ; then
     for i in native pcr ;
     do
 	fq=$datadir/fastqs/MDRstool_16_$i.fq
-	prefix=`echo $fq | basename .fq`
 	kraken2 \
 	    --db $dbdir/standard_ont \
 	    --threads 36 \
-	    --classified-out $datadir/kraken/$prefix.class.txt \
-	    --unclassified-out $datadir/kraken/$prefix.unclass.txt \
-	    --output $datadir/kraken/$prefix.out.txt \
-	    --report $datadir/kraken/$prefix.report.txt \
+	    --classified-out $datadir/kraken/$i.class.txt \
+	    --unclassified-out $datadir/kraken/$i.unclass.txt \
+	    --output $datadir/kraken/$i.out.txt \
+	    --report $datadir/kraken/$i.report.txt \
 	    --use-names \
 	    $fq
     done
@@ -43,7 +42,7 @@ if [ $1 == runkraken_illumina ] ; then
     ##run kraken2 on illumina data
     for i in phase shotgun ;
     do
-	fq=$datadir/illumina/*$i*fq.gz
+	fq=$datadir/illumina/trimmed/*$i*fq.gz
 	kraken2 \
 	    --db $dbdir/standard \
 	    --threads 36 \

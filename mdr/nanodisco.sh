@@ -1,19 +1,19 @@
 #!/bin/bash
 
-datadir=/uru/Data/Nanopore/projects/mdr/
-samps="MDRstool_16 MDRstool_19"
+##recall: must go to ~/software/nanodisco and run `singularity run nd_env` and then go to /home/yfan/Code/.. to run stuff
+datadir=/uru/Data/Nanopore/projects/mdr/MDRstool_16
 
 
 if [ $1 == preprocess ] ; then
-    for i in $samps ;
+    for i in native pcr ;
     do
-	mkdir -p $datadir/$i/nanodisco/preprocess
+	mkdir -p $datadir/nanodisco/$i/preprocess
 	nanodisco preprocess \
 		  -p 36 \
-		  -f $datadir/$i/called/workspace/ \
+		  -f $datadir/called_$i/workspace/ \
 		  -s $i \
 		  -o $datadir/$i/nanodisco/preprocess \
-		  -r $datadir/$i/metaflye/150m/assembly.fasta
+		  -r $datadir/metaflye/${i}_100m/MDRstool_16_${i}_100m.assembly.fasta
     done
 fi
 
@@ -40,5 +40,8 @@ if [ $1 == current_diff ] ; then
 		  -nc 4 \
 		  -p 2 \
 		  -r $datadir/$i/metaflye/150m/assembly.fasta \
-		  -i $datadir/$i/nanodisco/preprocess \
+		  -i $datadir/$i/nanodisco/preprocess 
 		  
+    done
+fi
+	
