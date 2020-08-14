@@ -26,7 +26,7 @@ if [ $1 == gather ] ; then
 fi
 
 	     
-if [ $1 == assemble ] ; then
+if [ $1 == old_assemble ] ; then
     sizes="150m 100m 500m 10g"
     for i in $samps ;
     do
@@ -133,6 +133,24 @@ fi
 if [ $1 == rename_stool16 ] ; then
     for i in native_100m pcr_100m ;
     do
+	mv $datadir/MDRstool_16/metaflye/$i/assembly.fasta $datadir/MDRstool_16/metaflye/$i/MDRstool_16_$i.assembly.fasta
+    done
+fi
+
+
+if [ $1 == assemble ] ; then
+    ##try new version of flye that doesn't need gsize param
+    for i in native pcr ;
+    do
+	mkdir -p $datadir/MDRstool_16/metaflye/$i
+	
+	flye \
+	    --nano-raw $datadir/MDRstool_16/fastqs/MDRstool_16_$i.fq \
+	    -o $datadir/MDRstool_16/metaflye/$i \
+	    -t 36 \
+	    --plasmids \
+	    --meta
+
 	mv $datadir/MDRstool_16/metaflye/$i/assembly.fasta $datadir/MDRstool_16/metaflye/$i/MDRstool_16_$i.assembly.fasta
     done
 fi

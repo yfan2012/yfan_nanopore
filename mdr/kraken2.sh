@@ -57,6 +57,13 @@ if [ $1 == runkraken_illumina ] ; then
 fi
 	    
 
-    
+if [ $1 == top40 ] ; then
+    for i in phase shotgun pcr native ;
+    do
+	awk '$4 == "S" {print $0}' $datadir/kraken/$i.report.txt | \
+	    sort -r -k2 -n | \
+	    head -n 40 > $datadir/kraken/$i.report.top40.txt
+    done
+fi
     
     
