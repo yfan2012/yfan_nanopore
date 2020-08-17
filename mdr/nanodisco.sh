@@ -7,7 +7,7 @@ ref=$datadir/metaflye/pcr/MDRstool_16_pcr.assembly.fasta
 if [ $1 == preprocess ] ; then
     for i in native pcr ;
     do
-	mkdir -p $datadir/nanodisco/$i/preprocess
+	mkdir -p $datadir/nanodisco/preprocess
 	nanodisco preprocess \
 		  -p 36 \
 		  -f $datadir/called_$i/workspace/ \
@@ -21,7 +21,6 @@ fi
 if [ $1 == coverage ] ; then
     for i in native pcr
     do
-	mkdir -p $datadir/nanodisco/$i/coverage/${i}_pcr
 	nanodisco coverage \
 		  -b $datadir/nanodisco/preprocess/$i.sorted.bam \
 		  -o $datadir/nanodisco/preprocess \
