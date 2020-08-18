@@ -30,21 +30,19 @@ fi
 
 
 if [ $1 == current_diff ] ; then
-    for i in $samps
-    do
-	nanodisco chunk_info -r $ref
 
-	mkdir -p $datadir/nanodisco/diffs
-	nanodisco difference \
-		  -nj 16 \
-		  -nc 4 \
-		  -p 2 \
-		  -w pcr \
-		  -n native \
-		  -r $datadir/pcr/MDRstool_16_pcr.assembly.fasta \
-		  -i $datadir/nanodisco/preprocess \
-		  -o $datadir/nanodisco/diffs
-		  
-    done
+    nanodisco chunk_info -r $ref
+    
+    mkdir -p $datadir/nanodisco/diffs
+    nanodisco difference \
+	      -nj 4 \
+	      -nc 4 \
+	      -p 8 \
+	      -w pcr \
+	      -n native \
+	      -r $ref \
+	      -i $datadir/nanodisco/preprocess \
+	      -o $datadir/nanodisco/diffs
+    
 fi
 	

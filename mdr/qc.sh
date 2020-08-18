@@ -28,19 +28,19 @@ if [ $1 == check_run ] ; then
 fi
 
     
-if [ $1 == stool16_asms ] ; then
+if [ $1 == stool16 ] ; then
 
     touch $dbxdir/qc/stool16_asms.csv
     for i in native pcr ;
     do
-	asm=$datadir/MDRstool_16/metaflye/${i}_100m/MDRstool_16_${i}_100m.assembly.fasta
+	asm=$datadir/MDRstool_16/metaflye/$i/MDRstool_16_${i}.assembly.fasta
 	python $srcdir/asm_assess.py \
 	       -i $asm \
 	       -p stool16_$i \
 	       >> $dbxdir/qc/stool16_asms.csv
     done
     python $srcdir/asm_assess.py \
-	   -i $datadir/illumina/metaspades/181127_hiC_stool_shotgun.contigs.fasta \
+	   -i $datadir/MDRstool_16/metaspades/181127_hiC_stool_shotgun.contigs.fasta \
 	   -p stool16_illumina \
 	   >> $dbxdir/qc/stool16_asms.csv
 fi
