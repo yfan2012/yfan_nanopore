@@ -2,6 +2,18 @@
 
 datadir=/uru/Data/Nanopore/projects/nivar
 
+if [ $1 == final_busco ] ; then
+    i=r9
+    ref=$datadir/reference/candida_nivariensis.fa
+    python ~/software/busco/scripts/run_BUSCO.py -f -i $datadir/pilon/${i}_pilon/nivar_${i}.pilon_bwa.6.fasta -o asm_busco -l ~/software/busco/lineages/fungi_odb9 -sp candida_albicans -m genome
+    python ~/software/busco/scripts/run_BUSCO.py -f -i $ref -o ref_busco -l ~/software/busco/lineages/fungi_odb9 -sp candida_albicans -m genome
+
+    mkdir -p $datadir/paperfigs/busco
+    mv run_asm_busco $datadir/paperfigs/busco/
+    mv run_ref_busco $datadir/paperfigs/busco/
+fi
+
+
 if [ $1 == yields ] ; then
     
     for i in $datadir/illumina/gDNA/nivar_gDNA_R*.fastq.gz ;
@@ -56,22 +68,6 @@ if [ $1 == asm_stats ] ; then
     echo $datadir/assemble/r10_assembly/nivar_r10.contigs.fasta,$r10
 fi
 
-if [ $1 == busco ] ; then
-
-    for i in r9 r10 ;
-    do
-	##pilon
-	python ~/software/busco/scripts/run_BUSCO.py -f -i $datadir/pilon/${i}_pilon/nivar_${i}.pilon_bwa.15.fasta -o ${i}_pilon -l ~/software/busco/lineages/fungi_odb9 -sp candida_albicans -m genome
-	##racon
-	python ~/software/busco/scripts/run_BUSCO.py -f -i $datadir/racon/${i}_racon/nivar_${i}.racon.15.fasta -o ${i}_racon -l ~/software/busco/lineages/fungi_odb9 -sp candida_albicans -m genome
-	##freebayes
-	python ~/software/busco/scripts/run_BUSCO.py -f -i $datadir/freebayes/${i}_freebayes/nivar_fb15_bwa.fasta -o ${i}_freebayes -l ~/software/busco/lineages/fungi_odb9 -sp candida_albicans -m genome
-    done
-
-    ref=$datadir/reference/candida_nivariensis.fa
-    python ~/software/busco/scripts/run_BUSCO.py -f -i $ref -o ref_busco -l ~/software/busco/lineages/fungi_odb9 -sp candida_albicans -m genome
-fi
-
 
 if [ $1 == transcriptome_busco ] ; then
     transcriptome=$r9dir/trinity/Trinity.fasta
@@ -108,9 +104,3 @@ if [ $1 == extract_quals ] ; then
 fi
 
 
-if [ $1 == final_busco ] ; then
-    i=r9
-    ref=$datadir/reference/candida_nivariensis.fa
-    python ~/software/busco/scripts/run_BUSCO.py -f -i $datadir/pilon/${i}_pilon/nivar_${i}.pilon_bwa.6.fasta -o asm_busco -l ~/software/busco/lineages/fungi_odb9 -sp candida_albicans -m genome
-    python ~/software/busco/scripts/run_BUSCO.py -f -i $ref -o ref_busco -l ~/software/busco/lineages/fungi_odb9 -sp candida_albicans -m genome
-fi
