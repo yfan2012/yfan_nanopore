@@ -3,9 +3,12 @@
 datadir=/uru/Data/Nanopore/projects/nivar
 
 if [ $1 == final_busco ] ; then
-    i=r9
+    for i in r9 r10 ;
+    do
+
+	python ~/software/busco/scripts/run_BUSCO.py -f -i $datadir/pilon/${i}_pilon/nivar_${i}.pilon_bwa.6.fasta -o asm_busco -l ~/software/busco/lineages/fungi_odb9 -sp candida_albicans -m genome
+    done
     ref=$datadir/reference/candida_nivariensis.fa
-    python ~/software/busco/scripts/run_BUSCO.py -f -i $datadir/pilon/${i}_pilon/nivar_${i}.pilon_bwa.6.fasta -o asm_busco -l ~/software/busco/lineages/fungi_odb9 -sp candida_albicans -m genome
     python ~/software/busco/scripts/run_BUSCO.py -f -i $ref -o ref_busco -l ~/software/busco/lineages/fungi_odb9 -sp candida_albicans -m genome
 
     mkdir -p $datadir/paperfigs/busco

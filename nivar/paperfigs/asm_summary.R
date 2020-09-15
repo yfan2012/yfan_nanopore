@@ -8,7 +8,7 @@ datadir='/uru/Data/Nanopore/projects/nivar/'
 reffile='/uru/Data/Nanopore/projects/nivar/reference/candida_nivariensis.fa'
 
 ##asm contig lengths compared to ref length
-asmfile=paste0(datadir, 'pilon/r9_pilon/nivar_r9.pilon_bwa.6.fasta')
+asmfile=paste0(datadir, 'medusa/')
 asm=readDNAStringSet(asmfile)
 asminfo=tibble(lens=sort(width(asm), decreasing=TRUE)) %>%
     mutate(rank=row_number()) %>%

@@ -6,7 +6,7 @@ library(R.utils)
 
 dbxdir='~/Dropbox/yfan/nivar/'
 datadir='/uru/Data/Nanopore/projects/nivar/'
-asmfile=paste0(datadir,'pilon/r9_pilon/nivar_r9.pilon_bwa.6.fasta')
+asmfile=paste0(datadir,'medusa/nivar_r10.pilon_bwa.6.scaffold.fasta')
 
 ##plot busco
 cnames=c('buscoid', 'status', 'contig', 'start', 'end', 'score', 'length')
@@ -58,3 +58,14 @@ if (FALSE) {
 
 ##check telomeres
 asm=readDNAStringSet(asmfile)
+seqs=as.character(asm)
+teloseqs=c('CTGGGTGCTGTGGGGT', 'ACCCCACAGCACCCAG')
+telorev=str_count(seqs, teloseqs[2])
+
+teloinfo=tibble(chr=names(asm)) %>%
+    mutate(length=width(asm[chr])) %>%
+    mutate(fwd=str_count(as.character(asm[chr]), teloseqs[1])) %>%
+    mutate(rev=str_count(as.character(asm[chr]), teloseqs[2]))
+
+telocsv=paste0(dbxdir,'/paperfigs/raw/telocounts.csv')
+write_csv(teloinfo, telocsv)

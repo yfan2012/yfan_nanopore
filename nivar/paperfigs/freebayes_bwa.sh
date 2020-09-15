@@ -11,8 +11,9 @@ mkdir -p $1/bam
 prefix=$3
 cp $2 $1/index/$prefix.fasta
 
+cd ~/software/freebayes/scripts
 
-for i in {1..3} ;
+for i in {1..7} ;
 do
     ##build the index and align
     echo building index and aligning for round $i =================================================================
@@ -23,7 +24,7 @@ do
 	samtools sort -@ 36 -o $1/bam/$prefix.sorted.bam
     samtools index $1/bam/$prefix.sorted.bam
 
-     
+    
     ##do the correction
     echo correcting for round $i ================================================================================
     ./freebayes-parallel \
@@ -37,9 +38,6 @@ do
     tabix -p vcf $1/nivar_fb${i}_bwa.vcf.gz
     bcftools consensus $1/nivar_fb${i}_bwa.vcf.gz < $1/index/$prefix.fasta > $1/nivar_fb${i}_bwa.fasta
 
-    ##see how many changes
-    dnadiff $1/index/$prefix.fasta $1/nivar_fb${i}_bwa.fasta -d $i/nivar_fb${i}.delta
-    
     ##newly corrected genome replaces the old genome in the index dir
     echo clearing old
     rm $1/index/*
