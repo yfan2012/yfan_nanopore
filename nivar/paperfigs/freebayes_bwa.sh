@@ -13,7 +13,7 @@ cp $2 $1/index/$prefix.fasta
 
 cd ~/software/freebayes/scripts
 
-for i in {1..7} ;
+for i in {1..5} ;
 do
     ##build the index and align
     echo building index and aligning for round $i =================================================================
@@ -33,15 +33,16 @@ do
 	$1/bam/$prefix.sorted.bam > $1/nivar_fb${i}_bwa_raw.vcf
 
 
-    vcffilter -f "AO > 3"  $1/nivar_fb${i}_bwa_raw.vcf > $1/nivar_fb${i}_bwa.vcf
+    vcffilter -f "AO > RO & AO > 5 & AF > .5" $1/nivar_fb${i}_bwa_raw.vcf > $1/nivar_fb${i}_bwa.vcf
     bgzip -c $1/nivar_fb${i}_bwa.vcf > $1/nivar_fb${i}_bwa.vcf.gz
     tabix -p vcf $1/nivar_fb${i}_bwa.vcf.gz
     bcftools consensus $1/nivar_fb${i}_bwa.vcf.gz < $1/index/$prefix.fasta > $1/nivar_fb${i}_bwa.fasta
 
     ##newly corrected genome replaces the old genome in the index dir
-    echo clearing old
+    echo moving old
+    mv $1/bam/$prefix.sorted.bam $1/bam/$prefix.$i.sorted.bam
+    mv $1/bam/$prefix.sorted.bam.bai $1/bam/$prefix.$i.sorted.bam.bai
     rm $1/index/*
-    rm $1/bam/*
     echo copying $i to empty index folder
     cp $1/nivar_fb${i}_bwa.fasta $1/index/$prefix.fasta
 

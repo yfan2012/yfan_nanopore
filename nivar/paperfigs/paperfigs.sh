@@ -45,7 +45,6 @@ fi
 if [ $1 == polish ] ; then
     mkdir -p $datadir/freebayes
     cp $rawdir/illumina/gDNA_trimmed/*_paired.fq.gz $datadir/freebayes
-
     
     bash ./freebayes_bwa.sh $datadir/freebayes $datadir/assembly/nivar.contigs.fasta nivar
 fi
@@ -56,7 +55,26 @@ if [ $1 == medusa ] ; then
 
     java -jar ~/software/medusa/medusa.jar \
 	 -f $rawdir/reference/medusa_fungi \
-	 -i $datadir/freebayes/nivar.fb.15.fasta \
+	 -i $datadir/freebayes/nivar_fb3_bwa.fasta \
 	 -v \
 	 -o $datadir/medusa/nivar.scaffold.fasta
+fi
+
+ref=$rawdir/reference/candida_nivariensis.fa
+
+if [ $1 == busco ] ; then
+    python ~/software/busco/scripts/run_BUSCO.py -f \
+	   -i $datadir/medusa/nivar.scaffold.fasta \
+	   -l ~/software/busco/lineages/fungi_odb9 \
+	   -sp candida_albicans \
+	   -o nivar \
+	   -m genome
+    python ~/software/busco/scripts/run_BUSCO.py -f \
+	   -i $ref \
+	   -l ~/software/busco/lineages/fungi_odb9 \
+	   -sp candida_albicans \
+	   -o ref \
+	   -m genome
+
+    mv ./run_* $datadir/busco/
 fi
