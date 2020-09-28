@@ -29,13 +29,14 @@ if [ $1 == assemble ] ; then
 	genomeSize=11.6m \
 	-nanopore-raw $fq
 fi
+asm=$datadir/assembly/nivar.contigs.fasta
 
 if [ $1 == medaka ] ; then
     mkdir -p $datadir/medaka
     
     medaka_consensus \
 	-i $fq \
-	-d $datadir/assembly/nivar.contigs.fasta \
+	-d $asm \
 	-o $datadir/medaka \
 	-t 36 \
 	-m r941_min_high_g303
@@ -46,8 +47,9 @@ if [ $1 == polish ] ; then
     mkdir -p $datadir/freebayes
     cp $rawdir/illumina/gDNA_trimmed/*_paired.fq.gz $datadir/freebayes
     
-    bash ./freebayes_bwa.sh $datadir/freebayes $datadir/assembly/nivar.contigs.fasta nivar
+    bash ./freebayes_bwa.sh $datadir/freebayes $asm nivar
 fi
+asmcorr=$datadir/freebayes/nivar_fb3_bwa.fasta
 
 if [ $1 == medusa ] ; then
     mkdir -p $datadir/medusa
@@ -55,12 +57,32 @@ if [ $1 == medusa ] ; then
 
     java -jar ~/software/medusa/medusa.jar \
 	 -f $rawdir/reference/medusa_fungi \
-	 -i $datadir/freebayes/nivar_fb3_bwa.fasta \
+	 -i $asmcorr \
 	 -v \
 	 -o $datadir/medusa/nivar.scaffold.fasta
 fi
 
+if [ $1 == ragtag_correct ] ; then
+    mkdir -p $datadir/ragtag
+    ragtag.py correct \
+	      -w \
+	      -u \
+	      -o $datadir/ragtag/ \
+	      $rawdir/reference/medusa_fungi/candida_glabrata.fa \
+	      $asmcorr
+fi
+if [ $1 == ragtag ] ; then
+    mkdir -p $datadir/ragtag
+    ragtag.py scaffold \
+	      -w \
+	      -u \
+	      -o $datadir/ragtag/ \
+	      $rawdir/reference/medusa_fungi/candida_glabrata.fa \
+	      $datadir/ragtag/nivar_fb3_bwa.corrected.fasta
+fi
+
 ref=$rawdir/reference/candida_nivariensis.fa
+sca=$datadir/medusa/nivar.scaffold.fasta
 
 if [ $1 == busco ] ; then
     python ~/software/busco/scripts/run_BUSCO.py -f \
