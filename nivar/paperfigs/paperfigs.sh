@@ -84,6 +84,7 @@ fi
 ref=$rawdir/reference/candida_nivariensis.fa
 sca=$datadir/medusa/nivar.scaffold.fasta
 rag=$datadir/ragtag/ragtag.scaffolds.fasta
+gla=$rawdir/reference/medusa_fungi/candida_glabrata.fa
 
 if [ $1 == busco ] ; then
     python ~/software/busco/scripts/run_BUSCO.py -f \
@@ -128,6 +129,43 @@ if [ $1 == mummer ] ; then
     dnadiff -p ~/tmp/mummer/nivar_fb3_bwa/nivar_fb3_bwa ~/tmp/mummer/nivar_fb3_bwa/nivar_fb3_bwa.fasta ~/tmp/mummer/candida_nivariensis.fa 
 
     cp -r ~/tmp/mummer $datadir/
+fi
+
+
+if [ $1 == glabrata_mum ] ; then
+    mkdir -p ~/tmp/mummer
+    mkdir -p ~/tmp/mummer/glabrata_nivar_fb3_bwa
+    
+    cp $gla ~/tmp/mummer
+
+    cp $asmcorr ~/tmp/mummer/glabrata_nivar_fb3_bwa
+    nucmer -p ~/tmp/mummer/glabrata_nivar_fb3_bwa/glabrata_nivar_fb3_bwa ~/tmp/mummer/glabrata_nivar_fb3_bwa/nivar_fb3_bwa.fasta ~/tmp/mummer/candida_glabrata.fa 
+    mummerplot --filter --fat --png -p ~/tmp/mummer/glabrata_nivar_fb3_bwa/glabrata_nivar_fb3_bwa ~/tmp/mummer/glabrata_nivar_fb3_bwa/glabrata_nivar_fb3_bwa.delta
+    dnadiff -p ~/tmp/mummer/glabrata_nivar_fb3_bwa/glabrata_nivar_fb3_bwa ~/tmp/mummer/glabrata_nivar_fb3_bwa/nivar_fb3_bwa.fasta ~/tmp/mummer/candida_glabrata.fa 
+
+    cp -r ~/tmp/mummer $datadir/
+fi
+
+if [ $1 == align ] ; then
+    mkdir $datadir/align
+
+    minimap2 -t 36 -ax map-ont $asmcorr $fq |
+	samtools view -@ 36 -b |
+	samtools sort -@ 36 -o $datadir/align/nivar_fb3_bwa.sorted.bam
+    samtools index $datadir/align/nivar_fb3_bwa.sorted.bam
+fi
+
+
+if [ $1 == mito_mum ] ; then
+    mkdir -p ~/tmp/mummer/mito
+
+    cp $datadir/assembly_final/nivar_fb3_bwa_mito.fasta ~/tmp/mummer/mito
+    cp $rawdir/reference/mitos/candida_nivariensis_mito.fa ~/tmp/mummer/mito/
+    
+    nucmer -p ~/tmp/mummer/mito/nivar_mito ~/tmp/mummer/mito/nivar_fb3_bwa_mito.fasta ~/tmp/mummer/mito/candida_nivariensis_mito.fa 
+    mummerplot --filter --fat --png -p ~/tmp/mummer/mito/nivar_mito ~/tmp/mummer/mito/nivar_mito.delta
+    dnadiff -p ~/tmp/mummer/mito/nivar_mito ~/tmp/mummer/mito/nivar_fb3_bwa_mito.fasta ~/tmp/mummer/mito/candida_nivariensis_mito.fa
+    cp -r ~/tmp/mummer/mito $datadir/mummer/
 fi
 
     

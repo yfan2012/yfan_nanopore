@@ -11,6 +11,9 @@ datadir='/uru/Data/Nanopore/projects/nivar/paperfigs/'
 asmfile=paste0(datadir,'assembly/nivar.contigs.fasta')
 scafile=paste0(datadir,'medusa/nivar.scaffold.fasta')
 ragfile=paste0(datadir,'ragtag/ragtag.scaffolds.fasta')
+fbsfile=paste0(datadir,'freebayes/nivar_fb3_bwa.fasta')
+reffile='/uru/Data/Nanopore/projects/nivar/reference/candida_nivariensis.fa'
+glafile='/uru/Data/Nanopore/projects/nivar/reference/medusa_fungi/candida_glabrata.fa'
 
 ##plot busco
 cnames=c('buscoid', 'status', 'contig', 'start', 'end', 'score', 'length')
@@ -77,6 +80,8 @@ telocheck <- function(asmfile, fwdtelo, revtelo) {
 scatelo=telocheck(scafile, fwdtelo, revtelo)
 asmtelo=telocheck(asmfile, fwdtelo, revtelo)
 ragtelo=telocheck(ragfile, fwdtelo, revtelo)
+glatelo=telocheck(glafile, fwdtelo, revtelo)
+fbstelo=telocheck(fbsfile, fwdtelo, revtelo)
 
 scatelocsv=paste0(dbxdir,'/paperfigs/raw/telocounts_scaffold.csv')
 write_csv(scatelo, scatelocsv)
@@ -113,8 +118,15 @@ scateloplot=as_tibble(teloplot(scafile, fwdtelo, revtelo)) %>%
     mutate(name='medusa')
 ragteloplot=as_tibble(teloplot(ragfile, fwdtelo, revtelo)) %>%
     mutate(name='ragtag')
+refteloplot=as_tibble(teloplot(reffile, fwdtelo, revtelo)) %>%
+    mutate(name='reference')
+glateloplot=as_tibble(teloplot(glafile, fwdtelo, revtelo)) %>%
+    mutate(name='glabrata')
+fbsteloplot=as_tibble(teloplot(fbsfile, fwdtelo, revtelo)) %>%
+    mutate(name='corrected')
 
-allteloplot=rbind(asmteloplot, scateloplot, ragteloplot)
+
+allteloplot=rbind(asmteloplot, scateloplot, ragteloplot, refteloplot, glateloplot)
 
 teloplotfile=paste0(dbxdir, '/paperfigs/raw/teloplots.pdf')
 pdf(teloplotfile, w=16, h=9)
@@ -124,4 +136,34 @@ ggplot(allteloplot, aes(x=percpos, colour=name, fill=name, alpha=.2)) +
     xlab('position (as percent of seq length)') +
     theme_bw()
 dev.off()
+
+
+
+##exclude sequences, extract mito
+fbs=readDNAStringSet(fbsfile)
+mito=fbs[19]
+mitofile=paste0(datadir, 'assembly_final/nivar_fb3_bwa_mito.fasta')
+writeXStringSet(mito, mitofile, format='fasta')
+
+
+
+##cut mito based on mummer of nivar_fb3_bwa_mito.fasta
+mumcols=c('refstart', 'refend', 'qstart', 'qend', 'rlen', 'qlen', 'ident', 'rtot', 'qtot', 'rperc', 'qperc', 'rname', 'qname')
+mumfile=paste0(datadir, 'mummer/mito/nivar_mito.mcoords')
+muminfo=read_tsv(mumfile, col_names=mumcols)
+mitoextra=muminfo$qstart[1]-muminfo$qend[2]
+mitolen=length(mito[[1]])-mitoextra
+mitoclipped=DNAStringSet(mito[[1]][1:mitolen])
+names(mitoclipped)='jhu_candida_nivariensis_seqMito'
+
+newasm=c(fbs[-c(16, 17, 18, 19, 20, 21)], mitoclipped)
+newasmfile=paste0(datadir, 'assembly_final/nivar.final.fasta')
+writeXStringSet(newasm,newasmfile, format='fasta')
+
+
+
+
+    
+
+
 
