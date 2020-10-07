@@ -1,8 +1,11 @@
 #!/bin/bash
 
 rawdir=/uru/Data/Nanopore/projects/nivar
-datadir=/uru/Data/Nanopore/projects/nivar/paperfigs
-fq=/uru/Data/Nanopore/projects/nivar/r9/r9_3kb.fq
+datadir=$rawdir/paperfigs
+fq=$rawdir/r9/r9_3kb.fq
+drna=$rawdir/dRNA/dRNA.fq
+rnafwd=$rawdir/illumina/cDNA_trimmed/nivar_cDNA_fwd_paired.fq
+rnarev=$rawdir/illumina/cDNA_trimmed/nivar_cDNA_rev_paired.fq
 dbxdir=~/Dropbox/yfan/nivar/paperfigs
 
 gen=$datadir/assembly_final/nivar.final.fasta
@@ -23,3 +26,26 @@ if [ $1 == liftoff_cerevisiae ] ; then
 	$gen \
 	$cer
 fi
+
+if [ $1 == align ] ; then
+    mkdir -p $datadir/annotation/align
+
+    minimap2 -t 36 \
+	-ax splice -uf -k14 $gen $drna | \
+	samtools view -@ 36 -b | \
+	samtools sort -@ 36 -o $datadir/annotation/align/nivar_dRNA.sorted.bam
+    samtools index $datadir/annotation/align/nivar_dRNA.sorted.bam
+
+    echo hisat####################################
+    ##hisat2-build $gen $datadir/assembly_final/nivar.final
+    hisat2 -p 36 \
+	-x $datadir/assembly_final/nivar.final \
+	-1 $rnafwd \
+	-2 $rnarev | \
+	samtools view -@ 36 -b | \
+	samtools sort -@ 36 -o $datadir/annotation/align/nivar_cDNA.sorted.bam
+    samtools index $datadir/annotation/align/nivar_cDNA.sorted.bam
+fi
+
+if [ $1 == intersect ] ; then
+    ##check how many liftoff genes have support
