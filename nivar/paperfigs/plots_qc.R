@@ -9,8 +9,10 @@ library(doParallel)
 dbxdir='~/Dropbox/yfan/nivar/'
 datadir='/uru/Data/Nanopore/projects/nivar/paperfigs/'
 asmfile=paste0(datadir,'assembly/nivar.contigs.fasta')
-scafile=paste0(datadir,'medusa/nivar.scaffold.fasta')
-ragfile=paste0(datadir,'ragtag/ragtag.scaffolds.fasta')
+scafilegla=paste0(datadir,'medusa/glabrata/nivar.final.scaffold.fasta')
+ragfilegla=paste0(datadir,'ragtag/glabrata/ragtag.scaffolds.fasta')
+scafile=paste0(datadir,'medusa/nivariensis/nivar.final.scaffold.fasta')
+ragfile=paste0(datadir,'ragtag/nivariensis/ragtag.scaffolds.fasta')
 fbsfile=paste0(datadir,'freebayes/nivar_fb3_bwa.fasta')
 reffile='/uru/Data/Nanopore/projects/nivar/reference/candida_nivariensis.fa'
 glafile='/uru/Data/Nanopore/projects/nivar/reference/medusa_fungi/candida_glabrata.fa'
@@ -78,10 +80,13 @@ telocheck <- function(asmfile, fwdtelo, revtelo) {
 }
 
 scatelo=telocheck(scafile, fwdtelo, revtelo)
+scatelogla=telocheck(scafilegla, fwdtelo, revtelo)
 asmtelo=telocheck(asmfile, fwdtelo, revtelo)
 ragtelo=telocheck(ragfile, fwdtelo, revtelo)
+ragtelogla=telocheck(ragfilegla, fwdtelo, revtelo)
 glatelo=telocheck(glafile, fwdtelo, revtelo)
 fbstelo=telocheck(fbsfile, fwdtelo, revtelo)
+
 
 scatelocsv=paste0(dbxdir,'/paperfigs/raw/telocounts_scaffold.csv')
 write_csv(scatelo, scatelocsv)
@@ -113,11 +118,15 @@ teloplot <- function(asmfile, fwdtelo, revtelo) {
 }        
 
 asmteloplot=as_tibble(teloplot(asmfile, fwdtelo, revtelo)) %>%
-    mutate(name='assmebly')
+    mutate(name='assembly')
 scateloplot=as_tibble(teloplot(scafile, fwdtelo, revtelo)) %>%
     mutate(name='medusa')
 ragteloplot=as_tibble(teloplot(ragfile, fwdtelo, revtelo)) %>%
     mutate(name='ragtag')
+scateloplotgla=as_tibble(teloplot(scafilegla, fwdtelo, revtelo)) %>%
+    mutate(name='medusa_glabrata')
+ragteloplotgla=as_tibble(teloplot(ragfilegla, fwdtelo, revtelo)) %>%
+    mutate(name='ragtag_glabrata')
 refteloplot=as_tibble(teloplot(reffile, fwdtelo, revtelo)) %>%
     mutate(name='reference')
 glateloplot=as_tibble(teloplot(glafile, fwdtelo, revtelo)) %>%
@@ -126,7 +135,8 @@ fbsteloplot=as_tibble(teloplot(fbsfile, fwdtelo, revtelo)) %>%
     mutate(name='corrected')
 
 
-allteloplot=rbind(asmteloplot, scateloplot, ragteloplot, refteloplot, glateloplot)
+##allteloplot=rbind(asmteloplot, scateloplot, ragteloplot, scateloplotgla, ragteloplotgla, refteloplot, glateloplot)
+allteloplot=rbind(scateloplot, ragteloplot, scateloplotgla, ragteloplotgla)
 
 teloplotfile=paste0(dbxdir, '/paperfigs/raw/teloplots.pdf')
 pdf(teloplotfile, w=16, h=9)
@@ -161,8 +171,9 @@ newasmfile=paste0(datadir, 'assembly_final/nivar.final.fasta')
 writeXStringSet(newasm,newasmfile, format='fasta')
 
 
-
-
+fintelo=telocheck(newasmfile, fwdtelo, revtelo)
+fintelocsv=paste0(dbxdir,'/paperfigs/raw/telocounts_final.csv')
+write_csv(fintelo, fin telocsv)
     
 
 

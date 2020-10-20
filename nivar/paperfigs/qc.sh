@@ -1,19 +1,16 @@
 #!/bin/bash
 
 datadir=/uru/Data/Nanopore/projects/nivar
+ref=$datadir/reference/candida_nivariensis.fa
+asm=$datadir/paperfigs/assembly_final/nivar.final.fasta
 
 if [ $1 == final_busco ] ; then
-    for i in r9 r10 ;
-    do
-
-	python ~/software/busco/scripts/run_BUSCO.py -f -i $datadir/pilon/${i}_pilon/nivar_${i}.pilon_bwa.6.fasta -o asm_busco -l ~/software/busco/lineages/fungi_odb9 -sp candida_albicans -m genome
-    done
-    ref=$datadir/reference/candida_nivariensis.fa
-    python ~/software/busco/scripts/run_BUSCO.py -f -i $ref -o ref_busco -l ~/software/busco/lineages/fungi_odb9 -sp candida_albicans -m genome
+    python ~/software/busco/scripts/run_BUSCO.py -f -i $ref -o ref -l ~/software/busco/lineages/fungi_odb9 -sp candida_albicans -m genome
+    python ~/software/busco/scripts/run_BUSCO.py -f -i $asm -o asm -l ~/software/busco/lineages/fungi_odb9 -sp candida_albicans -m genome
 
     mkdir -p $datadir/paperfigs/busco
-    mv run_asm_busco $datadir/paperfigs/busco/
-    mv run_ref_busco $datadir/paperfigs/busco/
+    mv run_asm $datadir/paperfigs/busco/
+    mv run_ref $datadir/paperfigs/busco/
 fi
 
 
@@ -63,12 +60,11 @@ if [ $1 == yields ] ; then
 fi
 
 if [ $1 == asm_stats ] ; then
-    ref=`python ~/Code/utils/qc/asm_assess.py -i $datadir/reference/candida_nivariensis.fa`
-    echo $datadir/reference/candida_nivariensis.fa,$ref
-    r9=`python ~/Code/utils/qc/asm_assess.py -i $datadir/assemble/r9_assembly/nivar_r9.contigs.fasta`
-    echo $datadir/assemble/r9_assembly/nivar_r9.contigs.fasta,$r9
-    r10=`python ~/Code/utils/qc/asm_assess.py -i $datadir/assemble/r10_assembly/nivar_r10.contigs.fasta`
-    echo $datadir/assemble/r10_assembly/nivar_r10.contigs.fasta,$r10
+    ##prints asm stats for reference and final
+    refstats=`python ~/Code/utils/qc/asm_assess.py -i $ref`
+    echo $ref,$refstats
+    asmstats=`python ~/Code/utils/qc/asm_assess.py -i $asm`
+    echo $asm,$asmstats
 fi
 
 
@@ -95,15 +91,6 @@ if [ $1 == raw_busco ] ; then
     python ~/software/busco/scripts/run_BUSCO.py -f -i $r10dir/canu/nivar.contigs.fasta -o r10raw_busco -l ~/software/busco/lineages/fungi_odb9 -sp candida_albicans -m tran
 fi
 
-if [ $1 == extract_quals ] ; then
-    python error_basequals.py -m $datadir/mummer/r9_raw_ref/nivar_r9_raw_ref.snps \
-	   -b1 $datadir/align/r9/reference_r9.sorted.bam \
-	   -b2 $datadir/align/r10/reference_r10.sorted.bam \
-	   -o $datadir/error_quals/r9_quals.csv
-    python error_basequals.py -m $datadir/mummer/r10_raw_ref/nivar_r10_raw_ref.snps \
-	   -b1 $datadir/align/r10/reference_r10.sorted.bam \
-	   -b2 $datadir/align/r9/reference_r9.sorted.bam \
-	   -o $datadir/error_quals/r10_quals.csv
-fi
+
 
 

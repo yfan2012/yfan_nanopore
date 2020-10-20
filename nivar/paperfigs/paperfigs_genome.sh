@@ -51,85 +51,9 @@ if [ $1 == polish ] ; then
 fi
 asmcorr=$datadir/freebayes/nivar_fb3_bwa.fasta
 
-if [ $1 == medusa ] ; then
-    mkdir -p $datadir/medusa
-    cp -r ~/software/medusa/medusa_scripts ./
-
-    java -jar ~/software/medusa/medusa.jar \
-	 -f $rawdir/reference/medusa_fungi \
-	 -i $asmcorr \
-	 -v \
-	 -o $datadir/medusa/nivar.scaffold.fasta
-fi
-
-if [ $1 == ragtag_correct ] ; then
-    mkdir -p $datadir/ragtag
-    ragtag.py correct \
-	      -w \
-	      -u \
-	      -o $datadir/ragtag/ \
-	      $rawdir/reference/medusa_fungi/candida_glabrata.fa \
-	      $asmcorr
-fi
-if [ $1 == ragtag ] ; then
-    mkdir -p $datadir/ragtag
-    ragtag.py scaffold \
-	      -w \
-	      -u \
-	      -o $datadir/ragtag/ \
-	      $rawdir/reference/medusa_fungi/candida_glabrata.fa \
-	      $datadir/ragtag/nivar_fb3_bwa.corrected.fasta
-fi
 
 ref=$rawdir/reference/candida_nivariensis.fa
-sca=$datadir/medusa/nivar.scaffold.fasta
-rag=$datadir/ragtag/ragtag.scaffolds.fasta
 gla=$rawdir/reference/medusa_fungi/candida_glabrata.fa
-
-if [ $1 == busco ] ; then
-    python ~/software/busco/scripts/run_BUSCO.py -f \
-	   -i $datadir/medusa/nivar.scaffold.fasta \
-	   -l ~/software/busco/lineages/fungi_odb9 \
-	   -sp candida_albicans \
-	   -o nivar \
-	   -m genome
-    python ~/software/busco/scripts/run_BUSCO.py -f \
-	   -i $ref \
-	   -l ~/software/busco/lineages/fungi_odb9 \
-	   -sp candida_albicans \
-	   -o ref \
-	   -m genome
-
-    mv ./run_* $datadir/busco/
-fi
-
-if [ $1 == mummer ] ; then
-    mkdir -p $datadir/mummer
-    mkdir -p ~/tmp/mummer
-    mkdir -p ~/tmp/mummer/scaffold_medusa
-    mkdir -p ~/tmp/mummer/scaffold_ragtag
-    mkdir -p ~/tmp/mummer/nivar_fb3_bwa
-    
-
-    cp $ref ~/tmp/mummer
-
-    cp $sca ~/tmp/mummer/scaffold_medusa
-    nucmer -p ~/tmp/mummer/scaffold_medusa/nivar.scaffold ~/tmp/mummer/scaffold_medusa/nivar.scaffold.fasta ~/tmp/mummer/candida_nivariensis.fa 
-    mummerplot --filter --fat --png -p ~/tmp/mummer/scaffold_medusa/nivar.scaffold ~/tmp/mummer/scaffold_medusa/nivar.scaffold.delta
-    dnadiff -p ~/tmp/mummer/scaffold_medusa/nivar.scaffold ~/tmp/mummer/scaffold_medusa/nivar.scaffold.fasta ~/tmp/mummer/candida_nivariensis.fa 
-
-    cp $rag ~/tmp/mummer/scaffold_ragtag
-    nucmer -p ~/tmp/mummer/scaffold_ragtag/ragtag.scaffolds ~/tmp/mummer/scaffold_ragtag/ragtag.scaffolds.fasta ~/tmp/mummer/candida_nivariensis.fa 
-    mummerplot --filter --fat --png -p ~/tmp/mummer/scaffold_ragtag/ragtag.scaffolds ~/tmp/mummer/scaffold_ragtag/ragtag.scaffolds.delta
-    dnadiff -p ~/tmp/mummer/scaffold_ragtag/ragtag.scaffolds ~/tmp/mummer/scaffold_ragtag/ragtag.scaffolds.fasta ~/tmp/mummer/candida_nivariensis.fa 
-
-    cp $asmcorr ~/tmp/mummer/nivar_fb3_bwa
-    nucmer -p ~/tmp/mummer/nivar_fb3_bwa/nivar_fb3_bwa ~/tmp/mummer/nivar_fb3_bwa/nivar_fb3_bwa.fasta ~/tmp/mummer/candida_nivariensis.fa 
-    mummerplot --filter --fat --png -p ~/tmp/mummer/nivar_fb3_bwa/nivar_fb3_bwa ~/tmp/mummer/nivar_fb3_bwa/nivar_fb3_bwa.delta
-    dnadiff -p ~/tmp/mummer/nivar_fb3_bwa/nivar_fb3_bwa ~/tmp/mummer/nivar_fb3_bwa/nivar_fb3_bwa.fasta ~/tmp/mummer/candida_nivariensis.fa 
-
-    cp -r ~/tmp/mummer $datadir/
-fi
 
 
 if [ $1 == glabrata_mum ] ; then
@@ -168,4 +92,94 @@ if [ $1 == mito_mum ] ; then
     cp -r ~/tmp/mummer/mito $datadir/mummer/
 fi
 
+fin=$datadir/assembly_final/nivar.final.fasta
+
+if [ $1 == medusa ] ; then
+    mkdir -p $datadir/medusa
+
+    cp -r ~/software/medusa/medusa_scripts ./
+
+    mkdir -p $datadir/medusa/nivariensis
+    java -jar ~/software/medusa/medusa.jar \
+	 -f $rawdir/reference/medusa_fungi \
+	 -i $fin \
+	 -v $ref \
+	 -o $datadir/medusa/nivariensis/nivar.final.scaffold.fasta
+
+    mkdir -p $datadir/medusa/glabrata
+    java -jar ~/software/medusa/medusa.jar \
+	 -f $rawdir/reference/medusa_fungi \
+	 -i $fin \
+	 -v $gla \
+	 -o $datadir/medusa/glabrata/nivar.final.scaffold.fasta
+	
+fi
+
+if [ $1 == ragtag ] ; then
+    mkdir -p $datadir/ragtag
+    mkdir -p $datadir/ragtag/nivariensis
+    ragtag.py scaffold \
+	      -w \
+	      -u \
+	      -o $datadir/ragtag/nivariensis \
+	      $ref \
+	      $fin
+    mkdir -p $datadir/ragtag/glabrata
+    ragtag.py scaffold \
+	      -w \
+	      -u \
+	      -o $datadir/ragtag/glabrata \
+	      $gla \
+	      $fin
+	
+fi
+
+sca=$datadir/medusa/nivar.scaffold.fasta
+rag=$datadir/ragtag/ragtag.scaffolds.fasta
+
+if [ $1 == mummer ] ; then
+    mkdir -p $datadir/mummer
+    mkdir -p ~/tmp/mummer
+    mkdir -p ~/tmp/mummer/scaffold_medusa
+    mkdir -p ~/tmp/mummer/scaffold_ragtag
+    mkdir -p ~/tmp/mummer/nivar_fb3_bwa
     
+
+    cp $ref ~/tmp/mummer
+
+    cp $sca ~/tmp/mummer/scaffold_medusa
+    nucmer -p ~/tmp/mummer/scaffold_medusa/nivar.scaffold ~/tmp/mummer/scaffold_medusa/nivar.scaffold.fasta ~/tmp/mummer/candida_nivariensis.fa 
+    mummerplot --filter --fat --png -p ~/tmp/mummer/scaffold_medusa/nivar.scaffold ~/tmp/mummer/scaffold_medusa/nivar.scaffold.delta
+    dnadiff -p ~/tmp/mummer/scaffold_medusa/nivar.scaffold ~/tmp/mummer/scaffold_medusa/nivar.scaffold.fasta ~/tmp/mummer/candida_nivariensis.fa 
+
+    cp $rag ~/tmp/mummer/scaffold_ragtag
+    nucmer -p ~/tmp/mummer/scaffold_ragtag/ragtag.scaffolds ~/tmp/mummer/scaffold_ragtag/ragtag.scaffolds.fasta ~/tmp/mummer/candida_nivariensis.fa 
+    mummerplot --filter --fat --png -p ~/tmp/mummer/scaffold_ragtag/ragtag.scaffolds ~/tmp/mummer/scaffold_ragtag/ragtag.scaffolds.delta
+    dnadiff -p ~/tmp/mummer/scaffold_ragtag/ragtag.scaffolds ~/tmp/mummer/scaffold_ragtag/ragtag.scaffolds.fasta ~/tmp/mummer/candida_nivariensis.fa 
+
+    cp $asmcorr ~/tmp/mummer/nivar_fb3_bwa
+    nucmer -p ~/tmp/mummer/nivar_fb3_bwa/nivar_fb3_bwa ~/tmp/mummer/nivar_fb3_bwa/nivar_fb3_bwa.fasta ~/tmp/mummer/candida_nivariensis.fa 
+    mummerplot --filter --fat --png -p ~/tmp/mummer/nivar_fb3_bwa/nivar_fb3_bwa ~/tmp/mummer/nivar_fb3_bwa/nivar_fb3_bwa.delta
+    dnadiff -p ~/tmp/mummer/nivar_fb3_bwa/nivar_fb3_bwa ~/tmp/mummer/nivar_fb3_bwa/nivar_fb3_bwa.fasta ~/tmp/mummer/candida_nivariensis.fa 
+
+    cp -r ~/tmp/mummer $datadir/
+fi
+
+
+
+if [ $1 == busco ] ; then
+    python ~/software/busco/scripts/run_BUSCO.py -f \
+	   -i $datadir/medusa/nivar.scaffold.fasta \
+	   -l ~/software/busco/lineages/fungi_odb9 \
+	   -sp candida_albicans \
+	   -o nivar \
+	   -m genome
+    python ~/software/busco/scripts/run_BUSCO.py -f \
+	   -i $ref \
+	   -l ~/software/busco/lineages/fungi_odb9 \
+	   -sp candida_albicans \
+	   -o ref \
+	   -m genome
+
+    mv ./run_* $datadir/busco/
+fi
