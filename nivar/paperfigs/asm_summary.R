@@ -3,12 +3,12 @@ library(argparse)
 library(Biostrings)
 
 ##misc paper figs
-dbxdir='~/Dropbox/yfan/nivar/paperfigs/'
-datadir='/uru/Data/Nanopore/projects/nivar/'
+dbxdir='~/Dropbox/yfan/nivar/paperfigs/raw/'
+datadir='/uru/Data/Nanopore/projects/nivar/paperfigs/'
 reffile='/uru/Data/Nanopore/projects/nivar/reference/candida_nivariensis.fa'
 
 ##asm contig lengths compared to ref length
-asmfile=paste0(datadir, 'medusa/')
+asmfile=paste0(datadir, '/assembly_final/nivar.final.fasta')
 asm=readDNAStringSet(asmfile)
 asminfo=tibble(lens=sort(width(asm), decreasing=TRUE)) %>%
     mutate(rank=row_number()) %>%

@@ -106,9 +106,10 @@ if [ $1 == gffcompare ] ; then
     drna=$datadir/annotation/stringtie/denovo_drna.gff
     rnaseq=$datadir/annotation/stringtie/denovo_rnaseq.gff
     
-    gffcompare $liftalb -r $liftcer -o $datadir/annotation/compare/liftcer_liftalb
-    gffcompare $braker -r $liftcer -o $datadir/annotation/compare/liftcer_braker
-    gffcompare $drna -r $liftcer -o $datadir/annotation/compare/liftcer_drna
-    gffcompare $rnaseq -r $liftcer -o $datadir/annotation/compare/liftcer_rnaseq
-    
+    gffcompare -r $liftcer -o $datadir/annotation/compare/liftcer_liftalb $liftalb
+    gffcompare -r $liftcer -o $datadir/annotation/compare/liftcer_braker $braker
+    gffcompare -r $liftcer -o $datadir/annotation/compare/liftcer_drna $drna
+    gffcompare -r $liftcer -o $datadir/annotation/compare/liftcer_rnaseq $rnaseq
+
+    gffcompare -r $drna -o $datadir/annotation/compare/drna_braker $braker
 fi

@@ -144,7 +144,6 @@ if [ $1 == mummer ] ; then
     mkdir -p ~/tmp/mummer/scaffold_ragtag
     mkdir -p ~/tmp/mummer/nivar_fb3_bwa
     
-
     cp $ref ~/tmp/mummer
 
     cp $sca ~/tmp/mummer/scaffold_medusa
