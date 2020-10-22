@@ -49,11 +49,11 @@ frombraker=brakergff %>%
     mutate(geneidraw=substring(strsplit(attribute, ';', fixed=TRUE)[[1]][1], 4)) %>%
     mutate(geneid=paste0(strsplit(geneidraw, '.', fixed=TRUE)[[1]][1],'.', strsplit(geneidraw, '.', fixed=TRUE)[[1]][2])) %>%
     filter(geneid %in% drnabraker_rev$qry_gene_id | geneid %in% drnabraker_rev$qry_id) %>%
+    #mutate(attribute=paste0('"', attribute, '"')) %>%
     select(-geneid, -geneidraw)
-data_annots=rbind(fromdrna, frombraker)
+data_annots=rbind(frombraker, fromdrna)
 
 data_tsv=file.path(datadir, 'combined', 'data_all.gff')
-write_tsv(data_annots, data_tsv, col_names=FALSE)
+write.table(data_annots, data_tsv, quote=FALSE, sep='\t', col.names=FALSE, row.names=FALSE)
 
 
-##gffcompare between lifted_annots and data_annots

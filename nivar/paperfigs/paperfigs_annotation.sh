@@ -113,3 +113,20 @@ if [ $1 == gffcompare ] ; then
 
     gffcompare -r $drna -o $datadir/annotation/compare/drna_braker $braker
 fi
+
+if [ $1 == annot_compare ] ; then
+    mkdir -p $datadir/annotation/combined
+    Rscript ~/Code/yfan_nanopore/nivar/paperfigs/annot_compare.R
+fi
+
+if [ $1 == compare_combinations ] ; then
+    gffcompare \
+	-r $datadir/annotation/combined/lifted_all.gff \
+	-o $datadir/annotation/combined/lifted_vs_data \
+	$datadir/annotation/combined/data_all.gff
+fi
+
+if [ $1 == annot_combine ] ; then
+    mkdir -p $datadir/annotation_final
+    Rscript ~/Code/yfan_nanopore/nivar/paperfigs/annot_combine.R
+fi
