@@ -14,23 +14,35 @@ ref=$rawdir/reference/candida_nivariensis.fa
 
 gla=$rawdir/reference/medusa_fungi/candida_glabrata.fa
 cer=$rawdir/reference/saccharomyces_cerevisiae.fa
+alb=$rawdir/reference/candida_albicans.fa
 cergff=$rawdir/reference/saccharomyces_cerevisiae.gff
+albgff=$rawdir/reference/candida_albicans.gff
 
 if [ $1 == fix_tignames ] ; then
     mv $gen $rawname
     awk -F ' ' '{print $1}' > $gen
 fi
 
-if [ $1 == liftoff_cerevisiae ] ; then
+if [ $1 == liftoff ] ; then
     mkdir -p $datadir/annotation/liftoff
     liftoff \
 	-p 36 \
 	-o $datadir/annotation/liftoff/nivar_cer_lifted.gff \
 	-u $datadir/annotation/liftoff/nivar_cer_unmapped.txt \
-	-dir $datadir/annotation/liftoff/intermediate_files \
+	-dir $datadir/annotation/liftoff/cer_intermediate_files \
 	-g $cergff \
 	$gen \
 	$cer
+
+    liftoff \
+	-p 36 \
+	-o $datadir/annotation/liftoff/nivar_alb_lifted.gff \
+	-u $datadir/annotation/liftoff/nivar_alb_unmapped.txt \
+	-dir $datadir/annotation/liftoff/alb_intermediate_files \
+	-g $albgff \
+	$gen \
+	$alb
+
 fi
 
 if [ $1 == align ] ; then
@@ -79,10 +91,24 @@ if [ $1 == braker ] ; then
     export GENEMARK_PATH=~/software/gmes_linux_64
     ~/software/BRAKER/scripts/braker.pl \
 	--cores=36 \
+	--gff3 \
 	--genome=$gen \
 	--species=nivar \
 	--bam=$datadir/annotation/align/nivar_cDNA.sorted.bam
 fi
     
+if [ $1 == gffcompare ] ; then
+    mkdir -p $datadir/annotation/compare
 
+    liftcer=$datadir/annotation/liftoff/nivar_cer_lifted.gff
+    liftalb=$datadir/annotation/liftoff/nivar_alb_lifted.gff
+    braker=$datadir/annotation/braker/braker.gff3
+    drna=$datadir/annotation/stringtie/denovo_drna.gff
+    rnaseq=$datadir/annotation/stringtie/denovo_rnaseq.gff
     
+    gffcompare $liftalb -r $liftcer -o $datadir/annotation/compare/liftcer_liftalb
+    gffcompare $braker -r $liftcer -o $datadir/annotation/compare/liftcer_braker
+    gffcompare $drna -r $liftcer -o $datadir/annotation/compare/liftcer_drna
+    gffcompare $rnaseq -r $liftcer -o $datadir/annotation/compare/liftcer_rnaseq
+    
+fi
