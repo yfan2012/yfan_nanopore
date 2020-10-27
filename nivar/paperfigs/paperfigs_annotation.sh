@@ -15,6 +15,7 @@ ref=$rawdir/reference/candida_nivariensis.fa
 gla=$rawdir/reference/medusa_fungi/candida_glabrata.fa
 cer=$rawdir/reference/saccharomyces_cerevisiae.fa
 alb=$rawdir/reference/candida_albicans.fa
+glagff=$rawdir/reference/candida_glabrata.gff
 cergff=$rawdir/reference/saccharomyces_cerevisiae.gff
 albgff=$rawdir/reference/candida_albicans.gff
 
@@ -42,6 +43,15 @@ if [ $1 == liftoff ] ; then
 	-g $albgff \
 	$gen \
 	$alb
+
+    liftoff \
+	-p 36 \
+	-o $datadir/annotation/liftoff/nivar_gla_lifted.gff \
+	-u $datadir/annotation/liftoff/nivar_gla_unmapped.txt \
+	-dir $datadir/annotation/liftoff/gla_intermediate_files \
+	-g $glagff \
+	$gen \
+	$gla
 
 fi
 
@@ -102,31 +112,49 @@ if [ $1 == gffcompare ] ; then
 
     liftcer=$datadir/annotation/liftoff/nivar_cer_lifted.gff
     liftalb=$datadir/annotation/liftoff/nivar_alb_lifted.gff
+    liftgla=$datadir/annotation/liftoff/nivar_gla_lifted.gff
     braker=$datadir/annotation/braker/braker.gff3
     drna=$datadir/annotation/stringtie/denovo_drna.gff
     rnaseq=$datadir/annotation/stringtie/denovo_rnaseq.gff
-    
-    gffcompare -r $liftcer -o $datadir/annotation/compare/liftcer_liftalb $liftalb
-    gffcompare -r $liftcer -o $datadir/annotation/compare/liftcer_braker $braker
-    gffcompare -r $liftcer -o $datadir/annotation/compare/liftcer_drna $drna
-    gffcompare -r $liftcer -o $datadir/annotation/compare/liftcer_rnaseq $rnaseq
+    final=$datadir/annotation_final/nivar.final.gff
 
-    gffcompare -r $drna -o $datadir/annotation/compare/drna_braker $braker
+    ##awk '$3=="u" {print $4}' liftgla_liftcer.nivar_cer_lifted.gff.tmap | grep -f - ../liftoff/nivar_cer_lifted.gff
+
+    cp $braker $final
+
+    gffcompare -r $final -o $datadir/annotation/compare/liftgla_final $liftgla
+    awk '$3 == "u" {print $4}' $datadir/annotation/liftoff/liftgla_final.nivar_gla_lifted.gff.tmap \
+	| grep -f - $liftgla >> $final
+
+    gffcompare -r $final -o $datadir/annotation/compare/liftcer_final $liftcer
+    awk '$3 == "u" {print $4}' $datadir/annotation/liftoff/liftcer_final.nivar_cer_lifted.gff.tmap \
+	| grep -f - $liftcer >> $final
+
+    gffcompare -r $final -o $datadir/annotation/compare/liftalb_final $liftalb
+    awk '$3 == "u" {print $4}' $datadir/annotation/liftoff/liftalb_final.nivar_alb_lifted.gff.tmap \
+	| grep -f - $liftalb >> $final
+    
+    gffcompare -r $final -o $datadir/annotation/compare/drna_final $drna
+    awk '$3 == "u" {print $4}' $datadir/annotation/stringtie/drna_final.denovo_drna.gff.tmap \
+	| grep -f - $drna >> $final
+    
+    ##gffcompare -r $final -o $datadir/annotation/compare/braker_final $braker
+    ##awk '$3 == "u" {print $4}' $datadir/annotation/braker/braker_final.braker.gff3.tmap \
+	##| grep -f - $braker >> $final
+    
 fi
 
-if [ $1 == annot_compare ] ; then
+
+if [ $1 == transcriptome_oldattempt_not_used ] ; then
     mkdir -p $datadir/annotation/combined
     Rscript ~/Code/yfan_nanopore/nivar/paperfigs/annot_compare.R
-fi
 
-if [ $1 == compare_combinations ] ; then
+    	##-r $datadir/annotation/combined/lifted_all.gff \
     gffcompare \
-	-r $datadir/annotation/combined/lifted_all.gff \
+	-r $datadir/annotation/combined/lifted_all_gla.gff \
 	-o $datadir/annotation/combined/lifted_vs_data \
 	$datadir/annotation/combined/data_all.gff
-fi
 
-if [ $1 == annot_combine ] ; then
     mkdir -p $datadir/annotation_final
     Rscript ~/Code/yfan_nanopore/nivar/paperfigs/annot_combine.R
 fi

@@ -17,54 +17,6 @@ fbsfile=paste0(datadir,'freebayes/nivar_fb3_bwa.fasta')
 reffile='/uru/Data/Nanopore/projects/nivar/reference/candida_nivariensis.fa'
 glafile='/uru/Data/Nanopore/projects/nivar/reference/medusa_fungi/candida_glabrata.fa'
 
-##plot busco
-cnames=c('buscoid', 'status', 'contig', 'start', 'end', 'score', 'length')
-scabuscofile=paste0(datadir, 'busco/run_nivar_scaffold/full_table_nivar_scaffold.tsv')
-scabusco=read_tsv(scabuscofile, comment='#', col_names=cnames) %>%
-    group_by(status) %>%
-    summarise(sum=n()) %>%
-    mutate(asm='asm')
-refbuscofile=paste0(datadir, 'busco/run_ref/full_table_ref.tsv')
-refbusco=read_tsv(refbuscofile, comment='#', col_names=cnames) %>%
-    group_by(status) %>%
-    summarise(sum=n()) %>%
-    mutate(asm='ref')
-busco=rbind(refbusco, scabusco)
-
-buscoplot=paste0(dbxdir, 'paperfigs/raw/buscos.pdf')
-pdf(buscoplot, height=4, width=13)
-plot=ggplot(busco, aes(x=asm, y=sum, fill=status, colour=status, alpha=.5)) +
-    geom_bar(width=.7, stat='identity') +
-    coord_flip() +
-    ggtitle('BUSCO') +
-    xlab('Genome') +
-    ylab('Number of buscos') +
-    theme_bw()
-print(plot)
-dev.off()
-
-
-if (FALSE) {
-    ##plot busco
-    buscofile=paste0(dbxdir, '/qc/trans_buscos.csv')
-    buscocsv=read_csv(buscofile) %>%
-        select(-c(total))
-    busco=gather(buscocsv, key, value, -asm)
-    
-    buscoplot=paste0(dbxdir, '/qc/trans_buscos.pdf')
-    pdf(buscoplot, height=5, width=10)
-    plot=ggplot(busco, aes(x=asm, y=value, fill=key, colour=key, alpha=.5)) +
-        geom_bar(width=.7, stat='identity') +
-        coord_flip() +
-        ggtitle('BUSCO') +
-        xlab('Genome') +
-        ylab('Number of buscos') +
-        theme_bw()
-    print(plot)
-    dev.off()
-}
-
-
 
 ##check telomeres
 fwdtelo='CTGGGTGCTGTGGGGT'
@@ -148,13 +100,11 @@ ggplot(allteloplot, aes(x=percpos, colour=name, fill=name, alpha=.2)) +
 dev.off()
 
 
-
 ##exclude sequences, extract mito
 fbs=readDNAStringSet(fbsfile)
 mito=fbs[19]
 mitofile=paste0(datadir, 'assembly_final/nivar_fb3_bwa_mito.fasta')
 writeXStringSet(mito, mitofile, format='fasta')
-
 
 
 ##cut mito based on mummer of nivar_fb3_bwa_mito.fasta
@@ -173,7 +123,7 @@ writeXStringSet(newasm,newasmfile, format='fasta')
 
 fintelo=telocheck(newasmfile, fwdtelo, revtelo)
 fintelocsv=paste0(dbxdir,'/paperfigs/raw/telocounts_final.csv')
-write_csv(fintelo, fin telocsv)
+write_csv(fintelo, fintelocsv)
     
 
 

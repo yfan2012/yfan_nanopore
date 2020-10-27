@@ -5,7 +5,8 @@ datadir='/uru/Data/Nanopore/projects/nivar/paperfigs/annotation'
 
 gff=tibble(
     liftcer=file.path(datadir, 'liftoff', 'nivar_cer_lifted.gff'),
-    liftalb=file.path(datadir, 'liftoff', 'nivar_alb_lifted.gff'),
+    ##liftalb=file.path(datadir, 'liftoff', 'nivar_alb_lifted.gff'),
+    liftgla=file.path(datadir, 'liftoff', 'nivar_gla_lifted.gff'),
     braker=file.path(datadir, 'braker', 'braker.gff3'),
     drna=file.path(datadir, 'stringtie', 'denovo_drna.gff'),
     rnaseq=file.path(datadir, 'stringtie', 'denovo_rnaseq.gff'))
@@ -13,12 +14,14 @@ gff=tibble(
 
 cols=c('seqname', 'source', 'feature', 'start', 'end', 'score', 'strand', 'frame', 'attribute')
 liftcergff=read_tsv(gff$liftcer, col_names=cols)
-liftalbgff=read_tsv(gff$liftalb, col_names=cols)
+##liftalbgff=read_tsv(gff$liftalb, col_names=cols)
+liftglagff=read_tsv(gff$liftgla, col_names=cols)
 brakergff=read_tsv(gff$braker, col_names=cols)
 drnagff=read_tsv(gff$drna, col_names=cols, skip=2)
 
 
 ##find annots included in liftoff albicans that weren't found in liftoff cerevisiae
+'''
 liftalbfile=file.path(datadir, 'liftoff', 'liftcer_liftalb.nivar_alb_lifted.gff.tmap')
 liftalb=read_tsv(liftalbfile) %>%
     filter(class_code=='u')
@@ -30,6 +33,21 @@ fromalb=liftalbgff %>%
 lifted_annots=rbind(liftcergff, fromalb)
 
 lifted_tsv=file.path(datadir, 'combined', 'lifted_all.gff')
+write_tsv(lifted_annots, lifted_tsv, col_names=FALSE)
+'''
+
+liftcerfile=file.path(datadir, 'liftoff', 'liftgla_liftcer.nivar_cer_lifted.gff.tmap')
+liftcer=read_tsv(liftcerfile) %>%
+    filter(class_code=='u')
+fromcer=liftcergff %>%
+    rowwise() %>%
+    mutate(geneid=substring(strsplit(attribute, ';', fixed=TRUE)[[1]][1], 4)) %>%
+    filter(geneid %in% liftcer$qry_gene_id | geneid %in% liftgla$qry_id) %>%
+    select(-geneid)
+lifted_annots=rbind(liftcergff, fromgla)
+
+##lifted_tsv=file.path(datadir, 'combined', 'lifted_all.gff')
+lifted_tsv=file.path(datadir, 'combined', 'lifted_all_gla.gff')
 write_tsv(lifted_annots, lifted_tsv, col_names=FALSE)
 
 ##find common ones between stringtie and braker

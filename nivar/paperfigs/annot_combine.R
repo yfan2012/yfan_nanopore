@@ -4,7 +4,8 @@ rawdir='/uru/Data/Nanopore/projects/nivar/paperfigs'
 datadir='/uru/Data/Nanopore/projects/nivar/paperfigs/annotation'
 
 cols=c('seqname', 'source', 'feature', 'start', 'end', 'score', 'strand', 'frame', 'attribute')
-lifted_tsv=file.path(datadir, 'combined', 'lifted_all.gff')
+##lifted_tsv=file.path(datadir, 'combined', 'lifted_all.gff')
+lifted_tsv=file.path(datadir, 'combined', 'lifted_all_gla.gff')
 data_tsv=file.path(datadir, 'combined', 'data_all.gff')
 
 
@@ -30,4 +31,4 @@ drnadata=read_tsv(data_tsv, col_names=cols) %>%
 
 final_annot=rbind(lifted, brakerdata, drnadata)
 final_annot_tsv=file.path(rawdir,'annotation_final', 'nivar.final.gff')
-write.table(final_annot, final_annot_tsv, row.names=FALSE, col.names=FALSE, sep='\t')
+write.table(final_annot, final_annot_tsv, row.names=FALSE, col.names=FALSE, sep='\t', quote=FALSE)

@@ -1,17 +1,131 @@
 #!/bin/bash
 
 datadir=/uru/Data/Nanopore/projects/nivar
+
 ref=$datadir/reference/candida_nivariensis.fa
+gla=$datadir/reference/candida_glabrata.fa
+glagff=$datadir/reference/candida_glabrata.gff
+glatransfa=$datadir/reference/candida_glabrata.transcriptome.fa
+cer=$datadir/reference/saccharomyces_cerevisiae.fa
+cergff=$datadir/reference/saccharomyces_cerevisiae.gff
+certransfa=$datadir/reference/saccharomyces_cerevisiae.transcriptome.fa
+alb=$datadir/reference/candida_albicans.fa
+albgff=$datadir/reference/candida_albicans.gff
+albtransfa=$datadir/reference/candida_albicans.transcriptome.fa
+
+
 asm=$datadir/paperfigs/assembly_final/nivar.final.fasta
+asmgff=$datadir/paperfigs/annotation_final/nivar.final.gff
+asmtransfa=$datadir/paperfigs/annotation_final/nivar.final.transcriptome.fasta
+
+bragff=$datadir/paperfigs/annotation/braker/braker.gff3
+bratransfa=$datadir/paperfigs/annotation/braker/braker.fa
+
 
 if [ $1 == final_busco ] ; then
-    python ~/software/busco/scripts/run_BUSCO.py -f -i $ref -o ref -l ~/software/busco/lineages/fungi_odb9 -sp candida_albicans -m genome
-    python ~/software/busco/scripts/run_BUSCO.py -f -i $asm -o asm -l ~/software/busco/lineages/fungi_odb9 -sp candida_albicans -m genome
+    busco \
+	-m genome \
+	-l saccharomycetes_odb10 \
+	--augustus_species saccharomyces_cerevisiae_S288C \
+	-i $asm \
+	-o asm \
+	--out_path $datadir/paperfigs/busco \
+	-c 36 \
+	-f
 
-    mkdir -p $datadir/paperfigs/busco
-    mv run_asm $datadir/paperfigs/busco/
-    mv run_ref $datadir/paperfigs/busco/
+    busco \
+	-m genome \
+	-l saccharomycetes_odb10 \
+	--augustus_species saccharomyces_cerevisiae_S288C \
+	-i $ref \
+	-o ref \
+	--out_path $datadir/paperfigs/busco \
+	-c 36 \
+	-f 
 fi
+
+if [ $1 == ref_busco_transcriptome ] ; then
+    #combined
+    bedtools getfasta \
+	     -fi $gla \
+	     -bed $glagff \
+	     -fo $glatransfa
+
+    busco \
+	-m transcriptome \
+	-l saccharomycetes_odb10 \
+	--augustus_species saccharomyces_cerevisiae_S288C \
+	-i $glatransfa \
+	-o transgla \
+	--out_path $datadir/paperfigs/busco \
+	-c 36 \
+	-f
+    
+    bedtools getfasta \
+	     -fi $cer \
+	     -bed $cergff \
+	     -fo $certransfa
+
+    busco \
+	-m transcriptome \
+	-l saccharomycetes_odb10 \
+	--augustus_species saccharomyces_cerevisiae_S288C \
+	-i $certransfa \
+	-o transcer \
+	--out_path $datadir/paperfigs/busco \
+	-c 36 \
+	-f
+    
+    bedtools getfasta \
+	     -fi $alb \
+	     -bed $albgff \
+	     -fo $albtransfa
+
+    busco \
+	-m transcriptome \
+	-l saccharomycetes_odb10 \
+	--augustus_species saccharomyces_cerevisiae_S288C \
+	-i $albtransfa \
+	-o transalb \
+	--out_path $datadir/paperfigs/busco \
+	-c 36 \
+	-f
+fi
+
+if [ $1 == busco_transcriptome ] ; then
+    #braker
+    bedtools getfasta \
+	     -fi $asm \
+	     -bed $bragff \
+	     -fo $bratransfa
+    
+    busco \
+	-m transcriptome \
+	-l saccharomycetes_odb10 \
+	--augustus_species saccharomyces_cerevisiae_S288C \
+	-i $bratransfa \
+	-o transasm_brakeronly \
+	--out_path $datadir/paperfigs/busco \
+	-c 36 \
+	-f
+fi
+
+if [ $1 == busco_transcriptome_final ] ; then
+    bedtools getfasta \
+	     -fi $asm \
+	     -bed $asmgff \
+	     -fo $asmtransfa
+    busco \
+	-m transcriptome \
+	-l saccharomycetes_odb10 \
+	--augustus_species saccharomyces_cerevisiae_S288C \
+	-i $asmtransfa \
+	-o transasm \
+	--out_path $datadir/paperfigs/busco \
+	-c 36 \
+	-f
+fi
+
 
 
 if [ $1 == yields ] ; then
@@ -66,31 +180,5 @@ if [ $1 == asm_stats ] ; then
     asmstats=`python ~/Code/utils/qc/asm_assess.py -i $asm`
     echo $asm,$asmstats
 fi
-
-
-if [ $1 == transcriptome_busco ] ; then
-    transcriptome=$r9dir/trinity/Trinity.fasta
-    python ~/software/busco/scripts/run_BUSCO.py -f -i $transcriptome -o tran_busco -l ~/software/busco/lineages/fungi_odb9 -sp candida_albicans -m tran
-fi
-
-if [ $1 == augustus_busco ] ; then
-    anndir=$r9dir/annotation
-    
-    awk '$3 == "transcript" {print $0}' $r9dir/annotation/augustus/cani_by_caal.gff > $r9dir/annotation/augustus/cani_by_caal_xscripts.gff
-    bedtools getfasta -fi $anndir/nivar_fb15_bwa.fasta -bed $anndir/augustus/cani_by_caal_xscripts.gff -fo $anndir/augustus/cani_by_caal_xscripts.fasta
-
-    python ~/software/busco/scripts/run_BUSCO.py -f -i $anndir/augustus/cani_by_caal_xscripts.fasta \
-	   -o augustus_busco \
-	   -l ~/software/busco/lineages/fungi_odb9 \
-	   -sp candida_albicans -m tran
-fi
-
-if [ $1 == raw_busco ] ; then
-    ##try with raw
-    python ~/software/busco/scripts/run_BUSCO.py -f -i $r9dir/canu/nivar.contigs.fasta -o r9raw_busco -l ~/software/busco/lineages/fungi_odb9 -sp candida_albicans -m tran
-    python ~/software/busco/scripts/run_BUSCO.py -f -i $r10dir/canu/nivar.contigs.fasta -o r10raw_busco -l ~/software/busco/lineages/fungi_odb9 -sp candida_albicans -m tran
-fi
-
-
 
 
