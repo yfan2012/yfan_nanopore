@@ -127,4 +127,14 @@ write_csv(fintelo, fintelocsv)
     
 
 
-
+finteloplot=as_tibble(teloplot(newasmfile, fwdtelo, revtelo)) %>%
+    mutate(name='Assembly')
+allteloplot=rbind(finteloplot, scateloplot, ragteloplot, scateloplotgla, ragteloplotgla)
+finteloplotfile=paste0(dbxdir, '/paperfigs/raw/teloplots.pdf')
+pdf(finteloplotfile, w=16, h=9)
+ggplot(allteloplot, aes(x=percpos, colour=name)) +
+    geom_histogram(position='identity', fill=NA) +
+    ggtitle('Telo positions') +
+    xlab('position (as percent of seq length)') +
+    theme_bw()
+dev.off()
