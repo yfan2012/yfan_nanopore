@@ -93,7 +93,11 @@ if [ $1 == mito_mum ] ; then
 fi
 
 fin=$datadir/assembly_final/nivar.final.fasta
-
+if [ $1 == clean_names ] ; then
+    sed -i -e 's/\s.*$//' $fin
+    sed -i -e 's/00//g' $fin
+fi
+    
 if [ $1 == medusa ] ; then
     mkdir -p $datadir/medusa
 
@@ -164,21 +168,3 @@ if [ $1 == mummer ] ; then
     cp -r ~/tmp/mummer $datadir/
 fi
 
-
-
-if [ $1 == busco ] ; then
-    python ~/software/busco/scripts/run_BUSCO.py -f \
-	   -i $datadir/medusa/nivar.scaffold.fasta \
-	   -l ~/software/busco/lineages/fungi_odb9 \
-	   -sp candida_albicans \
-	   -o nivar \
-	   -m genome
-    python ~/software/busco/scripts/run_BUSCO.py -f \
-	   -i $ref \
-	   -l ~/software/busco/lineages/fungi_odb9 \
-	   -sp candida_albicans \
-	   -o ref \
-	   -m genome
-
-    mv ./run_* $datadir/busco/
-fi

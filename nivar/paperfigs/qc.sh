@@ -13,7 +13,6 @@ alb=$datadir/reference/candida_albicans.fa
 albgff=$datadir/reference/candida_albicans.gff
 albtransfa=$datadir/reference/candida_albicans.transcriptome.fa
 
-
 asm=$datadir/paperfigs/assembly_final/nivar.final.fasta
 asmgff=$datadir/paperfigs/annotation_final/nivar.final.gff
 asmtransfa=$datadir/paperfigs/annotation_final/nivar.final.transcriptome.fasta
@@ -42,6 +41,39 @@ if [ $1 == final_busco ] ; then
 	--out_path $datadir/paperfigs/busco \
 	-c 36 \
 	-f 
+fi
+
+if [ $1 == ref_busco ] ; then
+    busco \
+	-m genome \
+	-l saccharomycetes_odb10 \
+	--augustus_species saccharomyces_cerevisiae_S288C \
+	-i $gla \
+	-o gla \
+	--out_path $datadir/paperfigs/busco \
+	-c 36 \
+	-f
+
+    busco \
+	-m genome \
+	-l saccharomycetes_odb10 \
+	--augustus_species saccharomyces_cerevisiae_S288C \
+	-i $cer \
+	-o cer \
+	--out_path $datadir/paperfigs/busco \
+	-c 36 \
+	-f
+    
+    busco \
+	-m genome \
+	-l saccharomycetes_odb10 \
+	--augustus_species saccharomyces_cerevisiae_S288C \
+	-i $alb \
+	-o alb \
+	--out_path $datadir/paperfigs/busco \
+	-c 36 \
+	-f 
+	
 fi
 
 if [ $1 == ref_busco_transcriptome ] ; then
@@ -182,3 +214,29 @@ if [ $1 == asm_stats ] ; then
 fi
 
 
+if [ $1 == mummer_final ] ; then
+    mkdir -p ~/tmp/mummer
+    mkdir -p ~/tmp/mummer/ref
+    mkdir -p ~/tmp/mummer/cer
+    mkdir -p ~/tmp/mummer/gla
+    
+    cp $asm ~/tmp/mummer
+	
+    cp $ref ~/tmp/mummer/ref
+    nucmer -p ~/tmp/mummer/ref/ref_nivar.final ~/tmp/mummer/ref/candida_nivariensis.fa ~/tmp/mummer/nivar.final.fasta
+    mummerplot --filter --fat --png -p ~/tmp/mummer/ref/ref_nivar.final ~/tmp/mummer/ref/ref_nivar.final.delta
+    dnadiff -p ~/tmp/mummer/ref/ref_nivar.final ~/tmp/mummer/ref/candida_nivariensis.fa ~/tmp/mummer/nivar.final.fasta
+	
+    cp $gla ~/tmp/mummer/gla
+    nucmer -p ~/tmp/mummer/gla/gla_nivar.final ~/tmp/mummer/gla/candida_glabrata.fa ~/tmp/mummer/nivar.final.fasta
+    mummerplot --filter --fat --png -p ~/tmp/mummer/gla/gla_nivar.final ~/tmp/mummer/gla/gla_nivar.final.delta
+    dnadiff -p ~/tmp/mummer/gla/gla_nivar.final ~/tmp/mummer/gla/candida_glabrata.fa ~/tmp/mummer/nivar.final.fasta
+    
+    cp $cer ~/tmp/mummer/cer
+    nucmer -p ~/tmp/mummer/cer/cer_nivar.final ~/tmp/mummer/cer/saccharomyces_cerevisiae.fa ~/tmp/mummer/nivar.final.fasta
+    mummerplot --filter --fat --png -p ~/tmp/mummer/cer/cer_nivar.final ~/tmp/mummer/cer/cer_nivar.final.delta
+    dnadiff -p ~/tmp/mummer/cer/cer_nivar.final ~/tmp/mummer/cer/saccharomyces_cerevisiae.fa ~/tmp/mummer/nivar.final.fasta
+    
+    mv ~/tmp/mummer $datadir/mummer_final
+fi
+    
