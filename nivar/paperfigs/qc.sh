@@ -20,6 +20,10 @@ asmtransfa=$datadir/paperfigs/annotation_final/nivar.final.transcriptome.fasta
 bragff=$datadir/paperfigs/annotation/braker/braker.gff3
 bratransfa=$datadir/paperfigs/annotation/braker/braker.fa
 
+fqraw=$datadir/r9/r9.fq
+fq=$datadir/r9/r9_3kb.fq
+illfwd=$datadir/illumina/gDNA_trimmed/nivar_gDNA_fwd_paired.fq.gz
+illrev=$datadir/illumina/gDNA_trimmed/nivar_gDNA_rev_paired.fq.gz
 
 if [ $1 == final_busco ] ; then
     busco \
@@ -238,3 +242,20 @@ if [ $1 == mummer_final ] ; then
     dnadiff -p ~/tmp/mummer/cer/cer_nivar.final ~/tmp/mummer/nivar.final.fasta ~/tmp/mummer/cer/saccharomyces_cerevisiae.fa 
 fi
     
+if [ $1 == coverage ] ; then
+    mkdir -p $datadir/paperfigs/cov
+    
+    minimap2 -ax map-ont -t 36 $asm $fq |
+	samtools view -@ 36 -bS |
+	samtools sort -@ 36 -o $datadir/paperfigs/align/nivar.final_nanopore.sorted.bam
+    samtools index $datadir/paperfigs/align/nivar.final_nanopore.sorted.bam
+    bedtools genomecov -d -ibam $datadir/paperfigs/align/nivar.final_nanopore.sorted.bam > $datadir/paperfigs/cov/nivar.final_nanopore.cov
+    
+    bwa index $asm
+    bwa mem -t 36 $asm $illfwd $illrev |
+	samtools view -@ 36 -bS - |
+	samtools sort -@ 36 -o $datadir/paperfigs/align/nivar.final_illumina.sorted.bam
+    samtools index $datadir/paperfigs/align/nivar.final_illumina.sorted.bam
+    bedtools genomecov -d -ibam $datadir/paperfigs/align/nivar.final_illumina.sorted.bam > $datadir/paperfigs/cov/nivar.final_illumina.cov
+    
+fi
