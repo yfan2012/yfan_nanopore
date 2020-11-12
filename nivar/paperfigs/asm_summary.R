@@ -259,16 +259,12 @@ both=comb[complete.cases(comb),]
 covplotfile=file.path(dbxdir, 'cov_hist.pdf')
 pdf(covplotfile, h=6, w=11)
 plot=ggplot(cov, aes(x=cov, colour=samp, fill=samp, alpha=.2)) +
-    geom_histogram() +
-    ggtitle('Coverage Histogram') +
-    xlab('Coverage') +
-    theme_bw()
-print(plot)
-zoomplot=ggplot(cov, aes(x=cov)) +
-    geom_histogram(binwidth=10, colour=samp, fill=samp, alpha=.2) +
+    geom_histogram(binwidth=10) +
+    scale_fill_brewer(palette = "Set2") +
+    scale_color_brewer(palette = "Set2") +
     ggtitle('Coverage Histogram') +
     xlim(0,500) +
     xlab('Coverage') +
     theme_bw()
-print(zoomplot)
+print(plot)
 dev.off()
