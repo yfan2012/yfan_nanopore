@@ -4,7 +4,7 @@ library(ggforce)
 library(argparse)
 library(Biostrings)
 library(RIdeogram)
-source('~/Code/yfan_nanopore/nivar/paperfigs/genome.R')
+
 
 ##misc paper figs
 dbxdir='~/Dropbox/yfan/nivar/paperfigs/raw/'
@@ -13,6 +13,7 @@ datadir='/uru/Data/Nanopore/projects/nivar/paperfigs/'
 reffile='/uru/Data/Nanopore/projects/nivar/reference/candida_nivariensis.fa'
 asmfile=paste0(datadir,'assembly/nivar.contigs.fasta')
 finfile=paste0(datadir, '/assembly_final/nivar.final.fasta')
+
 
 ##asm contig lengths compared to ref length
 fin=readDNAStringSet(finfile)
@@ -62,7 +63,7 @@ for (i in buscos) {
     buscofile=file.path(datadir, 'busco', i, 'run_saccharomycetes_odb10/full_table.tsv')
     sum=read_tsv(buscofile, comment='#', col_names=cnames) %>%
         group_by(status) %>%
-        summarise(sum=n()) %>%
+        summarise(sum=length(unique(buscoid))) %>%
         mutate(asm=i)
     allsum=rbind(allsum, sum)
 }
@@ -73,6 +74,7 @@ allsum=allsum %>%
                            asm=='gla' ~ 3,
                            asm=='cer' ~ 2,
                            asm=='alb' ~ 1))
+
 buscoplot=paste0(dbxdir, 'buscos.pdf')
 pdf(buscoplot, height=8, width=19)
 plot=ggplot(allsum, aes(x=status, y=sum, fill=asm, group=order, alpha=alpha)) +
@@ -85,6 +87,23 @@ plot=ggplot(allsum, aes(x=status, y=sum, fill=asm, group=order, alpha=alpha)) +
     theme_bw() +
     facet_zoom(ylim = c(0, 100))
 print(plot)
+dev.off()
+
+buscobarplot=paste0(dbxdir, 'buscos_bar.pdf')
+pdf(buscobarplot, height=8, width=19)
+allsum$asm <- factor(allsum$asm, levels=c('asm', 'ref', 'gla', 'cer', 'alb')) ##order of bars
+barplot=ggplot(allsum, aes(x=sum, y=asm, fill=status, alpha=.8)) +
+    geom_col() +
+    scale_fill_brewer(palette = "Set2") +
+    ggtitle('BUSCO') +
+    ylab('Genome') +
+    xlab('Number of BUSCOs') +
+    theme_bw()
+print(barplot)
+dev.off()
+buscobarplotzoom=paste0(dbxdir, 'buscos_bar_zoom.pdf')
+pdf(buscobarplotzoom, height=8, width=15)
+print(barplot + facet_zoom(xlim=c(0,100)))
 dev.off()
 
 ##check if buscos are in common
@@ -106,7 +125,7 @@ for (i in transbuscos) {
     buscofile=file.path(datadir, 'busco', paste0('trans', i), 'run_saccharomycetes_odb10/full_table.tsv')
     sum=read_tsv(buscofile, comment='#', col_names=cnames) %>%
         group_by(status) %>%
-        summarise(sum=n()) %>%
+        summarise(sum=length(unique(buscoid))) %>%
         mutate(asm=i)
     alltrans=rbind(alltrans, sum)
 }
@@ -129,6 +148,24 @@ plot=ggplot(alltrans, aes(x=status, y=sum, fill=asm, group=order, alpha=alpha)) 
     theme_bw()
 print(plot)
 dev.off()
+
+alltrans$asm <- factor(alltrans$asm, levels=c('asm', 'gla', 'cer', 'alb')) ##order of bars
+buscobarplot_trans=paste0(dbxdir, 'buscos_bar_transcriptome.pdf')
+pdf(buscobarplot_trans, height=8, width=19)
+barplot=ggplot(alltrans, aes(x=sum, y=asm, fill=status, alpha=.8)) +
+    geom_col() +
+    scale_fill_brewer(palette = "Set2") +
+    ggtitle('BUSCO') +
+    ylab('Genome') +
+    xlab('Number of BUSCOs') +
+    theme_bw()
+print(barplot)
+dev.off()
+buscobarplotzoom=paste0(dbxdir, 'buscos_bar_transcriptome_zoom.pdf')
+pdf(buscobarplotzoom, height=8, width=15)
+print(barplot + facet_zoom(xlim=c(0,300)))
+dev.off()
+
 
 
 ##ideogram
@@ -183,7 +220,7 @@ drawideo=ideogram(karyotype=as.data.frame(ideodata),
                   label_type='polygon',
                   colorset1=c("#ff0000", "#ffffff", "#0000ff"),
                   output=file.path(dbxdir,'ideogram.svg'))
-                 
+
 
 
 telocheck <- function(asmfile, fwdtelo, revtelo) {
@@ -195,3 +232,43 @@ telocheck <- function(asmfile, fwdtelo, revtelo) {
         mutate(fwd=str_count(as.character(asm[chr]), fwdtelo)) %>%
         mutate(rev=str_count(as.character(asm[chr]), revtelo))
 }
+
+
+##coverage histogram
+illcovfile=file.path(datadir, 'cov', 'nivar.final_illumina.cov')
+npcovfile=file.path(datadir, 'cov', 'nivar.final_nanopore.cov')
+
+cnames=c('tig', 'pos', 'cov')
+illcov=read_tsv(illcovfile, col_names=cnames) %>%
+    mutate(samp='illumina')
+npcov=read_tsv(npcovfile, col_names=cnames) %>%
+    mutate(samp='ont')
+cov=rbind(illcov, npcov)
+
+##check any physical 0 coverage
+illnocov=illcov %>%
+    filter(cov==0)
+npnocov=npcov %>%
+    filter(cov==0)
+comb=illnocov %>%
+    full_join(npnocov, by=c('tig', 'pos'))
+both=comb[complete.cases(comb),] 
+##manually inspected: 2 are at very end of chr. 2 are deletions reported as no cov
+
+
+covplotfile=file.path(dbxdir, 'cov_hist.pdf')
+pdf(covplotfile, h=6, w=11)
+plot=ggplot(cov, aes(x=cov, colour=samp, fill=samp, alpha=.2)) +
+    geom_histogram() +
+    ggtitle('Coverage Histogram') +
+    xlab('Coverage') +
+    theme_bw()
+print(plot)
+zoomplot=ggplot(cov, aes(x=cov)) +
+    geom_histogram(binwidth=10, colour=samp, fill=samp, alpha=.2) +
+    ggtitle('Coverage Histogram') +
+    xlim(0,500) +
+    xlab('Coverage') +
+    theme_bw()
+print(zoomplot)
+dev.off()
