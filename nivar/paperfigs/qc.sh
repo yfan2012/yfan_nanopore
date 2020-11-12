@@ -228,18 +228,22 @@ if [ $1 == mummer_final ] ; then
 	
     cp $ref ~/tmp/mummer/ref
     nucmer -p ~/tmp/mummer/ref/ref_nivar.final ~/tmp/mummer/nivar.final.fasta ~/tmp/mummer/ref/candida_nivariensis.fa 
+    mummerplot --filter --fat --postscript -p ~/tmp/mummer/ref/ref_nivar.final ~/tmp/mummer/ref/ref_nivar.final.delta
     mummerplot --filter --fat --png -p ~/tmp/mummer/ref/ref_nivar.final ~/tmp/mummer/ref/ref_nivar.final.delta
     dnadiff -p ~/tmp/mummer/ref/ref_nivar.final ~/tmp/mummer/nivar.final.fasta ~/tmp/mummer/ref/candida_nivariensis.fa 
 
     cp $gla ~/tmp/mummer/gla
     nucmer -p ~/tmp/mummer/gla/gla_nivar.final ~/tmp/mummer/nivar.final.fasta ~/tmp/mummer/gla/candida_glabrata.fa 
+    mummerplot --filter --fat --postscript -p ~/tmp/mummer/gla/gla_nivar.final ~/tmp/mummer/gla/gla_nivar.final.delta
     mummerplot --filter --fat --png -p ~/tmp/mummer/gla/gla_nivar.final ~/tmp/mummer/gla/gla_nivar.final.delta
     dnadiff -p ~/tmp/mummer/gla/gla_nivar.final ~/tmp/mummer/nivar.final.fasta ~/tmp/mummer/gla/candida_glabrata.fa 
     
     cp $cer ~/tmp/mummer/cer
     nucmer -p ~/tmp/mummer/cer/cer_nivar.final ~/tmp/mummer/nivar.final.fasta ~/tmp/mummer/cer/saccharomyces_cerevisiae.fa 
+    mummerplot --filter --fat --postscript -p ~/tmp/mummer/cer/cer_nivar.final ~/tmp/mummer/cer/cer_nivar.final.delta
     mummerplot --filter --fat --png -p ~/tmp/mummer/cer/cer_nivar.final ~/tmp/mummer/cer/cer_nivar.final.delta
-    dnadiff -p ~/tmp/mummer/cer/cer_nivar.final ~/tmp/mummer/nivar.final.fasta ~/tmp/mummer/cer/saccharomyces_cerevisiae.fa 
+    dnadiff -p ~/tmp/mummer/cer/cer_nivar.final ~/tmp/mummer/nivar.final.fasta ~/tmp/mummer/cer/saccharomyces_cerevisiae.fa
+
 fi
     
 if [ $1 == coverage ] ; then

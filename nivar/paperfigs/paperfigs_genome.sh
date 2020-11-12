@@ -64,6 +64,7 @@ if [ $1 == glabrata_mum ] ; then
 
     cp $asmcorr ~/tmp/mummer/glabrata_nivar_fb3_bwa
     nucmer -p ~/tmp/mummer/glabrata_nivar_fb3_bwa/glabrata_nivar_fb3_bwa ~/tmp/mummer/glabrata_nivar_fb3_bwa/nivar_fb3_bwa.fasta ~/tmp/mummer/candida_glabrata.fa 
+    mummerplot --filter --fat --postscript  -p ~/tmp/mummer/glabrata_nivar_fb3_bwa/glabrata_nivar_fb3_bwa ~/tmp/mummer/glabrata_nivar_fb3_bwa/glabrata_nivar_fb3_bwa.delta
     mummerplot --filter --fat --png -p ~/tmp/mummer/glabrata_nivar_fb3_bwa/glabrata_nivar_fb3_bwa ~/tmp/mummer/glabrata_nivar_fb3_bwa/glabrata_nivar_fb3_bwa.delta
     dnadiff -p ~/tmp/mummer/glabrata_nivar_fb3_bwa/glabrata_nivar_fb3_bwa ~/tmp/mummer/glabrata_nivar_fb3_bwa/nivar_fb3_bwa.fasta ~/tmp/mummer/candida_glabrata.fa 
 
@@ -87,6 +88,7 @@ if [ $1 == mito_mum ] ; then
     cp $rawdir/reference/mitos/candida_nivariensis_mito.fa ~/tmp/mummer/mito/
     
     nucmer -p ~/tmp/mummer/mito/nivar_mito ~/tmp/mummer/mito/nivar_fb3_bwa_mito.fasta ~/tmp/mummer/mito/candida_nivariensis_mito.fa 
+    mummerplot --filter --fat --postscript -p ~/tmp/mummer/mito/nivar_mito ~/tmp/mummer/mito/nivar_mito.delta
     mummerplot --filter --fat --png -p ~/tmp/mummer/mito/nivar_mito ~/tmp/mummer/mito/nivar_mito.delta
     dnadiff -p ~/tmp/mummer/mito/nivar_mito ~/tmp/mummer/mito/nivar_fb3_bwa_mito.fasta ~/tmp/mummer/mito/candida_nivariensis_mito.fa
     cp -r ~/tmp/mummer/mito $datadir/mummer/
@@ -152,17 +154,17 @@ if [ $1 == mummer ] ; then
 
     cp $sca ~/tmp/mummer/scaffold_medusa
     nucmer -p ~/tmp/mummer/scaffold_medusa/nivar.scaffold ~/tmp/mummer/scaffold_medusa/nivar.scaffold.fasta ~/tmp/mummer/candida_nivariensis.fa 
-    mummerplot --filter --fat --png -p ~/tmp/mummer/scaffold_medusa/nivar.scaffold ~/tmp/mummer/scaffold_medusa/nivar.scaffold.delta
+    mummerplot --filter --fat --postscript --png -p ~/tmp/mummer/scaffold_medusa/nivar.scaffold ~/tmp/mummer/scaffold_medusa/nivar.scaffold.delta
     dnadiff -p ~/tmp/mummer/scaffold_medusa/nivar.scaffold ~/tmp/mummer/scaffold_medusa/nivar.scaffold.fasta ~/tmp/mummer/candida_nivariensis.fa 
 
     cp $rag ~/tmp/mummer/scaffold_ragtag
     nucmer -p ~/tmp/mummer/scaffold_ragtag/ragtag.scaffolds ~/tmp/mummer/scaffold_ragtag/ragtag.scaffolds.fasta ~/tmp/mummer/candida_nivariensis.fa 
-    mummerplot --filter --fat --png -p ~/tmp/mummer/scaffold_ragtag/ragtag.scaffolds ~/tmp/mummer/scaffold_ragtag/ragtag.scaffolds.delta
+    mummerplot --filter --fat --postscript --png -p ~/tmp/mummer/scaffold_ragtag/ragtag.scaffolds ~/tmp/mummer/scaffold_ragtag/ragtag.scaffolds.delta
     dnadiff -p ~/tmp/mummer/scaffold_ragtag/ragtag.scaffolds ~/tmp/mummer/scaffold_ragtag/ragtag.scaffolds.fasta ~/tmp/mummer/candida_nivariensis.fa 
 
     cp $asmcorr ~/tmp/mummer/nivar_fb3_bwa
     nucmer -p ~/tmp/mummer/nivar_fb3_bwa/nivar_fb3_bwa ~/tmp/mummer/nivar_fb3_bwa/nivar_fb3_bwa.fasta ~/tmp/mummer/candida_nivariensis.fa 
-    mummerplot --filter --fat --png -p ~/tmp/mummer/nivar_fb3_bwa/nivar_fb3_bwa ~/tmp/mummer/nivar_fb3_bwa/nivar_fb3_bwa.delta
+    mummerplot --filter --fat --postscritp --png -p ~/tmp/mummer/nivar_fb3_bwa/nivar_fb3_bwa ~/tmp/mummer/nivar_fb3_bwa/nivar_fb3_bwa.delta
     dnadiff -p ~/tmp/mummer/nivar_fb3_bwa/nivar_fb3_bwa ~/tmp/mummer/nivar_fb3_bwa/nivar_fb3_bwa.fasta ~/tmp/mummer/candida_nivariensis.fa 
 
     cp -r ~/tmp/mummer $datadir/
