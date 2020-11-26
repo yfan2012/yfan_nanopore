@@ -4,7 +4,8 @@ library(ggforce)
 library(argparse)
 library(Biostrings)
 library(RIdeogram)
-
+library(GenomicRanges)
+library(Rsamtools)
 
 ##misc paper figs
 dbxdir='~/Dropbox/yfan/nivar/paperfigs/raw/'
@@ -39,12 +40,14 @@ ggplot(asms, aes(x=rank, y=perc, colour=samp)) +
     xlim(0,50) +
     xlab('Contig Rank') +
     ylab('Percent of Assembly Length') +
+    scale_color_brewer(palette = "Set2") +
     theme_bw()
 ggplot(asms, aes(x=rank, y=perc, colour=samp)) +
     geom_step(size=1) +
     ggtitle('Cumulative Percentage of Assembly Length')  +
     xlab('Contig Rank') +
     ylab('Percent of Assembly Length') +
+    scale_color_brewer(palette = "Set2") +
     theme_bw()
 dev.off()
 
@@ -169,6 +172,8 @@ dev.off()
 
 
 ##ideogram
+fwdtelo='CTGGGTGCTGTGGGGT'
+revtelo='ACCCCACAGCACCCAG'
 ideodata=tibble(
     Chr=names(fin)[1:15],
     Start=rep(0, times=15),
@@ -179,11 +184,12 @@ ideowindows=tibble(
     End=as.numeric())
 for (i in 1:dim(ideodata)[1]) {
     tigranges=tibble(
-        Start=seq(1, ideodata$End[i], 50000), 
-        End=c(seq(20001, ideodata$End[i], 20000), ideodata$End[i])) %>%
+        Start=seq(1, ideodata$End[i], 20000), 
+        End=c(seq(20000, ideodata$End[i], 20000), ideodata$End[i])) %>%
         mutate(Chr=ideodata$Chr[i])
     ideowindows=rbind(ideowindows, tigranges)
 }
+
 ideowindows=ideowindows %>%
     mutate(numfwd=str_count(substr(as.character(fin[Chr]), Start, End), fwdtelo)) %>%
     mutate(numrev=str_count(substr(as.character(fin[Chr]), Start, End), revtelo)) %>%
@@ -195,43 +201,66 @@ ideotelo=tibble(
     Value=ideowindows$numtelo) %>%
     mutate(color=case_when(Value > '1' ~ 'ff0000', T ~ '000000'))
 
-ideosmall=tibble(
-    Chr=as.character(),
-    Start=as.numeric(),
-    End=as.numeric())
-for (i in 1:dim(ideodata)[1]) {
-    tigranges=tibble(
-        Start=seq(1, ideodata$End[i], 500), 
-        End=c(seq(501, ideodata$End[i], 500), ideodata$End[i])) %>%
-        mutate(Chr=ideodata$Chr[i])
-    ideosmall=rbind(ideosmall, tigranges)
+if (FALSE) {
+    ##draw AT percent
+    ideosmall=tibble(
+        Chr=as.character(),
+        Start=as.numeric(),
+        End=as.numeric())
+    for (i in 1:dim(ideodata)[1]) {
+        tigranges=tibble(
+            Start=seq(1, ideodata$End[i], 500), 
+            End=c(seq(501, ideodata$End[i], 500), ideodata$End[i])) %>%
+            mutate(Chr=ideodata$Chr[i])
+        ideosmall=rbind(ideosmall, tigranges)
+    }
+    ideosmall=ideosmall %>%
+        mutate(numA=str_count(substr(as.character(fin[Chr]), Start, End), 'A')) %>%
+        mutate(numT=str_count(substr(as.character(fin[Chr]), Start, End), 'T')) %>%
+        mutate(total=numA+numT)
+    overlay=ideosmall %>%
+        select(Chr, Start, End) %>%
+        mutate(Value=1/(1+exp(-(ideosmall$total/max(ideosmall$total)))))
+    
+    drawideo=ideogram(karyotype=as.data.frame(ideodata),
+                      overlaid=as.data.frame(overlay), 
+                      label=(as.data.frame(ideotelo)),
+                      label_type='polygon',
+                      colorset1=c("#ff0000", "#ffffff", "#0000ff"),
+                      output=file.path(dbxdir,'ideogram.svg'))
 }
-ideosmall=ideosmall %>%
-    mutate(numA=str_count(substr(as.character(fin[Chr]), Start, End), 'A')) %>%
-    mutate(numT=str_count(substr(as.character(fin[Chr]), Start, End), 'T')) %>%
-    mutate(total=numA+numT)
-overlay=ideosmall %>%
-    select(Chr, Start, End) %>%
-    mutate(Value=1/(1+exp(-(ideosmall$total/max(ideosmall$total)))))
 
+
+##draw gaps in reference on ideogram
+mumfile=file.path(datadir, 'mummer', 'ref', 'ref_nivar.final.1coords')
+mumcnames=c('rstart', 'rend', 'qstart', 'qend', 'raln', 'qaln', 'ident', 'rlen', 'qlen', 'rcov', 'qcov', 'Chr', 'qryChr')
+
+newseq <- function(muminfo) {
+    pos=seq(1, muminfo$rlen[1])
+    for (i in 1:dim(muminfo)[1]) {
+        covered=seq(muminfo$rstart[i], muminfo$rend[i])
+        pos=pos[ ! pos %in% covered ]
+    }
+    starts=seq(1, muminfo$rlen[1], 10000)
+    ends=c(seq(10000, muminfo$rlen[1], 10000), muminfo$rlen[1])
+    freqinfo=tibble(Start=starts, End=ends) %>%
+        rowwise() %>%
+        mutate(Value=sum(pos %in% seq(Start, End)))
+    return(freqinfo)
+}
+
+mum=read_tsv(mumfile, col_names=mumcnames) %>%
+    group_by(Chr) %>%
+    do(newseq(.)) %>%
+    mutate(Value=case_when(Value>'1' ~ 10000, T ~ 0))
 drawideo=ideogram(karyotype=as.data.frame(ideodata),
-                  overlaid=as.data.frame(overlay), 
+                  overlaid=as.data.frame(mum), 
                   label=(as.data.frame(ideotelo)),
                   label_type='polygon',
-                  colorset1=c("#ff0000", "#ffffff", "#0000ff"),
-                  output=file.path(dbxdir,'ideogram.svg'))
+                  colorset1=c("#ffffff", "#66C2A5"),
+                  output=file.path(dbxdir,'ideogram_gaps.svg'))
 
 
-
-telocheck <- function(asmfile, fwdtelo, revtelo) {
-    asm=readDNAStringSet(asmfile)
-    seqs=as.character(asm)
-
-    teloinfo=tibble(chr=names(asm)) %>%
-        mutate(length=width(asm[chr])) %>%
-        mutate(fwd=str_count(as.character(asm[chr]), fwdtelo)) %>%
-        mutate(rev=str_count(as.character(asm[chr]), revtelo))
-}
 
 
 ##coverage histogram
@@ -255,7 +284,6 @@ comb=illnocov %>%
 both=comb[complete.cases(comb),] 
 ##manually inspected: 2 are at very end of chr. 2 are deletions reported as no cov
 
-
 covplotfile=file.path(dbxdir, 'cov_hist.pdf')
 pdf(covplotfile, h=6, w=11)
 plot=ggplot(cov, aes(x=cov, colour=samp, fill=samp, alpha=.2)) +
@@ -268,3 +296,90 @@ plot=ggplot(cov, aes(x=cov, colour=samp, fill=samp, alpha=.2)) +
     theme_bw()
 print(plot)
 dev.off()
+
+
+
+
+##check repeat regions and multimapping regions
+trffile=file.path(datadir, 'trf', 'trf.out')
+trfinfo=read_csv(trffile, col_names=c('trf'))
+cnames=c('start', 'end', 'size', 'copies', 'consensus', 'matches', 'indels', 'score', 'A', 'C', 'G', 'T', 'entropy', 'seq1', 'seq2', 'seq3', 'seq4', 'name')
+
+#deal annoying trf output format
+name=substr(trfinfo$trf[1], 2, str_length(trfinfo$trf[1]))
+trf=as_tibble(str_split_fixed(trfinfo$trf[2], pattern=' ', n=17)) %>%
+    mutate(name=name)
+colnames(trf)=cnames
+for (i in 3:dim(trfinfo)[1]) {
+    if (substr(trfinfo$trf[i], 1, 1)=='@') {
+        name=substr(trfinfo$trf[i], 2, str_length(trfinfo$trf[i]))
+    } else {
+        trfsep=as_tibble(str_split_fixed(trfinfo$trf[i], pattern=' ', n=17)) %>%
+            mutate(name=name)
+        colnames(trfsep)=cnames
+        trf=rbind(trf, trfsep)
+    }
+}
+
+findgaps <- function(muminfo) {
+    ##get gap ranges from mummer info
+    pos=seq(1, muminfo$rlen[1])
+    for (i in 1:dim(muminfo)[1]) {
+        covered=seq(muminfo$rstart[i], muminfo$rend[i])
+        pos=pos[ ! pos %in% covered ]
+    }
+    gapranges=tibble(start=as.numeric(),
+                     end=as.numeric())
+    
+    if (length(pos)> 1) {
+        start=pos[1]
+        for (i in 2:length(pos)) {
+            if (pos[i]>pos[i-1]+1) {
+                gapranges=rbind(gapranges, tibble(start=start, end=pos[i-1]))
+                start=pos[i]
+            }
+        }
+    }
+    return(gapranges)
+}
+numbers=names(trf[1:12])
+trf[numbers]=lapply(trf[numbers], as.numeric)
+
+##trf=trf %>% filter(end-start>100)
+reps=GRanges(seqnames=trf$name, ranges=IRanges(start=trf$start, end=trf$end))
+gaps=read_tsv(mumfile, col_names=mumcnames) %>%
+    group_by(Chr) %>%
+    do(findgaps(.)) %>%
+    mutate(width=end-start) %>%
+    filter(width>300)
+gapgrange=GRanges(seqnames=gaps$Chr, ranges=IRanges(start=gaps$start, end=gaps$end))
+overlaps=findOverlaps(gapgrange, reps) ##new sequence in asm that overlaps repeats
+
+
+bampath=file.path(datadir, 'align', 'nivar.final_illumina.sorted.bam')
+bamfile=BamFile(bampath)
+bam=scanBam(bamfile)
+align=tibble(seqnames=bam[[1]]$rname,
+             start=bam[[1]]$pos,
+             end=bam[[1]]$pos+bam[[1]]$qwidth, 
+             mapq=bam[[1]]$mapq,
+             qname=bam[[1]]$qname)
+align=align[complete.cases(align),]
+alignranges=GRanges(seqnames=align$seqnames, ranges=IRanges(start=align$start, end=align$end), mapq=align$mapq)
+
+findmultimap <- function(baminfo, align) {
+    ##counts mapq=0 in gap alignments
+    multimap=sum(align$mapq[baminfo$subjectHits]==0)
+    singlemap=sum(align$mapq[baminfo$subjectHits]!=0)
+    return(tibble(multi=multimap, single=singlemap))
+}
+gapaligns=as_tibble(findOverlaps(gapgrange, alignranges)) %>%
+    group_by(queryHits) %>%
+    do(findmultimap(., align)) %>%
+    filter(multi/(multi+single)>.1)
+
+goodgaps=unique(c(as.data.frame(overlaps)$queryHits, gapaligns$queryHits))
+    
+    
+
+
