@@ -109,14 +109,12 @@ if [ $1 == medusa ] ; then
     java -jar ~/software/medusa/medusa.jar \
 	 -f $rawdir/reference/medusa_fungi \
 	 -i $fin \
-	 -v $ref \
 	 -o $datadir/medusa/nivariensis/nivar.final.scaffold.fasta
 
     mkdir -p $datadir/medusa/glabrata
     java -jar ~/software/medusa/medusa.jar \
-	 -f $rawdir/reference/medusa_fungi \
+	 -f $rawdir/reference/medusa_glabrata \
 	 -i $fin \
-	 -v $gla \
 	 -o $datadir/medusa/glabrata/nivar.final.scaffold.fasta
 	
 fi
