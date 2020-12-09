@@ -94,10 +94,12 @@ teloplotfile=paste0(dbxdir, '/paperfigs/raw/teloplots.pdf')
 pdf(teloplotfile, w=16, h=9)
 ggplot(allteloplot, aes(x=percpos, colour=name, fill=name, alpha=.2)) +
     geom_histogram(position='identity') +
+    facet_wrap(. ~ name, ncol=2) +
     ggtitle('Telo positions') +
     xlab('position (as percent of seq length)') +
     theme_bw()
 dev.off()
+
 
 
 ##exclude sequences, extract mito
