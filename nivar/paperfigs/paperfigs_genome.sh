@@ -168,3 +168,15 @@ if [ $1 == mummer ] ; then
     cp -r ~/tmp/mummer $datadir/
 fi
 
+if [ $1 == mitoself ] ; then
+    mkdir -p ~/tmp/mummer/mito_self
+
+    cp $datadir/assembly_final/nivar_fb3_bwa_mito.fasta ~/tmp/mummer/mito_self
+    
+    nucmer -p ~/tmp/mummer/mito_self/mito_self ~/tmp/mummer/mito_self/nivar_fb3_bwa_mito.fasta ~/tmp/mummer/mito_self/nivar_fb3_bwa_mito.fasta 
+    mummerplot --postscript -p ~/tmp/mummer/mito_self/mito_self ~/tmp/mummer/mito_self/mito_self.delta
+    mummerplot --png -p ~/tmp/mummer/mito_self/mito_self ~/tmp/mummer/mito_self/mito_self.delta
+    dnadiff -p ~/tmp/mummer/mito_self/mito_self ~/tmp/mummer/mito_self/nivar_fb3_bwa_mito.fasta ~/tmp/mummer/mito_self/nivar_fb3_bwa_mito.fasta
+    
+    cp -r ~/tmp/mummer/mito_self $datadir/mummer/
+fi

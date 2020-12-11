@@ -41,3 +41,17 @@ names(geneseqs)=regiontable$Systematic_Name
 geneseqsfa=file.path(datadir, 'patho', 'gpicwp.fa')
 writeXStringSet(geneseqs, geneseqsfa, format='fasta')
 
+
+
+##compare gpicwp hits between ref and asm
+cnames=c('gene', 'chr', 'ident', 'alignlen', 'mismatches', 'gap', 'qstart', 'qend', 'sstart', 'send', 'eval', 'store')
+nivtsv=file.path(datadir, 'patho', 'nivar.final.gpicwp_hits.tsv')
+reftsv=file.path(datadir, 'patho', 'candida_nivariensis.tsv')
+nivhits=read_tsv(nivtsv, comment='#', col_names=cnames)
+refhits=read_tsv(reftsv, comment='#', col_names=cnames)
+
+repgenes=regiontable %>%
+    filter(Is_Repetitive=='yes')
+foundreps=intersect(repgenes$Systematic_Name, unique(nivhits$gene))
+
+
