@@ -180,3 +180,17 @@ if [ $1 == mitoself ] ; then
     
     cp -r ~/tmp/mummer/mito_self $datadir/mummer/
 fi
+
+
+if [ $1 == blastmissingbusco ] ; then
+    makeblastdb \
+	-in $fin \
+	-out $datadir/assembly_final/nivar.final \
+	-dbtype nucl
+
+    blastn \
+	-query $datadir/busco/missing/41996at4891.fa \
+	-db $datadir/assembly_final/nivar.final \
+	-outfmt 7 \
+	-out $datadir/busco/missing/41996at4891.tsv
+fi

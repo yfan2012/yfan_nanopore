@@ -6,6 +6,7 @@ library(Biostrings)
 library(RIdeogram)
 library(GenomicRanges)
 library(Rsamtools)
+library(BSgenome)
 
 ##misc paper figs
 dbxdir='~/Dropbox/yfan/nivar/paperfigs/raw/'
@@ -109,6 +110,8 @@ pdf(buscobarplotzoom, height=8, width=15)
 print(barplot + facet_zoom(xlim=c(0,100)))
 dev.off()
 
+
+
 ##check if buscos are in common
 refbuscofile=file.path(datadir, 'busco', 'ref', 'run_saccharomycetes_odb10/full_table.tsv')
 refmiss=read_tsv(refbuscofile, comment='#', col_names=cnames) %>%
@@ -116,7 +119,20 @@ refmiss=read_tsv(refbuscofile, comment='#', col_names=cnames) %>%
 finbuscofile=file.path(datadir, 'busco', 'asm', 'run_saccharomycetes_odb10/full_table.tsv')
 finmiss=read_tsv(finbuscofile, comment='#', col_names=cnames) %>%
     filter(status=='Missing')
-    
+##get missing 41996at4891 sequence to blast
+missing=read_tsv(refbuscofile, comment='#', col_names=cnames) %>%
+    filter(buscoid=='41996at4891')
+missingregion=GRanges(seqnames=missing$contig, ranges=IRanges(start=missing$start, end=missing$end))
+ref=readDNAStringSet(reffile)
+newnames=tibble(names=names(ref)) %>%
+    rowwise() %>%
+    mutate(new=strsplit(names, split=' ', fixed=TRUE)[[1]][1])
+names(ref)=newnames$new
+missingseq=getSeq(ref, missingregion)
+names(missingseq)=missing$contig
+writeXStringSet(missingseq, filepath=file.path(datadir, 'busco', 'missing', '41996at4891.fa'))
+
+
 
 ##transcriptome busco
 transbuscos=c('asm', 'gla', 'cer', 'alb')

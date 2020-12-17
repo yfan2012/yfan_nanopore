@@ -14,11 +14,14 @@ gff=$datadir/annotation_final/nivar.final.gff
 xugla=$datadir/patho/glabrata_xu.fa
 
 if [ $1 == amino ] ; then
-    ## ~/software/Augustus/scripts/gtf2aa.pl $fin $datadir/annotation/braker/braker.gtf $datadir/annotation_final/nivar.final.faa
-     ~/software/Augustus/scripts/gtf2aa.pl $fin $gff $datadir/annotation_final/nivar.final.faa
+    gffread \
+	-y $datadir/patho/long_genes.fa \
+	-g $fin \
+	$datadir/patho/long_genes.gff
 fi
 
-if [ $1 == blast ] ; then
+if [ $1 == subtelo ] ; then
+    ##blast ref and asm for list of subtelo genes from xu glabrata study
     makeblastdb \
 	-in $fin \
 	-out $datadir/patho/nivar.final \
@@ -29,9 +32,7 @@ if [ $1 == blast ] ; then
 	-db $datadir/patho/nivar.final \
 	-outfmt 7 \
 	-out $datadir/patho/nivar.final.gpicwp_hits.tsv
-fi
 
-if [ $1 == refblast ] ; then
     makeblastdb \
 	-in $ref \
 	-out $datadir/patho/candida_nivariensis \
@@ -42,4 +43,29 @@ if [ $1 == refblast ] ; then
 	-db $datadir/patho/candida_nivariensis \
 	-outfmt 7 \
 	-out $datadir/patho/candida_nivariensis.tsv
+fi
+
+if [ $1 == adhesion ] ; then
+    ##blast ref and asm for list of putative adhesion prots from predGPI
+    makeblastdb \
+	-in $fin \
+	-out $datadir/patho/nivar.final \
+	-dbtype nucl
+
+    blastn \
+	-query $datadir/patho/gpigenes.fasta \
+	-db $datadir/patho/nivar.final \
+	-outfmt 7 \
+	-out $datadir/patho/nivar.final.predgpi_hits.tsv
+
+    makeblastdb \
+	-in $ref \
+	-out $datadir/patho/candida_nivariensis \
+	-dbtype nucl
+
+    blastn \
+	-query $datadir/patho/gpigenes.fasta \
+	-db $datadir/patho/candida_nivariensis \
+	-outfmt 7 \
+	-out $datadir/patho/candida_nivariensis.predgpi_hits.tsv
 fi
