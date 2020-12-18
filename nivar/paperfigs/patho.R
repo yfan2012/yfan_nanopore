@@ -8,6 +8,7 @@ library(BSgenome)
 library(R.utils)
 library(foreach)
 library(doParallel)
+library(colorspace)
 
 dbxdir='~/Dropbox/yfan/nivar/'
 datadir='/uru/Data/Nanopore/projects/nivar/paperfigs/'
@@ -20,6 +21,13 @@ glafile='/uru/Data/Nanopore/projects/nivar/reference/medusa_fungi/candida_glabra
 xufile='/uru/Data/Nanopore/projects/nivar/paperfigs/patho/glabrata_xu.fa'
 
 regionsfile='/uru/Data/Nanopore/projects/nivar/paperfigs/patho/gpicwp_regions.csv'
+
+##colors
+colors=tibble(scale=seq(0, .8, .1)) %>%
+    mutate(light=lighten('#8DA0CB', scale)) %>%
+    mutate(dark=darken('#8DA0CB', scale))
+colvec=c(rev(colors$light), colors$dark[-1])
+
 
 ##read in regions file from xu (asterisks removed)
 regiontable=read_csv(regionsfile) %>%
@@ -82,20 +90,46 @@ allhits=rbind(nivhits, refhits) %>%
     mutate(status=regiontable$Status[regiontable$Systematic_Name==gene])
 allhitscsv=file.path(dbxdir, 'paperfigs','raw', 'copynum.csv')
 write_csv(allhits, allhitscsv)
-    
+
+allhitscorr=spread(allhits[,1:3], asm, counts)
+allhitscorrcsv=file.path(dbxdir, 'paperfigs','raw', 'copynum_corr.csv')
+write_csv(allhitscorr, allhitscorrcsv)
+
 copynumpdf=file.path(dbxdir, 'paperfigs', 'raw', 'copynum.pdf')
 pdf(copynumpdf, height=8, width=7)
-plot=ggplot(allhits, aes(x=counts, fill=asm, colour=asm, alpha=.3)) +
+plot=ggplot(allhits, aes(x=numhits, fill=asm, colour=asm, alpha=.3)) +
     geom_histogram(stat='count', binwidth=1) +
     facet_wrap(. ~ asm, ncol=1) +
     scale_fill_brewer(palette = "Set2") +
     scale_color_brewer(palette = "Set2") +
     xlim(0,10) +
-    scale_x_continuous(name='Copy Number', limits=c(0,10), breaks=seq(0,10,1)) +
+    scale_x_continuous(name='Number of Hits', limits=c(0,10), breaks=seq(0,10,1)) +
     ggtitle('Telomeric Gene Copy Number') +
     theme_bw()
 print(plot)
+asmheatmap=ggplot(allhits, aes(numhits, counts)) +
+    geom_bin2d() +
+    scale_fill_gradientn(colours=colvec) +
+    facet_wrap(. ~ asm, ncol=1) +
+    ggtitle('Telomereic Gene Hits') +
+    scale_x_continuous(name='Number of Hits', limits=c(0,10), breaks=seq(0,10,1)) +
+    scale_y_continuous(name='Adjusted Copy Number', limits=c(0,10), breaks=seq(0,10,1)) +
+    theme_bw()
+print(asmheatmap)
 dev.off()
+copynumcorrpdf=file.path(dbxdir, 'paperfigs', 'raw', 'copynum_corr.pdf')
+pdf(copynumcorrpdf, height=5, width=9)
+corrheat=ggplot(allhitscorr, aes(x=asm, y=ref)) +
+    geom_bin2d() +
+    scale_fill_gradientn(colours=colvec) +
+    ggtitle('Adjusted Copy Number') +
+    scale_x_continuous(name='JHU_Cniv_v1', limits=c(0,11), breaks=seq(0,11,1)) +
+    scale_y_continuous(name='C. Nivariensis Reference', limits=c(0,11), breaks=seq(0,11,1)) +
+    theme_bw()
+print(corrheat)
+dev.off()
+
+
 
 
 
@@ -161,10 +195,72 @@ writeXStringSet(gpiseqs, gpiseqfile)
 
 
 
+
 ##read blast of gpi and compare
 nivpredtsv=file.path(datadir, 'patho', 'nivar.final.predgpi_hits.tsv')
 refpredtsv=file.path(datadir, 'patho', 'candida_nivariensis.predgpi_hits.tsv')
+cnames=c('gene', 'chr', 'ident', 'alignlen', 'mismatches', 'gap', 'qstart', 'qend', 'sstart', 'send', 'eval', 'store')
 nivpred=read_tsv(nivpredtsv, comment='#', col_names=cnames) %>%
-    mutate(genome='asm')
+    mutate(genome='asm') %>%
+    rowwise() %>%
+    mutate(start=min(sstart, send)) %>%
+    mutate(end=max(sstart, send))
 refpred=read_tsv(refpredtsv, comment='#', col_names=cnames) %>%
     mutate(genome='ref')
+allpred=rbind(nivpred, refpred) %>%
+    group_by(gene) %>%
+    summarise(maxref=max(alignlen[genome=='ref']),
+              maxasm=max(alignlen[genome=='asm']),
+              numref=sum(genome=='ref'),
+              numasm=sum(genome=='asm'))
+
+
+
+##get list of pred genes that have repeats
+trffile=file.path(datadir, 'trf', 'trf.out')
+trfinfo=read_csv(trffile, col_names=c('trf'))
+cnames=c('start', 'end', 'size', 'copies', 'consensus', 'matches', 'indels', 'score', 'A', 'C', 'G', 'T', 'entropy', 'seq1', 'seq2', 'seq3', 'seq4', 'name')
+name=substr(trfinfo$trf[1], 2, str_length(trfinfo$trf[1]))
+trf=as_tibble(str_split_fixed(trfinfo$trf[2], pattern=' ', n=17)) %>%
+    mutate(name=name)
+colnames(trf)=cnames
+for (i in 3:dim(trfinfo)[1]) {
+    if (substr(trfinfo$trf[i], 1, 1)=='@') {
+        name=substr(trfinfo$trf[i], 2, str_length(trfinfo$trf[i]))
+    } else {
+        trfsep=as_tibble(str_split_fixed(trfinfo$trf[i], pattern=' ', n=17)) %>%
+            mutate(name=name)
+        colnames(trfsep)=cnames
+        trf=rbind(trf, trfsep)
+    }
+}
+
+repregs=GRanges(seqnames=trf$name,
+                ranges=IRanges(start=as.numeric(trf$start), end=as.numeric(trf$end)))
+predregs=GRanges(seqnames=nivpred$chr,
+                 ranges=IRanges(start=nivpred$start, end=nivpred$end))
+predrep=unique(nivpred$gene[unique(queryHits(findOverlaps(predregs, repregs)))])
+
+repgpis=allpred %>%
+    filter(gene %in% predrep)
+
+gpipdf=file.path(dbxdir, 'paperfigs', 'raw', 'gpis.pdf')
+pdf(gpipdf, h=6, w=18)
+alen=ggplot(repgpis, aes(x=maxasm, y=maxref)) +
+    geom_bin2d(binwidth=c(100,100)) +
+    scale_fill_gradientn(colours=colvec) +
+    ggtitle('Max GPI-CWP Hit Lengths') +
+    scale_x_continuous(name='JHU_Cniv_v1', breaks=seq(0,12000,1000)) +
+    scale_y_continuous(name='C. Nivariensis Reference', breaks=seq(0,4000,1000)) +
+    theme_bw()
+print(alen)
+numalign=ggplot(repgpis, aes(x=numasm, y=numref)) +
+    geom_bin2d(binwidth=c(100,100)) +
+    scale_fill_gradientn(colours=colvec) +
+    ggtitle('Max GPI-CWP Hit Lengths') +
+    scale_x_continuous(name='JHU_Cniv_v1', breaks=seq(0,1300,100)) +
+    scale_y_continuous(name='C. Nivariensis Reference', breaks=seq(0,100,100)) +
+    theme_bw()
+print(numalign)
+dev.off()
+    
