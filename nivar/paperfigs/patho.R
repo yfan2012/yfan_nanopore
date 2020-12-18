@@ -249,17 +249,17 @@ pdf(gpipdf, h=6, w=18)
 alen=ggplot(repgpis, aes(x=maxasm, y=maxref)) +
     geom_bin2d(binwidth=c(100,100)) +
     scale_fill_gradientn(colours=colvec) +
-    ggtitle('Max GPI-CWP Hit Lengths') +
-    scale_x_continuous(name='JHU_Cniv_v1', breaks=seq(0,12000,1000)) +
+    ggtitle('GPI-CWP Max Hit Lengths') +
+    scale_x_continuous(name='JHU_Cniv_v1', limits=c(0, 12000), breaks=seq(0,12000,1000)) +
     scale_y_continuous(name='C. Nivariensis Reference', breaks=seq(0,4000,1000)) +
     theme_bw()
 print(alen)
 numalign=ggplot(repgpis, aes(x=numasm, y=numref)) +
-    geom_bin2d(binwidth=c(100,100)) +
+    geom_bin2d(binwidth=c(25,5)) +
     scale_fill_gradientn(colours=colvec) +
-    ggtitle('Max GPI-CWP Hit Lengths') +
+    ggtitle('GPI-CWP Hit Counts') +
     scale_x_continuous(name='JHU_Cniv_v1', breaks=seq(0,1300,100)) +
-    scale_y_continuous(name='C. Nivariensis Reference', breaks=seq(0,100,100)) +
+    scale_y_continuous(name='C. Nivariensis Reference', breaks=seq(0,100,10)) +
     theme_bw()
 print(numalign)
 dev.off()
