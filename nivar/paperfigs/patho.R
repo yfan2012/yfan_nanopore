@@ -23,7 +23,7 @@ xufile='/uru/Data/Nanopore/projects/nivar/paperfigs/patho/glabrata_xu.fa'
 regionsfile='/uru/Data/Nanopore/projects/nivar/paperfigs/patho/gpicwp_regions.csv'
 
 ##colors
-colors=tibble(scale=seq(0, .8, .1)) %>%
+colors=tibble(scale=seq(0, .7, .1)) %>%
     mutate(light=lighten('#8DA0CB', scale)) %>%
     mutate(dark=darken('#8DA0CB', scale))
 colvec=c(rev(colors$light), colors$dark[-1])
@@ -145,7 +145,6 @@ annot=read_tsv(asmgff, col_names=cnames) %>%
 longpath=file.path(datadir, 'patho', 'long_genes.gff')
 write_tsv(annot, longpath, col_names=FALSE)
 
-
 ##long_genes.fa made using gffread
 aafile=file.path(datadir, 'patho', 'long_genes.fa')
 aa=readAAStringSet(aafile,  format='fasta')
@@ -196,6 +195,7 @@ writeXStringSet(gpiseqs, gpiseqfile)
 
 
 
+
 ##read blast of gpi and compare
 nivpredtsv=file.path(datadir, 'patho', 'nivar.final.predgpi_hits.tsv')
 refpredtsv=file.path(datadir, 'patho', 'candida_nivariensis.predgpi_hits.tsv')
@@ -213,6 +213,7 @@ allpred=rbind(nivpred, refpred) %>%
               maxasm=max(alignlen[genome=='asm']),
               numref=sum(genome=='ref'),
               numasm=sum(genome=='asm'))
+
 
 
 
@@ -263,4 +264,69 @@ numalign=ggplot(repgpis, aes(x=numasm, y=numref)) +
     theme_bw()
 print(numalign)
 dev.off()
-    
+
+
+
+
+
+
+##see where glabrata subtelo homologs are on the tig
+##see where gpi adhesion prots
+subtelogenespos=nivhits %>%
+    rowwise() %>%
+    filter(str_sub(gene, -1)=='g') %>%
+    mutate(position=(sstart+send)/2/width(asm[chr]))
+gpicwppos=annotgpi %>%
+    rowwise() %>%
+    mutate(position=(start+end)/2/width(asm[chr]))
+glagpicwp=regiontable %>%
+    filter(Is_Adehesin=='yes') %>%
+    rowwise() %>%
+    mutate(position=(Start+End)/2/width(xugla[Chrom]))
+
+genepospdf=file.path(dbxdir, 'paperfigs', 'raw', 'genepos.pdf')
+pdf(genepospdf, h=6, w=11)
+subteloplot=ggplot(subtelogenespos, aes(x=position, alpha=.3)) +
+    geom_histogram(colour='grey') +
+    ggtitle('Position of glabrata subtelomeric gene homologs') +
+    xlab('Position on Contig') +
+    ylab('Frequency') +
+    theme_bw()
+print(subteloplot)
+gpiplot=ggplot(gpicwppos, aes(x=position, colour='black', alpha=.3)) +
+    geom_histogram(colour='grey') +
+    ggtitle('Position of predicted GPI-CWPs') +
+    xlab('Position on Contig') +
+    ylab('Frequency') +
+    theme_bw()
+print(gpiplot)
+glagpiplot=ggplot(glagpicwp, aes(x=position, colour='black', alpha=.3)) +
+    geom_histogram(colour='grey') +
+    ggtitle('Position of predicted GPI-CWPs in glabrata') +
+    xlab('Position on Chromosome') +
+    ylab('Frequency') +
+    theme_bw()
+print(glagpiplot)
+dev.off()
+
+
+##length hist of gpicwps
+gpicwplens=rbind(annotgpi %>%
+                 select(width) %>%
+                 mutate(genome='asm'),
+                 glagpicwp %>%
+                 mutate(width=Length) %>%
+                 select(width) %>%
+                 mutate(genome='gla'))
+
+gpilenpdf=file.path(dbxdir, 'paperfigs', 'raw', 'gpilen.pdf')
+pdf(gpilenpdf, h=7, w=9)
+gpilen=ggplot(gpicwplens, aes(x=width)) +
+    geom_histogram(data=subset(gpicwplens, genome=='asm'), fill=brewer.pal(3, 'Set2')[1], colour=brewer.pal(3, 'Set2')[1], alpha=.3) +
+    geom_histogram(data=subset(gpicwplens, genome=='gla'), fill=brewer.pal(3, 'Set2')[2], colour=brewer.pal(3, 'Set2')[2], alpha=.3) +
+    ggtitle('Length of predicted GPI-CWPs') +
+    scale_x_continuous(name='Gene Length', breaks=seq(0,30000,5000)) +
+    ylab('Count') +
+    theme_bw()
+print(gpilen)
+dev.off()
