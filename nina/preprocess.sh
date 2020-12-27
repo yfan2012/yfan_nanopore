@@ -106,3 +106,11 @@ if [ $1 == trim_illumina ] ; then
 	     ILLUMINACLIP:NexteraPE-PE.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:30 MINLEN:36
     done
 fi
+
+if [ $1 == nameflye ] ; then
+    for i in st31 st5317 st90853 ;
+    do
+	cp $datadir/$i/asm/flye/assembly.fasta $datadir/$i/asm/flye/$i.ctgs.fasta
+    done
+fi
+	
