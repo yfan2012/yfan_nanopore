@@ -57,3 +57,23 @@ if [ $1 == medaka ] ; then
 	done
     done
 fi
+
+if [ $1 == freebayes ] ; then
+    for i in st31 st5317 st90853 ;
+    do
+	mkdir -p $datadir/$i/freebayes
+	for asm in canu flye ;
+	do
+
+	    mkdir -p $datadir/$i/freebayes/$asm
+	    cp $datadir/$i/medaka/$asm/consensus.fasta $datadir/$i/medaka/$asm/$i.$asm.medaka.fasta
+	    
+	    bash ~/Code/yfan_nanopore/nina/freebayes.sh \
+		 $datadir/$i/freebayes/$asm \
+		 $datadir/$i/medaka/$asm/$i.$asm.medaka.fasta \
+		 $datadir/$i/reads/illumina \
+		 $i.$asm
+	done
+    done
+fi
+	    
