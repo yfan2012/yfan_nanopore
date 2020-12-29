@@ -265,6 +265,7 @@ newseq <- function(muminfo) {
     return(freqinfo)
 }
 
+
 mum=read_tsv(mumfile, col_names=mumcnames) %>%
     group_by(Chr) %>%
     do(newseq(.)) %>%
@@ -276,12 +277,26 @@ drawideo=ideogram(karyotype=as.data.frame(ideodata),
                   colorset1=c("#ffffff", "#66C2A5"),
                   output=file.path(dbxdir,'ideogram_gaps.svg'))
 
+repseqs <- function(muminfo) {
+    ##check for multiple contig coverage
+    cov=tibble(idx=seq(1, muminfo$rlen[1],1), cov=rep(0, muminfo$rlen[1]))
+    for (i in 1:dim(muminfo)[1]) {
+        cov=cov %>%
+            mutate(cov=case_when(idx>=muminfo$rstart[i] & idx<=muminfo$rend[i] ~ cov+1, T ~ cov))
+    }
+    totalmulti=sum(cov$cov>1)
+    return(tibble(Chr=muminfo$Chr[1], total=totalmulti))
+}
 
+multitotal=mum %>%
+    group_by(Chr) %>%
+    do(repseqs(.))
 
 
 ##coverage histogram
 illcovfile=file.path(datadir, 'cov', 'nivar.final_illumina.cov')
 npcovfile=file.path(datadir, 'cov', 'nivar.final_nanopore.cov')
+rawcovfile=file.path(datadir,'cov', 'nivar.contigs_nanopore.cov')
 
 cnames=c('tig', 'pos', 'cov')
 illcov=read_tsv(illcovfile, col_names=cnames) %>%
@@ -299,6 +314,11 @@ comb=illnocov %>%
     full_join(npnocov, by=c('tig', 'pos'))
 both=comb[complete.cases(comb),] 
 ##manually inspected: 2 are at very end of chr. 2 are deletions reported as no cov
+
+rawcov=read_tsv(rawcovfile, col_names=cnames) %>%
+    group_by(tig) %>%
+    summarise(avgcov=mean(cov))
+write_csv(rawcov, file.path(dbxdir, 'contig_cov.csv'))
 
 covplotfile=file.path(dbxdir, 'cov_hist.pdf')
 pdf(covplotfile, h=6, w=11)
@@ -335,6 +355,7 @@ for (i in 3:dim(trfinfo)[1]) {
         colnames(trfsep)=cnames
         trf=rbind(trf, trfsep)
     }
+
 }
 
 findgaps <- function(muminfo) {
