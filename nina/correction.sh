@@ -59,7 +59,8 @@ if [ $1 == medaka ] ; then
 fi
 
 if [ $1 == freebayes ] ; then
-    for i in st31 st5317 st90853 ;
+    ##for i in st31 st5317 st90853 ;
+    for i in st5317;
     do
 	mkdir -p $datadir/$i/freebayes
 	for asm in canu flye ;

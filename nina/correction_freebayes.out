@@ -1,0 +1,660 @@
+building index and aligning for round 1 =================================================================
+1498139 reads; of these:
+  1498139 (100.00%) were paired; of these:
+    49719 (3.32%) aligned concordantly 0 times
+    1301090 (86.85%) aligned concordantly exactly 1 time
+    147330 (9.83%) aligned concordantly >1 times
+    ----
+    49719 pairs aligned concordantly 0 times; of these:
+      42616 (85.71%) aligned discordantly 1 time
+    ----
+    7103 pairs aligned 0 times concordantly or discordantly; of these:
+      14206 mates make up the pairs; of these:
+        1727 (12.16%) aligned 0 times
+        1083 (7.62%) aligned exactly 1 time
+        11396 (80.22%) aligned >1 times
+99.94% overall alignment rate
+[bam_sort_core] merging from 0 files and 54 in-memory blocks...
+correcting for round 1 ================================================================================
+Note: the --sample option not given, applying all records regardless of the genotype
+Applied 3514 variants
+moving old
+copying 1 to empty index folder
+building index and aligning for round 2 =================================================================
+1498139 reads; of these:
+  1498139 (100.00%) were paired; of these:
+    49717 (3.32%) aligned concordantly 0 times
+    1301079 (86.85%) aligned concordantly exactly 1 time
+    147343 (9.84%) aligned concordantly >1 times
+    ----
+    49717 pairs aligned concordantly 0 times; of these:
+      42615 (85.72%) aligned discordantly 1 time
+    ----
+    7102 pairs aligned 0 times concordantly or discordantly; of these:
+      14204 mates make up the pairs; of these:
+        1723 (12.13%) aligned 0 times
+        1083 (7.62%) aligned exactly 1 time
+        11398 (80.25%) aligned >1 times
+99.94% overall alignment rate
+[bam_sort_core] merging from 0 files and 54 in-memory blocks...
+correcting for round 2 ================================================================================
+Note: the --sample option not given, applying all records regardless of the genotype
+Applied 8 variants
+moving old
+copying 2 to empty index folder
+building index and aligning for round 3 =================================================================
+1498139 reads; of these:
+  1498139 (100.00%) were paired; of these:
+    49717 (3.32%) aligned concordantly 0 times
+    1301079 (86.85%) aligned concordantly exactly 1 time
+    147343 (9.84%) aligned concordantly >1 times
+    ----
+    49717 pairs aligned concordantly 0 times; of these:
+      42615 (85.72%) aligned discordantly 1 time
+    ----
+    7102 pairs aligned 0 times concordantly or discordantly; of these:
+      14204 mates make up the pairs; of these:
+        1723 (12.13%) aligned 0 times
+        1083 (7.62%) aligned exactly 1 time
+        11398 (80.25%) aligned >1 times
+99.94% overall alignment rate
+[bam_sort_core] merging from 0 files and 54 in-memory blocks...
+correcting for round 3 ================================================================================
+Note: the --sample option not given, applying all records regardless of the genotype
+Applied 0 variants
+moving old
+copying 3 to empty index folder
+building index and aligning for round 4 =================================================================
+1498139 reads; of these:
+  1498139 (100.00%) were paired; of these:
+    49717 (3.32%) aligned concordantly 0 times
+    1301079 (86.85%) aligned concordantly exactly 1 time
+    147343 (9.84%) aligned concordantly >1 times
+    ----
+    49717 pairs aligned concordantly 0 times; of these:
+      42615 (85.72%) aligned discordantly 1 time
+    ----
+    7102 pairs aligned 0 times concordantly or discordantly; of these:
+      14204 mates make up the pairs; of these:
+        1723 (12.13%) aligned 0 times
+        1083 (7.62%) aligned exactly 1 time
+        11398 (80.25%) aligned >1 times
+99.94% overall alignment rate
+[bam_sort_core] merging from 0 files and 54 in-memory blocks...
+correcting for round 4 ================================================================================
+Note: the --sample option not given, applying all records regardless of the genotype
+Applied 0 variants
+moving old
+copying 4 to empty index folder
+building index and aligning for round 5 =================================================================
+1498139 reads; of these:
+  1498139 (100.00%) were paired; of these:
+    49717 (3.32%) aligned concordantly 0 times
+    1301079 (86.85%) aligned concordantly exactly 1 time
+    147343 (9.84%) aligned concordantly >1 times
+    ----
+    49717 pairs aligned concordantly 0 times; of these:
+      42615 (85.72%) aligned discordantly 1 time
+    ----
+    7102 pairs aligned 0 times concordantly or discordantly; of these:
+      14204 mates make up the pairs; of these:
+        1723 (12.13%) aligned 0 times
+        1083 (7.62%) aligned exactly 1 time
+        11398 (80.25%) aligned >1 times
+99.94% overall alignment rate
+[bam_sort_core] merging from 0 files and 54 in-memory blocks...
+correcting for round 5 ================================================================================
+Note: the --sample option not given, applying all records regardless of the genotype
+Applied 0 variants
+moving old
+copying 5 to empty index folder
+building index and aligning for round 1 =================================================================
+1498139 reads; of these:
+  1498139 (100.00%) were paired; of these:
+    50572 (3.38%) aligned concordantly 0 times
+    1324263 (88.39%) aligned concordantly exactly 1 time
+    123304 (8.23%) aligned concordantly >1 times
+    ----
+    50572 pairs aligned concordantly 0 times; of these:
+      43892 (86.79%) aligned discordantly 1 time
+    ----
+    6680 pairs aligned 0 times concordantly or discordantly; of these:
+      13360 mates make up the pairs; of these:
+        2167 (16.22%) aligned 0 times
+        1296 (9.70%) aligned exactly 1 time
+        9897 (74.08%) aligned >1 times
+99.93% overall alignment rate
+[bam_sort_core] merging from 0 files and 54 in-memory blocks...
+correcting for round 1 ================================================================================
+Note: the --sample option not given, applying all records regardless of the genotype
+Applied 3422 variants
+moving old
+copying 1 to empty index folder
+building index and aligning for round 2 =================================================================
+1498139 reads; of these:
+  1498139 (100.00%) were paired; of these:
+    50554 (3.37%) aligned concordantly 0 times
+    1324290 (88.40%) aligned concordantly exactly 1 time
+    123295 (8.23%) aligned concordantly >1 times
+    ----
+    50554 pairs aligned concordantly 0 times; of these:
+      43900 (86.84%) aligned discordantly 1 time
+    ----
+    6654 pairs aligned 0 times concordantly or discordantly; of these:
+      13308 mates make up the pairs; of these:
+        2139 (16.07%) aligned 0 times
+        1281 (9.63%) aligned exactly 1 time
+        9888 (74.30%) aligned >1 times
+99.93% overall alignment rate
+[bam_sort_core] merging from 0 files and 54 in-memory blocks...
+correcting for round 2 ================================================================================
+Note: the --sample option not given, applying all records regardless of the genotype
+Applied 11 variants
+moving old
+copying 2 to empty index folder
+building index and aligning for round 3 =================================================================
+1498139 reads; of these:
+  1498139 (100.00%) were paired; of these:
+    50506 (3.37%) aligned concordantly 0 times
+    1324355 (88.40%) aligned concordantly exactly 1 time
+    123278 (8.23%) aligned concordantly >1 times
+    ----
+    50506 pairs aligned concordantly 0 times; of these:
+      43869 (86.86%) aligned discordantly 1 time
+    ----
+    6637 pairs aligned 0 times concordantly or discordantly; of these:
+      13274 mates make up the pairs; of these:
+        2137 (16.10%) aligned 0 times
+        1265 (9.53%) aligned exactly 1 time
+        9872 (74.37%) aligned >1 times
+99.93% overall alignment rate
+[bam_sort_core] merging from 0 files and 54 in-memory blocks...
+correcting for round 3 ================================================================================
+Note: the --sample option not given, applying all records regardless of the genotype
+Applied 3 variants
+moving old
+copying 3 to empty index folder
+building index and aligning for round 4 =================================================================
+1498139 reads; of these:
+  1498139 (100.00%) were paired; of these:
+    50506 (3.37%) aligned concordantly 0 times
+    1324354 (88.40%) aligned concordantly exactly 1 time
+    123279 (8.23%) aligned concordantly >1 times
+    ----
+    50506 pairs aligned concordantly 0 times; of these:
+      43869 (86.86%) aligned discordantly 1 time
+    ----
+    6637 pairs aligned 0 times concordantly or discordantly; of these:
+      13274 mates make up the pairs; of these:
+        2137 (16.10%) aligned 0 times
+        1265 (9.53%) aligned exactly 1 time
+        9872 (74.37%) aligned >1 times
+99.93% overall alignment rate
+[bam_sort_core] merging from 0 files and 54 in-memory blocks...
+correcting for round 4 ================================================================================
+Note: the --sample option not given, applying all records regardless of the genotype
+Applied 0 variants
+moving old
+copying 4 to empty index folder
+building index and aligning for round 5 =================================================================
+1498139 reads; of these:
+  1498139 (100.00%) were paired; of these:
+    50506 (3.37%) aligned concordantly 0 times
+    1324354 (88.40%) aligned concordantly exactly 1 time
+    123279 (8.23%) aligned concordantly >1 times
+    ----
+    50506 pairs aligned concordantly 0 times; of these:
+      43869 (86.86%) aligned discordantly 1 time
+    ----
+    6637 pairs aligned 0 times concordantly or discordantly; of these:
+      13274 mates make up the pairs; of these:
+        2137 (16.10%) aligned 0 times
+        1265 (9.53%) aligned exactly 1 time
+        9872 (74.37%) aligned >1 times
+99.93% overall alignment rate
+[bam_sort_core] merging from 0 files and 54 in-memory blocks...
+correcting for round 5 ================================================================================
+Note: the --sample option not given, applying all records regardless of the genotype
+Applied 0 variants
+moving old
+copying 5 to empty index folder
+building index and aligning for round 1 =================================================================
+7863289 reads; of these:
+  7863289 (100.00%) were paired; of these:
+    3204818 (40.76%) aligned concordantly 0 times
+    4392395 (55.86%) aligned concordantly exactly 1 time
+    266076 (3.38%) aligned concordantly >1 times
+    ----
+    3204818 pairs aligned concordantly 0 times; of these:
+      3055496 (95.34%) aligned discordantly 1 time
+    ----
+    149322 pairs aligned 0 times concordantly or discordantly; of these:
+      298644 mates make up the pairs; of these:
+        32636 (10.93%) aligned 0 times
+        37067 (12.41%) aligned exactly 1 time
+        228941 (76.66%) aligned >1 times
+99.79% overall alignment rate
+[bam_sort_core] merging from 0 files and 54 in-memory blocks...
+correcting for round 1 ================================================================================
+Note: the --sample option not given, applying all records regardless of the genotype
+Applied 165350 variants
+moving old
+copying 1 to empty index folder
+building index and aligning for round 2 =================================================================
+7863289 reads; of these:
+  7863289 (100.00%) were paired; of these:
+    3189841 (40.57%) aligned concordantly 0 times
+    4400696 (55.97%) aligned concordantly exactly 1 time
+    272752 (3.47%) aligned concordantly >1 times
+    ----
+    3189841 pairs aligned concordantly 0 times; of these:
+      3049025 (95.59%) aligned discordantly 1 time
+    ----
+    140816 pairs aligned 0 times concordantly or discordantly; of these:
+      281632 mates make up the pairs; of these:
+        21741 (7.72%) aligned 0 times
+        28749 (10.21%) aligned exactly 1 time
+        231142 (82.07%) aligned >1 times
+99.86% overall alignment rate
+[bam_sort_core] merging from 0 files and 54 in-memory blocks...
+correcting for round 2 ================================================================================
+Note: the --sample option not given, applying all records regardless of the genotype
+Applied 454 variants
+moving old
+copying 2 to empty index folder
+building index and aligning for round 3 =================================================================
+7863289 reads; of these:
+  7863289 (100.00%) were paired; of these:
+    3189907 (40.57%) aligned concordantly 0 times
+    4400690 (55.97%) aligned concordantly exactly 1 time
+    272692 (3.47%) aligned concordantly >1 times
+    ----
+    3189907 pairs aligned concordantly 0 times; of these:
+      3049161 (95.59%) aligned discordantly 1 time
+    ----
+    140746 pairs aligned 0 times concordantly or discordantly; of these:
+      281492 mates make up the pairs; of these:
+        21425 (7.61%) aligned 0 times
+        28560 (10.15%) aligned exactly 1 time
+        231507 (82.24%) aligned >1 times
+99.86% overall alignment rate
+[bam_sort_core] merging from 0 files and 54 in-memory blocks...
+correcting for round 3 ================================================================================
+Note: the --sample option not given, applying all records regardless of the genotype
+Applied 72 variants
+moving old
+copying 3 to empty index folder
+building index and aligning for round 4 =================================================================
+7863289 reads; of these:
+  7863289 (100.00%) were paired; of these:
+    3189721 (40.56%) aligned concordantly 0 times
+    4400857 (55.97%) aligned concordantly exactly 1 time
+    272711 (3.47%) aligned concordantly >1 times
+    ----
+    3189721 pairs aligned concordantly 0 times; of these:
+      3049205 (95.59%) aligned discordantly 1 time
+    ----
+    140516 pairs aligned 0 times concordantly or discordantly; of these:
+      281032 mates make up the pairs; of these:
+        21130 (7.52%) aligned 0 times
+        28493 (10.14%) aligned exactly 1 time
+        231409 (82.34%) aligned >1 times
+99.87% overall alignment rate
+[bam_sort_core] merging from 0 files and 54 in-memory blocks...
+correcting for round 4 ================================================================================
+Note: the --sample option not given, applying all records regardless of the genotype
+Applied 31 variants
+moving old
+copying 4 to empty index folder
+building index and aligning for round 5 =================================================================
+7863289 reads; of these:
+  7863289 (100.00%) were paired; of these:
+    3189753 (40.57%) aligned concordantly 0 times
+    4400851 (55.97%) aligned concordantly exactly 1 time
+    272685 (3.47%) aligned concordantly >1 times
+    ----
+    3189753 pairs aligned concordantly 0 times; of these:
+      3049214 (95.59%) aligned discordantly 1 time
+    ----
+    140539 pairs aligned 0 times concordantly or discordantly; of these:
+      281078 mates make up the pairs; of these:
+        21036 (7.48%) aligned 0 times
+        28488 (10.14%) aligned exactly 1 time
+        231554 (82.38%) aligned >1 times
+99.87% overall alignment rate
+[bam_sort_core] merging from 0 files and 54 in-memory blocks...
+correcting for round 5 ================================================================================
+Note: the --sample option not given, applying all records regardless of the genotype
+Applied 11 variants
+moving old
+copying 5 to empty index folder
+building index and aligning for round 1 =================================================================
+7863289 reads; of these:
+  7863289 (100.00%) were paired; of these:
+    3212093 (40.85%) aligned concordantly 0 times
+    4537548 (57.71%) aligned concordantly exactly 1 time
+    113648 (1.45%) aligned concordantly >1 times
+    ----
+    3212093 pairs aligned concordantly 0 times; of these:
+      3132800 (97.53%) aligned discordantly 1 time
+    ----
+    79293 pairs aligned 0 times concordantly or discordantly; of these:
+      158586 mates make up the pairs; of these:
+        35832 (22.59%) aligned 0 times
+        40550 (25.57%) aligned exactly 1 time
+        82204 (51.84%) aligned >1 times
+99.77% overall alignment rate
+[bam_sort_core] merging from 0 files and 54 in-memory blocks...
+correcting for round 1 ================================================================================
+Note: the --sample option not given, applying all records regardless of the genotype
+Applied 156491 variants
+moving old
+copying 1 to empty index folder
+building index and aligning for round 2 =================================================================
+7863289 reads; of these:
+  7863289 (100.00%) were paired; of these:
+    3192929 (40.61%) aligned concordantly 0 times
+    4550924 (57.88%) aligned concordantly exactly 1 time
+    119436 (1.52%) aligned concordantly >1 times
+    ----
+    3192929 pairs aligned concordantly 0 times; of these:
+      3122989 (97.81%) aligned discordantly 1 time
+    ----
+    69940 pairs aligned 0 times concordantly or discordantly; of these:
+      139880 mates make up the pairs; of these:
+        23994 (17.15%) aligned 0 times
+        32215 (23.03%) aligned exactly 1 time
+        83671 (59.82%) aligned >1 times
+99.85% overall alignment rate
+[bam_sort_core] merging from 0 files and 54 in-memory blocks...
+correcting for round 2 ================================================================================
+Note: the --sample option not given, applying all records regardless of the genotype
+Applied 350 variants
+moving old
+copying 2 to empty index folder
+building index and aligning for round 3 =================================================================
+7863289 reads; of these:
+  7863289 (100.00%) were paired; of these:
+    3192217 (40.60%) aligned concordantly 0 times
+    4551006 (57.88%) aligned concordantly exactly 1 time
+    120066 (1.53%) aligned concordantly >1 times
+    ----
+    3192217 pairs aligned concordantly 0 times; of these:
+      3123090 (97.83%) aligned discordantly 1 time
+    ----
+    69127 pairs aligned 0 times concordantly or discordantly; of these:
+      138254 mates make up the pairs; of these:
+        22941 (16.59%) aligned 0 times
+        32151 (23.26%) aligned exactly 1 time
+        83162 (60.15%) aligned >1 times
+99.85% overall alignment rate
+[bam_sort_core] merging from 0 files and 54 in-memory blocks...
+correcting for round 3 ================================================================================
+Note: the --sample option not given, applying all records regardless of the genotype
+Applied 81 variants
+moving old
+copying 3 to empty index folder
+building index and aligning for round 4 =================================================================
+7863289 reads; of these:
+  7863289 (100.00%) were paired; of these:
+    3191241 (40.58%) aligned concordantly 0 times
+    4551024 (57.88%) aligned concordantly exactly 1 time
+    121024 (1.54%) aligned concordantly >1 times
+    ----
+    3191241 pairs aligned concordantly 0 times; of these:
+      3123135 (97.87%) aligned discordantly 1 time
+    ----
+    68106 pairs aligned 0 times concordantly or discordantly; of these:
+      136212 mates make up the pairs; of these:
+        21871 (16.06%) aligned 0 times
+        31980 (23.48%) aligned exactly 1 time
+        82361 (60.47%) aligned >1 times
+99.86% overall alignment rate
+[bam_sort_core] merging from 0 files and 54 in-memory blocks...
+correcting for round 4 ================================================================================
+Note: the --sample option not given, applying all records regardless of the genotype
+Applied 48 variants
+moving old
+copying 4 to empty index folder
+building index and aligning for round 5 =================================================================
+7863289 reads; of these:
+  7863289 (100.00%) were paired; of these:
+    3191056 (40.58%) aligned concordantly 0 times
+    4551059 (57.88%) aligned concordantly exactly 1 time
+    121174 (1.54%) aligned concordantly >1 times
+    ----
+    3191056 pairs aligned concordantly 0 times; of these:
+      3123147 (97.87%) aligned discordantly 1 time
+    ----
+    67909 pairs aligned 0 times concordantly or discordantly; of these:
+      135818 mates make up the pairs; of these:
+        21628 (15.92%) aligned 0 times
+        31956 (23.53%) aligned exactly 1 time
+        82234 (60.55%) aligned >1 times
+99.86% overall alignment rate
+[bam_sort_core] merging from 0 files and 54 in-memory blocks...
+correcting for round 5 ================================================================================
+Note: the --sample option not given, applying all records regardless of the genotype
+Applied 22 variants
+moving old
+copying 5 to empty index folder
+building index and aligning for round 1 =================================================================
+1634304 reads; of these:
+  1634304 (100.00%) were paired; of these:
+    52912 (3.24%) aligned concordantly 0 times
+    1431630 (87.60%) aligned concordantly exactly 1 time
+    149762 (9.16%) aligned concordantly >1 times
+    ----
+    52912 pairs aligned concordantly 0 times; of these:
+      45470 (85.94%) aligned discordantly 1 time
+    ----
+    7442 pairs aligned 0 times concordantly or discordantly; of these:
+      14884 mates make up the pairs; of these:
+        2153 (14.47%) aligned 0 times
+        1164 (7.82%) aligned exactly 1 time
+        11567 (77.71%) aligned >1 times
+99.93% overall alignment rate
+[bam_sort_core] merging from 0 files and 54 in-memory blocks...
+correcting for round 1 ================================================================================
+Note: the --sample option not given, applying all records regardless of the genotype
+Applied 3647 variants
+moving old
+copying 1 to empty index folder
+building index and aligning for round 2 =================================================================
+1634304 reads; of these:
+  1634304 (100.00%) were paired; of these:
+    52896 (3.24%) aligned concordantly 0 times
+    1431638 (87.60%) aligned concordantly exactly 1 time
+    149770 (9.16%) aligned concordantly >1 times
+    ----
+    52896 pairs aligned concordantly 0 times; of these:
+      45467 (85.96%) aligned discordantly 1 time
+    ----
+    7429 pairs aligned 0 times concordantly or discordantly; of these:
+      14858 mates make up the pairs; of these:
+        2145 (14.44%) aligned 0 times
+        1160 (7.81%) aligned exactly 1 time
+        11553 (77.76%) aligned >1 times
+99.93% overall alignment rate
+[bam_sort_core] merging from 0 files and 54 in-memory blocks...
+correcting for round 2 ================================================================================
+Note: the --sample option not given, applying all records regardless of the genotype
+Applied 10 variants
+moving old
+copying 2 to empty index folder
+building index and aligning for round 3 =================================================================
+1634304 reads; of these:
+  1634304 (100.00%) were paired; of these:
+    52894 (3.24%) aligned concordantly 0 times
+    1431640 (87.60%) aligned concordantly exactly 1 time
+    149770 (9.16%) aligned concordantly >1 times
+    ----
+    52894 pairs aligned concordantly 0 times; of these:
+      45467 (85.96%) aligned discordantly 1 time
+    ----
+    7427 pairs aligned 0 times concordantly or discordantly; of these:
+      14854 mates make up the pairs; of these:
+        2143 (14.43%) aligned 0 times
+        1160 (7.81%) aligned exactly 1 time
+        11551 (77.76%) aligned >1 times
+99.93% overall alignment rate
+[bam_sort_core] merging from 0 files and 54 in-memory blocks...
+correcting for round 3 ================================================================================
+Note: the --sample option not given, applying all records regardless of the genotype
+Applied 3 variants
+moving old
+copying 3 to empty index folder
+building index and aligning for round 4 =================================================================
+1634304 reads; of these:
+  1634304 (100.00%) were paired; of these:
+    52893 (3.24%) aligned concordantly 0 times
+    1431641 (87.60%) aligned concordantly exactly 1 time
+    149770 (9.16%) aligned concordantly >1 times
+    ----
+    52893 pairs aligned concordantly 0 times; of these:
+      45467 (85.96%) aligned discordantly 1 time
+    ----
+    7426 pairs aligned 0 times concordantly or discordantly; of these:
+      14852 mates make up the pairs; of these:
+        2143 (14.43%) aligned 0 times
+        1159 (7.80%) aligned exactly 1 time
+        11550 (77.77%) aligned >1 times
+99.93% overall alignment rate
+[bam_sort_core] merging from 0 files and 54 in-memory blocks...
+correcting for round 4 ================================================================================
+Note: the --sample option not given, applying all records regardless of the genotype
+Applied 0 variants
+moving old
+copying 4 to empty index folder
+building index and aligning for round 5 =================================================================
+1634304 reads; of these:
+  1634304 (100.00%) were paired; of these:
+    52893 (3.24%) aligned concordantly 0 times
+    1431641 (87.60%) aligned concordantly exactly 1 time
+    149770 (9.16%) aligned concordantly >1 times
+    ----
+    52893 pairs aligned concordantly 0 times; of these:
+      45467 (85.96%) aligned discordantly 1 time
+    ----
+    7426 pairs aligned 0 times concordantly or discordantly; of these:
+      14852 mates make up the pairs; of these:
+        2143 (14.43%) aligned 0 times
+        1159 (7.80%) aligned exactly 1 time
+        11550 (77.77%) aligned >1 times
+99.93% overall alignment rate
+[bam_sort_core] merging from 0 files and 54 in-memory blocks...
+correcting for round 5 ================================================================================
+Note: the --sample option not given, applying all records regardless of the genotype
+Applied 0 variants
+moving old
+copying 5 to empty index folder
+building index and aligning for round 1 =================================================================
+1634304 reads; of these:
+  1634304 (100.00%) were paired; of these:
+    53112 (3.25%) aligned concordantly 0 times
+    1436166 (87.88%) aligned concordantly exactly 1 time
+    145026 (8.87%) aligned concordantly >1 times
+    ----
+    53112 pairs aligned concordantly 0 times; of these:
+      45535 (85.73%) aligned discordantly 1 time
+    ----
+    7577 pairs aligned 0 times concordantly or discordantly; of these:
+      15154 mates make up the pairs; of these:
+        1972 (13.01%) aligned 0 times
+        1310 (8.64%) aligned exactly 1 time
+        11872 (78.34%) aligned >1 times
+99.94% overall alignment rate
+[bam_sort_core] merging from 0 files and 54 in-memory blocks...
+correcting for round 1 ================================================================================
+Note: the --sample option not given, applying all records regardless of the genotype
+Applied 3788 variants
+moving old
+copying 1 to empty index folder
+building index and aligning for round 2 =================================================================
+1634304 reads; of these:
+  1634304 (100.00%) were paired; of these:
+    53099 (3.25%) aligned concordantly 0 times
+    1436177 (87.88%) aligned concordantly exactly 1 time
+    145028 (8.87%) aligned concordantly >1 times
+    ----
+    53099 pairs aligned concordantly 0 times; of these:
+      45531 (85.75%) aligned discordantly 1 time
+    ----
+    7568 pairs aligned 0 times concordantly or discordantly; of these:
+      15136 mates make up the pairs; of these:
+        1963 (12.97%) aligned 0 times
+        1298 (8.58%) aligned exactly 1 time
+        11875 (78.46%) aligned >1 times
+99.94% overall alignment rate
+[bam_sort_core] merging from 0 files and 54 in-memory blocks...
+correcting for round 2 ================================================================================
+Note: the --sample option not given, applying all records regardless of the genotype
+Applied 35 variants
+moving old
+copying 2 to empty index folder
+building index and aligning for round 3 =================================================================
+1634304 reads; of these:
+  1634304 (100.00%) were paired; of these:
+    53101 (3.25%) aligned concordantly 0 times
+    1436176 (87.88%) aligned concordantly exactly 1 time
+    145027 (8.87%) aligned concordantly >1 times
+    ----
+    53101 pairs aligned concordantly 0 times; of these:
+      45531 (85.74%) aligned discordantly 1 time
+    ----
+    7570 pairs aligned 0 times concordantly or discordantly; of these:
+      15140 mates make up the pairs; of these:
+        1964 (12.97%) aligned 0 times
+        1300 (8.59%) aligned exactly 1 time
+        11876 (78.44%) aligned >1 times
+99.94% overall alignment rate
+[bam_sort_core] merging from 0 files and 54 in-memory blocks...
+correcting for round 3 ================================================================================
+Note: the --sample option not given, applying all records regardless of the genotype
+Applied 5 variants
+moving old
+copying 3 to empty index folder
+building index and aligning for round 4 =================================================================
+1634304 reads; of these:
+  1634304 (100.00%) were paired; of these:
+    53102 (3.25%) aligned concordantly 0 times
+    1436175 (87.88%) aligned concordantly exactly 1 time
+    145027 (8.87%) aligned concordantly >1 times
+    ----
+    53102 pairs aligned concordantly 0 times; of these:
+      45531 (85.74%) aligned discordantly 1 time
+    ----
+    7571 pairs aligned 0 times concordantly or discordantly; of these:
+      15142 mates make up the pairs; of these:
+        1966 (12.98%) aligned 0 times
+        1300 (8.59%) aligned exactly 1 time
+        11876 (78.43%) aligned >1 times
+99.94% overall alignment rate
+[bam_sort_core] merging from 0 files and 54 in-memory blocks...
+correcting for round 4 ================================================================================
+Note: the --sample option not given, applying all records regardless of the genotype
+Applied 2 variants
+moving old
+copying 4 to empty index folder
+building index and aligning for round 5 =================================================================
+1634304 reads; of these:
+  1634304 (100.00%) were paired; of these:
+    53102 (3.25%) aligned concordantly 0 times
+    1436175 (87.88%) aligned concordantly exactly 1 time
+    145027 (8.87%) aligned concordantly >1 times
+    ----
+    53102 pairs aligned concordantly 0 times; of these:
+      45531 (85.74%) aligned discordantly 1 time
+    ----
+    7571 pairs aligned 0 times concordantly or discordantly; of these:
+      15142 mates make up the pairs; of these:
+        1966 (12.98%) aligned 0 times
+        1300 (8.59%) aligned exactly 1 time
+        11876 (78.43%) aligned >1 times
+99.94% overall alignment rate
+[bam_sort_core] merging from 0 files and 54 in-memory blocks...
+correcting for round 5 ================================================================================
+Note: the --sample option not given, applying all records regardless of the genotype
+Applied 0 variants
+moving old
+copying 5 to empty index folder

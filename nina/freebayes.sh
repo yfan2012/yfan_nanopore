@@ -14,7 +14,7 @@ cp $2 $1/index/$prefix.fasta
 
 cd ~/software/freebayes/scripts
 
-for i in {1..5} ;
+for i in {1..10} ;
 do
     ##build the index and align
     echo building index and aligning for round $i =================================================================
