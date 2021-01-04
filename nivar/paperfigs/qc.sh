@@ -263,3 +263,15 @@ if [ $1 == coverage ] ; then
     bedtools genomecov -d -ibam $datadir/paperfigs/align/nivar.final_illumina.sorted.bam > $datadir/paperfigs/cov/nivar.final_illumina.cov
     
 fi
+
+if [ $1 == coverage_raw ] ; then
+    mkdir -p $datadir/paperfigs/cov
+    
+    minimap2 -ax map-ont -t 36 $datadir/paperfigs/assembly/nivar.contigs.fasta $fq |
+	samtools view -@ 36 -bS |
+	samtools sort -@ 36 -o $datadir/paperfigs/align/nivar.contigs_nanopore.sorted.bam
+    samtools index $datadir/paperfigs/align/nivar.contigs_nanopore.sorted.bam
+    bedtools genomecov -d -ibam $datadir/paperfigs/align/nivar.contigs_nanopore.sorted.bam > $datadir/paperfigs/cov/nivar.contigs_nanopore.cov
+    
+fi
+
