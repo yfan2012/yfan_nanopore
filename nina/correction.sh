@@ -78,3 +78,18 @@ if [ $1 == freebayes ] ; then
     done
 fi
 	    
+
+if [ $1 == choose ] ; then
+    ##manually inspecting vcfs to pick which ones have converged
+    mkdir -p $datadir/st5317/genomes
+    cp $datadir/st5317/freebayes/canu/st5317.canu_fb12.fasta $datadir/st5317/genomes/st5317.canu.fasta
+    cp $datadir/st5317/freebayes/flye/st5317.flye_fb10.fasta $datadir/st5317/genomes/st5317.flye.fasta
+
+    mkdir -p $datadir/st31/genomes
+    cp $datadir/st31/freebayes/canu/st31.canu_fb3.fasta $datadir/st31/genomes/st31.canu.fasta
+    cp $datadir/st31/freebayes/flye/st31.flye_fb4.fasta $datadir/st31/genomes/st31.flye.fasta
+
+    mkdir -p $datadir/st90853/genomes
+    cp $datadir/st90853/freebayes/canu/st90853.canu_fb4.fasta $datadir/st90853/genomes/st90853.canu.fasta
+    cp $datadir/st90853/freebayes/flye/st90853.flye_fb5.fasta $datadir/st90853/genomes/st90853.flye.fasta
+fi
