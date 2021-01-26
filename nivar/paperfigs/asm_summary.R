@@ -247,6 +247,24 @@ if (FALSE) {
 }
 
 
+##table beautification
+asmfile=file.path(dbxdir, 'asm_stats.csv')
+asmstats=read_csv(asmfile, col_names=c('asm', 'tigs', 'N50', 'long', 'short', 'total')) %>%
+    mutate(asm=c('Reference', 'JHU_Cniv_v1')) %>%
+    mutate(tigs=as.character(tigs)) %>%
+    mutate(N50=paste0(as.character(round(N50, -3)/1000), ' Kb')) %>%
+    mutate(long=case_when(long>1000000 ~ paste0(as.character(round(long, -4)/1000000), ' Mb'),
+                          TRUE ~ paste0(as.character(round(long, -3)/1000), ' Kb'))) %>%
+    mutate(short=case_when(short>1000 ~ paste0(as.character(round(short, -2)/1000), ' Kb'),
+                           TRUE ~paste0(as.character(short), ' bp'))) %>%
+    mutate(total=paste0(as.character(round(total, -4)/1000000), ' Mb'))
+names(asmstats)=c('Assembly', 'Contigs', 'N50', 'LongestContig', 'ShortestContig', 'TotalLength')
+
+library(flextable)
+ft=theme_vanilla(flextable(data=data.frame(asmstats), col_keys=names(asmstats)))
+save_as_docx('asm table'=ft, path=file.path(dbxdir, 'asm_stats.docx'))
+
+
 ##draw gaps in reference on ideogram
 mumfile=file.path(datadir, 'mummer', 'ref', 'ref_nivar.final.1coords')
 mumcnames=c('rstart', 'rend', 'qstart', 'qend', 'raln', 'qaln', 'ident', 'rlen', 'qlen', 'rcov', 'qcov', 'Chr', 'qryChr')

@@ -12,6 +12,7 @@ certransfa=$datadir/reference/saccharomyces_cerevisiae.transcriptome.fa
 alb=$datadir/reference/candida_albicans.fa
 albgff=$datadir/reference/candida_albicans.gff
 albtransfa=$datadir/reference/candida_albicans.transcriptome.fa
+bra=$datadir/reference/candida_bracarensis.fa
 
 asm=$datadir/paperfigs/assembly_final/nivar.final.fasta
 asmgff=$datadir/paperfigs/annotation_final/nivar.final.gff
@@ -273,5 +274,30 @@ if [ $1 == coverage_raw ] ; then
     samtools index $datadir/paperfigs/align/nivar.contigs_nanopore.sorted.bam
     bedtools genomecov -d -ibam $datadir/paperfigs/align/nivar.contigs_nanopore.sorted.bam > $datadir/paperfigs/cov/nivar.contigs_nanopore.cov
     
+fi
+
+if [ $1 == mummer_bra ] ; then
+    mkdir -p ~/tmp/mummer/gla_bra
+    cp $gla ~/tmp/mummer/gla_bra
+    cp $bra ~/tmp/mummer/gla_bra
+    
+    nucmer -p ~/tmp/mummer/gla_bra/gla_bra ~/tmp/mummer/gla_bra/candida_bracarensis.fa ~/tmp/mummer/gla_bra/candida_glabrata.fa 
+    mummerplot --filter --fat --postscript -p ~/tmp/mummer/gla_bra/gla_bra ~/tmp/mummer/gla_bra/gla_bra.delta
+    mummerplot --filter --fat --png -p ~/tmp/mummer/gla_bra/gla_bra ~/tmp/mummer/gla_bra/gla_bra.delta
+    dnadiff -p ~/tmp/mummer/gla_bra/gla_bra ~/tmp/mummer/gla_bra/candida_bracarensis.fa ~/tmp/mummer/gla_bra/candida_glabrata.fa
+
+fi
+
+
+if [ $1 == mummer_cer ] ; then
+    mkdir -p ~/tmp/mummer/gla_cer
+    cp $gla ~/tmp/mummer/gla_cer
+    cp $cer ~/tmp/mummer/gla_cer
+    
+    nucmer -p ~/tmp/mummer/gla_cer/gla_cer ~/tmp/mummer/gla_cer/saccharomyces_cerevisiae.fa ~/tmp/mummer/gla_cer/candida_glabrata.fa 
+    mummerplot --filter --fat --postscript -p ~/tmp/mummer/gla_cer/gla_cer ~/tmp/mummer/gla_cer/gla_cer.delta
+    mummerplot --filter --fat --png -p ~/tmp/mummer/gla_cer/gla_cer ~/tmp/mummer/gla_cer/gla_cer.delta
+    dnadiff -p ~/tmp/mummer/gla_cer/gla_cer ~/tmp/mummer/gla_cer/saccharomyces_cerevisiae.fa ~/tmp/mummer/gla_cer/saccharomyces_cerevisiae.fa
+
 fi
 
