@@ -141,7 +141,9 @@ if [ $1 == gffcompare ] ; then
     ##gffcompare -r $final -o $datadir/annotation/compare/braker_final $braker
     ##awk '$3 == "u" {print $4}' $datadir/annotation/braker/braker_final.braker.gff3.tmap \
 	##| grep -f - $braker >> $final
-    
+
+
+    ##using above awk lines to count how many features, genes, exons are contributed each time
 fi
 
 

@@ -126,8 +126,12 @@ writeXStringSet(newasm,newasmfile, format='fasta')
 fintelo=telocheck(newasmfile, fwdtelo, revtelo)
 fintelocsv=paste0(dbxdir,'/paperfigs/raw/telocounts_final.csv')
 write_csv(fintelo, fintelocsv)
-    
 
+library(flextable)
+telotable=paste0(dbxdir, '/paperfigs/raw/telocounts_final.docx')
+fintelo=read_csv(fintelocsv, col_types='cccc')
+ft=theme_vanilla(flextable(data=fintelo, col_keys=names(fintelo)))
+save_as_docx('telo table'=ft, path=telotable)
 
 finteloplot=as_tibble(teloplot(newasmfile, fwdtelo, revtelo)) %>%
     mutate(name='Assembly')
