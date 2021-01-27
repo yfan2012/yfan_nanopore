@@ -136,7 +136,34 @@ names(ref)=newnames$new
 missingseq=getSeq(ref, missingregion)
 names(missingseq)=missing$contig
 writeXStringSet(missingseq, filepath=file.path(datadir, 'busco', 'missing', '41996at4891.fa'))
+##missing busco hits to JHU_Cniv_v1 at tig07:810438-803632
+foundbusco=GRanges(seqnames='tig07', ranges=IRanges(end=810438, start=803632))
+foundseq=getSeq(fin, foundbusco)
+names(foundseq)='tig07_810438-803632'
+writeXStringSet(foundseq, filepath=file.path(datadir, 'busco', 'missing', 'found_41996at4891.fa'))
 
+##check A/T homopolymer content
+count_content <- function(buscorow) {
+    tig=buscorow$contig
+    start=min(buscorow$start, buscorow$end)
+    end=max(buscorow$start, buscorow$end)
+    reg=GRanges(seqnames=tig, ranges=IRanges(start=start, end=end))
+
+    seq=getSeq(ref, reg)
+    
+    count=sum(vcountPattern('AAAAA', seq), vcountPattern('TTTTT', seq))
+    countnorm=count/(end-start)
+    buscorow$count=count
+    buscorow$countnorm=countnorm
+    return(buscorow)
+}
+
+refbuscos=read_tsv(refbuscofile, comment='#', col_names=cnames) %>%
+    filter(status!='Missing') %>%
+    group_by(buscoid, start, score) %>%
+    do(count_content(.)) %>%
+    arrange(-count)
+    
 
 
 ##transcriptome busco
@@ -268,6 +295,12 @@ names(asmstats)=c('Assembly', 'Contigs', 'N50', 'LongestContig', 'ShortestContig
 library(flextable)
 ft=theme_vanilla(flextable(data=data.frame(asmstats), col_keys=names(asmstats)))
 save_as_docx('asm table'=ft, path=file.path(dbxdir, 'asm_stats.docx'))
+
+##supp table beautification
+annotcountscsv=file.path('~/Dropbox/yfan/nivar/paperfigs/annot_addition_count.csv')
+annotcounts=read_csv(annotcountscsv, col_names=c('tool', 'total', 'gene', 'exon'), col_types='cccc')
+annotft=theme_vanilla(flextable(data=annotcounts, col_keys=names(annotcounts)))
+save_as_docx('annot table'=annotft, path=file.path(dbxdir, 'annot_addition_count.docx'))
 
 
 ##draw gaps in reference on ideogram

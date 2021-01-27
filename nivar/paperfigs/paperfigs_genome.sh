@@ -194,3 +194,12 @@ if [ $1 == blastmissingbusco ] ; then
 	-outfmt 7 \
 	-out $datadir/busco/missing/41996at4891.tsv
 fi
+
+if [ $1 == blastmissingbusco_out6 ] ; then
+    blastn \
+	-query $datadir/busco/missing/41996at4891.fa \
+	-subject $datadir/assembly_final/nivar.final.fasta \
+	-dust no \
+	-parse_deflines \
+	-out $datadir/busco/missing/41996at4891.txt
+fi

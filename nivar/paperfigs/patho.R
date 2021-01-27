@@ -24,7 +24,7 @@ xufile='/uru/Data/Nanopore/projects/nivar/paperfigs/patho/glabrata_xu.fa'
 regionsfile='/uru/Data/Nanopore/projects/nivar/paperfigs/patho/gpicwp_regions.csv'
 
 ##colors
-colors=tibble(scale=seq(0, .7, .1)) %>%
+colors=tibble(scale=seq(0, .7, .2)) %>%
     mutate(light=lighten('#8DA0CB', scale)) %>%
     mutate(dark=darken('#8DA0CB', scale))
 colvec=c(rev(colors$light), colors$dark[-1])
@@ -96,6 +96,15 @@ allhitscorr=spread(allhits[,1:3], asm, counts)
 allhitscorrcsv=file.path(dbxdir, 'paperfigs','raw', 'copynum_corr.csv')
 write_csv(allhitscorr, allhitscorrcsv)
 
+
+allhits=allhits %>%
+    mutate(numhits=as.character(numhits)) 
+library(flextable)
+doc=file.path(dbxdir, 'paperfigs', 'raw', 'copynum.docx')
+ft=flextable(data=allhits)
+save_as_docx('copy num'=ft, path=doc)
+
+
 copynumpdf=file.path(dbxdir, 'paperfigs', 'raw', 'copynum.pdf')
 pdf(copynumpdf, height=8, width=7)
 plot=ggplot(allhits, aes(x=numhits, fill=asm, colour=asm, alpha=.3)) +
@@ -110,6 +119,7 @@ plot=ggplot(allhits, aes(x=numhits, fill=asm, colour=asm, alpha=.3)) +
 print(plot)
 asmheatmap=ggplot(allhits, aes(numhits, counts)) +
     geom_bin2d() +
+
     scale_fill_gradientn(colours=colvec) +
     facet_wrap(. ~ asm, ncol=1) +
     ggtitle('Telomereic Gene Hits') +
@@ -118,10 +128,12 @@ asmheatmap=ggplot(allhits, aes(numhits, counts)) +
     theme_bw()
 print(asmheatmap)
 dev.off()
+
 copynumcorrpdf=file.path(dbxdir, 'paperfigs', 'raw', 'copynum_corr.pdf')
 pdf(copynumcorrpdf, height=5, width=9)
 corrheat=ggplot(allhitscorr, aes(x=asm, y=ref)) +
     geom_bin2d() +
+    geom_abline(linetype='dashed', alpha=.7, size=1, colour='grey') +
     scale_fill_gradientn(colours=colvec) +
     ggtitle('Adjusted Copy Number') +
     scale_x_continuous(name='JHU_Cniv_v1', limits=c(0,11), breaks=seq(0,11,1)) +
@@ -250,6 +262,7 @@ gpipdf=file.path(dbxdir, 'paperfigs', 'raw', 'gpis.pdf')
 pdf(gpipdf, h=6, w=18)
 alen=ggplot(repgpis, aes(x=maxasm, y=maxref)) +
     geom_bin2d(binwidth=c(100,100)) +
+    geom_abline(linetype='dashed', colour='grey', size=1, alpha=.7) +
     scale_fill_gradientn(colours=colvec) +
     ggtitle('GPI-CWP Max Hit Lengths') +
     scale_x_continuous(name='JHU_Cniv_v1', limits=c(0, 12000), breaks=seq(0,12000,1000)) +
