@@ -5,17 +5,19 @@ datadir=/pym/Data/Nanopore/projects/prolificans
 if [ $1 == align ] ; then
     for i in st31 st5317 st90853 ;
     do
-	mkdir -p $datadir/$i/align
+	mkdir -p $datadir/$i/racon
 	fq=$datadir/$i/reads/ont/${i}_long.fastq.gz
 	for asm in canu flye ;
 	do
 	    minimap2 -t 54 -ax map-ont $datadir/$i/asm/$asm/$i.c*.fasta $fq |
 		samtools view -@ 54 -b |
-		samtools sort -@ 54 -o $datadir/$i/align/$i.$asm.sorted.bam
-	    samtools index $datadir/$i/align/$i.$asm.sorted.bam
+		samtools sort -@ 54 -o $datadir/$i/racon/$i.$asm.sorted.bam
+	    samtools index $datadir/$i/racon/$i.$asm.sorted.bam
 	done
     done
 fi
+
+
 
 if [ $1 == racon ] ; then
     for i in st31 st5317 st90853 ;
@@ -25,13 +27,13 @@ if [ $1 == racon ] ; then
 
 	for asm in canu flye ;
 	do
-	    bam=$datadir/$i/align/$i.$asm.sorted.bam
-	    samtools view -@ 54 $bam > $datadir/$i/align/$i.$asm.sorted.sam
+	    bam=$datadir/$i/racon/$i.$asm.sorted.bam
+	    samtools view -@ 54 $bam > $datadir/$i/racon/$i.$asm.sorted.sam
 	    
 	    ##settings recommended by medaka page
 	    racon -m 8 -x -6 -g -8 -w 500 -t 54\
 		  $fq \
-		  $datadir/$i/align/$i.$asm.sorted.sam \
+		  $datadir/$i/racon/$i.$asm.sorted.sam \
 		  $datadir/$i/asm/$asm/$i.c*.fasta > $datadir/$i/racon/$i.$asm.racon.contigs.fasta
 	done
     done
@@ -92,4 +94,43 @@ if [ $1 == choose ] ; then
     mkdir -p $datadir/st90853/genomes
     cp $datadir/st90853/freebayes/canu/st90853.canu_fb4.fasta $datadir/st90853/genomes/st90853.canu.fasta
     cp $datadir/st90853/freebayes/flye/st90853.flye_fb5.fasta $datadir/st90853/genomes/st90853.flye.fasta
+fi
+
+
+if [ $1 == ragtag ] ; then
+
+    for i in st31 st5317 st90853 ;
+    do
+	mkdir -p $datadir/$i/ragtag/cf
+	ragtag.py scaffold \
+		  -w \
+		  -u \
+		  -o $datadir/$i/ragtag/cf \
+		  $datadir/$i/genomes/$i.canu.fasta \
+		  $datadir/$i/genomes/$i.flye.fasta
+
+	mv $datadir/$i/ragtag/cf/ragtag.scaffolds.fasta $datadir/$i/ragtag/cf/$i.ragtag_cf.scaffolds.fasta
+
+	mkdir -p $datadir/$i/ragtag/fc
+	ragtag.py scaffold \
+		  -w \
+		  -u \
+		  -o $datadir/$i/ragtag/fc \
+		  $datadir/$i/genomes/$i.flye.fasta \
+		  $datadir/$i/genomes/$i.canu.fasta
+
+
+	mv $datadir/$i/ragtag/fc/ragtag.scaffolds.fasta $datadir/$i/ragtag/fc/$i.ragtag_fc.scaffolds.fasta
+
+    done
+fi
+	    
+
+    
+if [ $1 == add_scaffolds ] ; then
+    for i in st31 st5317 st90853 ;
+    do
+	cp $datadir/$i/ragtag/fc/$i.ragtag_fc.scaffolds.fasta $datadir/$i/genomes/$i.ragtag_fc.fasta
+	cp $datadir/$i/ragtag/cf/$i.ragtag_cf.scaffolds.fasta $datadir/$i/genomes/$i.ragtag_cf.fasta
+    done
 fi
