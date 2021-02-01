@@ -1,6 +1,7 @@
 library(tidyverse)
 
 datadir='/pym/Data/Nanopore/projects/prolificans'
+dbxdir='~/Dropbox/timplab_data/prolificans'
 
 ##give some contig stats
 get_asm_cov <- function(npcovfile, illcovfile) {
@@ -108,10 +109,23 @@ for (i in strains) {
         cov=get_asm_cov(npcovfile, illcovfile)
         tiginfo=get_tigs_info(cov)
         breakregions=suggest_breaks(cov)
-        
-        alltiginfo=rbind(alltiginfo, tiginfo)
-        if (dim(breakregions)[1]>0) {
-            allbreaks=rbind(allbreaks, breakregions)
+
+        if (dim(breakregions)[1]<1) {
+            breakregions=tibble(asm=tiginfo$asm[1], tigname='none', start=0, end=0)
         }
+        
+        alltiginfo=bind_rows(alltiginfo, tiginfo)
+        allbreaks=bind_rows(allbreaks, breakregions)
     }
 }
+
+tiginfofile=file.path(dbxdir, 'contig_info.csv')
+write_csv(alltiginfo, tiginfofile)
+
+breakinfofile=file.path(dbxdir, 'zero_cov.csv')
+write_csv(allbreaks,breakinfofile)
+
+
+
+
+            
