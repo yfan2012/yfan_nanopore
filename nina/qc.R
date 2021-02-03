@@ -1,5 +1,6 @@
 library(tidyverse)
-
+library(Biostrings)
+library(RColorBrewer)
 datadir='/pym/Data/Nanopore/projects/prolificans'
 dbxdir='~/Dropbox/timplab_data/prolificans'
 
@@ -23,7 +24,6 @@ get_asm_cov <- function(npcovfile, illcovfile) {
     return(cov)
 }
 
-cov=get_asm_cov(npcovfile, illcovfile)
 
 get_tigs_info <- function(cov) {
     ##make table of info per contig
@@ -40,7 +40,6 @@ get_tigs_info <- function(cov) {
     return(tiginfo)
 }
 
-tiginfo=get_tigs_info(cov)
 
 findbreaks <- function(tigcov) {
     ##given a chunk of zero cov data frame for , return tigbreaks
@@ -80,10 +79,44 @@ suggest_breaks <- function(cov) {
     return(nocov)
 }
 
+telocheck <- function(asmfile, fwdtelo, revtelo) {
+    ##snatched from nivar analysis
+    asm=readDNAStringSet(asmfile)
+    seqs=as.character(asm)
+    
+    teloinfo=tibble(chr=names(asm)) %>%
+        mutate(length=width(asm[chr])) %>%
+        mutate(fwd=str_count(as.character(asm[chr]), fwdtelo)) %>%
+        mutate(rev=str_count(as.character(asm[chr]), revtelo))
+}
+
+library(doParallel)
+teloplot <- function(asmfile, fwdtelo, revtelo) {
+    ##also stolen from nivar analysis
+    asm=readDNAStringSet(asmfile)
+
+    teloinfo=foreach(i=1:length(asm), .combine=rbind) %dopar% {
+        seq=as.character(asm[i])
+        len=width(asm[i])
+        
+        fwdlocs=gregexpr(fwdtelo, seq)[[1]]
+        fwdinfo=data.frame(telopos=fwdlocs, percpos=fwdlocs/len, telo=as.character('fwd'), chr=as.character(names(asm[i])))
+        revlocs=gregexpr(revtelo, seq)[[1]]
+        revinfo=data.frame(telopos=revlocs, percpos=revlocs/len, telo=as.character('rev'), chr=as.character(names(asm[i])))
+
+        allinfo=rbind(fwdinfo, revinfo)
+        return(allinfo)
+    }
+    cleanteloinfo=as_tibble(teloinfo) %>%
+        mutate(name=asmfile) %>%
+        mutate(telo=as.character(telo)) %>%
+        mutate(chr=as.character(chr)) %>%
+        filter(telopos!=-1)
+    return(cleanteloinfo)
+}   
 
 
-
-
+##checking coverage
 strains=c('st31', 'st90853', 'st5317')
 alltiginfo=tibble(tigname=as.character(),
                   length=as.integer(),
@@ -96,8 +129,7 @@ allbreaks=tibble(asm=as.character(),
                  tigname=as.character(),
                  start=as.numeric(),
                  end=as.numeric())
-                 
-                 
+
 for (i in strains) {
     genomedir=file.path(datadir, i, 'genomes')
     prefixes=sub('\\.fasta$', '', list.files(genomedir, '.fasta$'))
@@ -119,13 +151,76 @@ for (i in strains) {
     }
 }
 
-tiginfofile=file.path(dbxdir, 'contig_info.csv')
-write_csv(alltiginfo, tiginfofile)
 
 breakinfofile=file.path(dbxdir, 'zero_cov.csv')
 write_csv(allbreaks,breakinfofile)
 
 
 
+##check for telomeres
+fwdtelo='AGGGTTAGGGTT'
+revtelo='AACCCTAACCCT'
+##single telo repeat looks like it's too short to use with just dumb matching.
+##looking for repeat pairs, then multiply count later.
 
-            
+alltelos=tibble(chr=as.character(),
+                length=as.numeric(),
+                fwd=as.numeric(),
+                rev=as.numeric(),
+                asm=as.character())
+
+for (i in strains) {
+    genomedir=file.path(datadir, i, 'genomes')
+    prefixes=sub('\\.fasta$', '', list.files(genomedir, '.fasta$'))
+    for (prefix in prefixes) {
+        asmfile=file.path(genomedir, paste0(prefix, '.fasta'))
+        telos=telocheck(asmfile, fwdtelo, revtelo) %>%
+            mutate(fwd=fwd*2) %>%
+            mutate(rev=rev*2) %>%
+            mutate(asm=prefix)
+        alltelos=bind_rows(alltelos, telos)
+    }
+}
+
+fulltiginfo=inner_join(alltelos, alltiginfo, by=c('asm', 'chr'))
+tiginfofile=file.path(dbxdir, 'contig_info.csv')
+write_csv(fulltiginfo, tiginfofile)
+
+allteloplots=tibble(telopos=as.integer(),
+                    percpos=as.numeric(),
+                    telo=as.character(),
+                    chr=as.character(),
+                    name=as.character())
+
+for (i in strains) {
+    genomedir=file.path(datadir, i, 'genomes')
+    prefixes=sub('\\.fasta$', '', list.files(genomedir, '.fasta$'))
+    for (prefix in prefixes) {
+        asmfile=file.path(genomedir, paste0(prefix, '.fasta'))
+        teloplotdf=as_tibble(teloplot(asmfile, fwdtelo, revtelo)) %>%
+            mutate(name=prefix)
+
+        allteloplots=bind_rows(teloplotdf, allteloplots)
+    }
+}
+allteloplots=allteloplots %>%
+    rowwise() %>%
+    mutate(strain=str_split(name, '\\.')[[1]][1])
+
+teloplotfile=file.path(dbxdir, 'telos.pdf')
+pdf(teloplotfile, w=11, h=8)
+for (i in strains) {
+    straintelo=allteloplots %>%
+        filter(strain==i)
+    
+    print(ggplot(straintelo, aes(x=percpos, colour=name, fill=name, alpha=.2)) +
+        geom_histogram(position='identity') +
+        scale_fill_brewer(palette = "Set2") +
+        scale_colour_brewer(palette = "Set2") +
+        facet_wrap(. ~ name, ncol=2) +
+        ggtitle('Telo positions') +
+        xlab('position (as percent of seq length)') +
+        theme_bw())
+}
+dev.off()
+
