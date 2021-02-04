@@ -57,9 +57,9 @@ def align_span(regions, npbam, minrange=5):
             alignupper=max(start, end)
             if alignlower < lower and alignupper > upper:
                 numspans+=1
-        spans=i.append(numspans)
-        spanregions.append(spans)
-    return(spanregions)
+        span=[x for x in i].append(numspans)
+        spanregions.append([span])
+    return spanregions
         
 
 def break_tigs(asmfile, npbamfile, illbamfile, regionfile):
