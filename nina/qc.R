@@ -151,7 +151,6 @@ for (i in strains) {
     }
 }
 
-
 breakinfofile=file.path(dbxdir, 'zero_cov.csv')
 write_csv(allbreaks,breakinfofile)
 
@@ -182,7 +181,7 @@ for (i in strains) {
     }
 }
 
-fulltiginfo=inner_join(alltelos, alltiginfo, by=c('asm', 'chr'))
+fulltiginfo=inner_join(alltelos, alltiginfo, by=c('asm', 'length','chr'='tigname'))
 tiginfofile=file.path(dbxdir, 'contig_info.csv')
 write_csv(fulltiginfo, tiginfofile)
 

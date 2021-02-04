@@ -129,3 +129,7 @@ if [ $1 == coverage ] ;then
 	done
     done
 fi
+
+if [ $1 == find_breaks ] ; then
+    Rscript ./qc.R
+fi
