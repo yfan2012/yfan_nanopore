@@ -1,6 +1,8 @@
 #!/bin/bash
 
 datadir=/pym/Data/Nanopore/projects/prolificans
+##tarballs are saved on aws and to datadir.
+##i think tarballs were dl from marcc to ~/data and mounted to docker
 
 if [ $1 == grabont ] ; then
     mkdir -p $datadir/st5317/reads/ont
