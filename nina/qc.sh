@@ -133,3 +133,25 @@ fi
 if [ $1 == find_breaks ] ; then
     Rscript ./qc.R
 fi
+
+if [ $1 == breaktigs ] ; then
+    for i in st31 st90853 st5317 ;
+    do
+	mkdir -p $datadir/$i/genomes_covfilt
+	for genome in $datadir/$i/genomes/*fasta ;
+	do
+	    prefix=`basename $genome .fasta`
+	    grep $prefix $dbxdir/zero_cov_telofilt.csv > $dbxdir/zero_cov_telofilt_tmp.csv
+
+	    python ~/Code/yfan_nanopore/nina/breaks.py \
+		   -a $genome \
+		   -n $datadir/$i/align/$prefix.sorted.bam \
+		   -i $datadir/$i/align/$prefix.illumina.sorted.bam \
+		   -r $dbxdir/zero_cov_telofilt_tmp.csv \
+		   -o $datadir/$i/genomes_covfilt/$prefix.covfilt.fasta
+	done
+    done
+fi
+	    
+	    
+	

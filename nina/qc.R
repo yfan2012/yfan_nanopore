@@ -82,12 +82,16 @@ suggest_breaks <- function(cov) {
 telocheck <- function(asmfile, fwdtelo, revtelo) {
     ##snatched from nivar analysis
     asm=readDNAStringSet(asmfile)
-    seqs=as.character(asm)
     
     teloinfo=tibble(chr=names(asm)) %>%
         mutate(length=width(asm[chr])) %>%
-        mutate(fwd=str_count(as.character(asm[chr]), fwdtelo)) %>%
-        mutate(rev=str_count(as.character(asm[chr]), revtelo))
+        rowwise() %>%
+        mutate(fwdlow=sum(str_locate_all(as.character(asm[chr]), fwdtelo)[[1]][,1] < 1000)) %>%
+        mutate(fwdhigh=sum(str_locate_all(as.character(asm[chr]), fwdtelo)[[1]][,1] > length-1000)) %>%
+        mutate(revlow=sum(str_locate_all(as.character(asm[chr]), revtelo)[[1]][,1] < 1000)) %>%
+        mutate(revhigh=sum(str_locate_all(as.character(asm[chr]), revtelo)[[1]][,1] > length-1000)) %>%
+        mutate(fwd=fwdlow+fwdhigh) %>%
+        mutate(rev=revlow+revhigh)
 }
 
 library(doParallel)
@@ -166,7 +170,12 @@ alltelos=tibble(chr=as.character(),
                 length=as.numeric(),
                 fwd=as.numeric(),
                 rev=as.numeric(),
-                asm=as.character())
+                asm=as.character(),
+                fwdlow=as.integer(),
+                fwdhigh=as.integer(),
+                revlow=as.integer(),
+                revhigh=as.integer())
+
 
 for (i in strains) {
     genomedir=file.path(datadir, i, 'genomes')
@@ -175,7 +184,11 @@ for (i in strains) {
         asmfile=file.path(genomedir, paste0(prefix, '.fasta'))
         telos=telocheck(asmfile, fwdtelo, revtelo) %>%
             mutate(fwd=fwd*2) %>%
+            mutate(fwdlow=fwdlow*2) %>%
+            mutate(fwdhigh=fwdhigh*2) %>%
             mutate(rev=rev*2) %>%
+            mutate(revlow=revlow*2) %>%
+            mutate(revhigh=revhigh*2) %>%
             mutate(asm=prefix)
         alltelos=bind_rows(alltelos, telos)
     }
@@ -223,3 +236,26 @@ for (i in strains) {
 }
 dev.off()
 
+
+##don't count zero cov for telos
+newregions=tibble(asm=as.character(),
+                 tigname=as.character(),
+                 start=as.numeric(),
+                 end=as.numeric())
+
+for (i in 1:dim(allbreaks)[1]) {
+    region=allbreaks[i,]
+    if (region$tigname != 'none') {
+        regiontelo=alltelos[alltelos$chr %in% region$tigname & alltelos$asm %in% region$asm,]
+        
+        highside=regiontelo$fwdhigh > regiontelo$fwdlow | regiontelo$revhigh > regiontelo$revlow
+        lowside=regiontelo$fwdlow > regiontelo$fwdhigh | regiontelo$revlow > regiontelo$revhigh
+        del=region$start < 1000 & lowside | region$end > regiontelo$length-1000 & highside
+        if (! del) {
+            newregions=bind_rows(newregions, region)
+        }
+    }
+}
+
+telofiltfile=file.path(dbxdir, 'zero_cov_telofilt.csv')
+write_csv(newregions, telofiltfile)
