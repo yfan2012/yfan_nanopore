@@ -153,5 +153,55 @@ if [ $1 == breaktigs ] ; then
     done
 fi
 	    
+
+##giving up on denovo mito discovery: just grab from laurent's circ asm
+ref=$datadir/ref/LProlificans_v1.0.fa
+if [ $1 == grabmito ] ; then
+    samtools faidx $ref
+    bytestart=`grep mitoscaff1 $ref.fai | awk '{print $3}'`
+    length=`grep mitoscaff1 $ref.fai | awk '{print $2}'`
+    linelen=`grep mitoscaff1 $ref.fai | awk '{print $4}'`
+    numlines=$(( length/linelen ))
+    finlines=$(( $numlines + 2 ))
+    grep mitoscaff1 $ref | tr '\n' ' ' >> $datadir/ref/LProlificans_mito_v1.0.fa
+    tail -c +$bytestart $ref | head -n $finlines >> $datadir/ref/LProlificans_mito_v1.0.fa
+fi
+  
+
+if [ $1 == mummer_mito ] ; then
+    mito=$datadir/ref/LProlificans_mito_v1.0.fa
+    for i in st31 st90853 st5317 ;
+    do
+	mkdir -p $datadir/$i/mummer_mito
+
+	for genome in $datadir/$i/genomes_covfilt/*fasta ;
+	do
+	    prefix=`basename $genome .covfilt.fasta`
+
+	    nucmer \
+		-p $datadir/$i/mummer_mito/$prefix \
+		$genome \
+		$mito
 	    
-	
+	    mummerplot \
+		--filter --fat --postscript \
+		-p $datadir/$i/mummer_mito/$prefix \
+		$datadir/$i/mummer_mito/$prefix.delta
+	    
+	    mummerplot \
+		--filter --fat --png \
+		-p $datadir/$i/mummer_mito/$prefix \
+		$datadir/$i/mummer_mito/$prefix.delta
+	    
+	    dnadiff \
+		-p $datadir/$i/mummer_mito/$prefix \
+		$genome \
+		$mito
+	done
+    done
+fi
+
+
+if [ $1 == mito_trim ] ; then
+    Rscript find_mito.R
+fi
