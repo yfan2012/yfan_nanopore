@@ -205,3 +205,21 @@ fi
 if [ $1 == mito_trim ] ; then
     Rscript find_mito.R
 fi
+
+
+
+if [ $1 == trimmed_asmstats ] ; then
+    mkdir -p $dbxdir/qc
+    touch $dbxdir/qc/asmstats_trimmed.csv
+    
+    for i in st31 st90853 st5317 ;
+    do
+	for asm in $datadir/$i/genomes_mitotrim/*fasta ;
+	do
+	    prefix=`basename $asm .fasta`
+	    python ~/Code/utils/qc/asm_assess.py \
+		   -i $asm \
+		   -p $prefix >> $dbxdir/qc/asmstats_trimmed.csv
+	done
+    done
+fi
