@@ -1,4 +1,4 @@
-#!/bin/bash
+x#!/bin/bash
 
 datadir=/pym/Data/Nanopore/projects/prolificans
 dbxdir=~/Dropbox/timplab_data/prolificans

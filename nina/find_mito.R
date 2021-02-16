@@ -22,13 +22,13 @@ for (i in strains) {
     system(paste0('mkdir -p ', newgenomedir))
 
     
-    for (asm in prefixes) {
-        coordsfile=file.path(datadir, i, 'mummer_mito', paste0(asm, '.mcoords'))
+    for (asmname in prefixes) {
+        coordsfile=file.path(datadir, i, 'mummer_mito', paste0(asmname, '.mcoords'))
         asmtiginfo=alltelos %>%
-            filter(asm==asm)
-        asmfile=file.path(genomedir, paste0(asm, '.covfilt.fasta'))
-        outfile=file.path(newgenomedir, paste0(asm, '.mitotrim.fasta'))
-        print(asm)
+            filter(asm==asmname)
+        asmfile=file.path(genomedir, paste0(asmname, '.covfilt.fasta'))
+        outfile=file.path(newgenomedir, paste0(asmname, '.mitotrim.fasta'))
+        print(asmname)
         suggest_mito_breaks(coordsfile, asmtiginfo, asmfile, outfile)
     }
 }

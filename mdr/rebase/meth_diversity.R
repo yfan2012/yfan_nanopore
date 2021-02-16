@@ -6,6 +6,13 @@ krakendir='/uru/Data/Nanopore/projects/mdr/MDRstool_16/kraken'
 dbxdir='~/Dropbox/yfan/methylation/rebase'
 rebasefile=file.path(datadir, 'refs', 'rebase_report.csv')
 
+motifsbyname <- function(rebase, name) {
+    orgdata=rebase %>%
+        filter(Organism==name)
+    motifs=unique(orgdata$Specificity)
+    return(motifs)
+}
+
 rebase=read_csv(rebasefile) %>%
     filter(!is.na(Specificity)) %>%
     filter(Gene=='M') %>%
@@ -28,7 +35,7 @@ ggplot(motifcounts[1:20,], aes(x=Specificity, y=count, colour=type, fill=type, a
     scale_colour_brewer(palette = 'Set2') +
     theme_bw()
 dev.off()
-    
+
 
 datasets=c('native', 'pcr', 'phase', 'shotgun')
 krakeninfo=tibble(percent=as.numeric(),
@@ -50,15 +57,10 @@ speciesinfo=krakeninfo %>%
     filter(name!='Homo sapiens')
 
 
-
-test=rebase %>%
+species_motifs=rebase %>%
     rowwise() %>%
-    filter(grepl('Bacteroides', Organism, fixed=TRUE))
+    filter(Organism %in% speciesinfo$name) %>%
+    filter(Type=='II', Gene=='M')
+motifs=unique(species_motifs$Specificity)
 
-motifsbyname <- function(rebase, name) {
-    orgdata=rebase %>%
-        filter(Organism==name)
-    motifs=unique(orgdata$Specificity)
-    return(motifs)
-}
 
