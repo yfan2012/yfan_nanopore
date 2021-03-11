@@ -15,7 +15,10 @@ motifsbyname <- function(rebase, name) {
 
 rebase=read_csv(rebasefile) %>%
     filter(!is.na(Specificity)) %>%
-    filter(Gene=='M') %>%
+    filter(Gene=='M')
+rebasefiltcsv=file.path(datadir, 'refs', 'rebase_filtered.csv')
+write_csv(rebase, rebasefiltcsv)
+
     
 motifcounts=rebase %>%
     group_by(Specificity) %>%
