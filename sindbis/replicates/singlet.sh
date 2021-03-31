@@ -99,4 +99,16 @@ if [ $1 == align ] ; then
     done
 fi
 
-	
+
+
+dbxdir=~/Dropbox/timplab_data/sindbis/replicates
+if [ $1 == count ] ; then
+    echo samp,sinv,rat >> $dbxdir/cov/align_counts_singlet.csv
+    for samp in $datadir/singlet/* ;
+    do
+        i=`basename $samp`
+        sinv=`samtools view -c -F 260 $samp/align/$i.primary.sorted.bam`
+        rat=`samtools view -c -F 260 $samp/align/$i.rat.primary.sorted.bam`
+        echo $i,$sinv,$rat >> $dbxdir/cov/align_counts_singlet.csv
+    done
+fi
