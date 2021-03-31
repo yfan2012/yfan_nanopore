@@ -1,6 +1,18 @@
 library(tidyverse)
 library(RColorBrewer)
 
+plot_bc_dists <- function(bc){
+    ##takes barcode info and plots dists
+    plot=ggplot(bc, aes(x=count, colour=motif, fill=motif, alpha=.2)) +
+        geom_density() +
+        ggtitle(paste0(samp$samp, '_', samp$motif)) +
+        xlab('Normalized Counts') +
+        scale_x_log10() +
+        scale_fill_brewer(palette = 'Set2') +
+        scale_colour_brewer(palette = 'Set2') +
+        theme_bw()
+    return(plot)
+}
 datadir='~/data/mdr/qc/barcode'
 dbxdir='~/Dropbox/timplab_data/mdr/barcode'
 sampinfo=tibble(samp=c('neb15', 'neb17', 'neb19', 'nebdcm', 'neb11'),
@@ -13,6 +25,7 @@ barcodeinfo=tibble(readname=as.character(),
                    samp=as.character(),
                    motif=as.character(),
                    count=as.numeric())
+bcplots=NULL
 
 bcdistsfile=file.path(dbxdir, 'score_dists.pdf')
 pdf(bcdistfile, h=8, w=15)
@@ -23,18 +36,16 @@ for (i in 1:dim(sampinfo)[1]) {
         mutate(samp=samp$motif) %>%
         gather('motif', 'count', -readname, -samp)
     barcodeinfo=bind_rows(barcodeinfo, bc)
-    plot=ggplot(bc, aes(x=count, colour=motif, fill=motif, alpha=.2)) +
-        geom_density() +
-        ggtitle(paste0(samp$samp, '_', samp$motif)) +
-        xlab('Normalized Counts') +
-        scale_x_log10() +
-        scale_fill_brewer(palette = 'Set2') +
-        scale_colour_brewer(palette = 'Set2') +
-        theme_bw()
+    plot=plot_bc_dists(bc)
     print(plot)
+    bcplots=bind_rows(tibble(samp=samp$samp, motif=samp$motif, plot=plot))
 }
 dev.off()
     
+
+
+
+
 
 ### for pca
 library(ggbiplot)

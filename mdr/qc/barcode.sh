@@ -20,7 +20,7 @@ fi
 
     
 if [ $1 == call ] ; then
-    for i in neb15 neb17 neb19 nebdcm ;
+    for i in neb15 neb17 neb19 nebdcm neb11 ;
     do
 	{ time python ~/Code/yfan_meth/utils/megalodon_barcode.py \
                -m $datadir/megalodon/$i/$i/${i}_mod_basecalls.txt \
@@ -28,7 +28,7 @@ if [ $1 == call ] ; then
                -r $ref \
                -b ~/Code/yfan_nanopore/mdr/qc/barcodes.txt \
                -o $datadir/barcode/${i}_barcodes.txt \
-               -t 36 ;} &> $datadir/barcode/${i}_time.txt
+               -t 72 ;} &> $datadir/barcode/${i}_time.txt
     done
 fi
 
