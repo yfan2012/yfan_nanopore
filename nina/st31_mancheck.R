@@ -64,3 +64,18 @@ spaninfo=common %>%
 
 
 
+
+##look at ends
+library(Biostrings)
+library(GenomicRanges)
+library(BSgenome)
+
+fafile=file.path('/pym/Data/Nanopore/projects/prolificans/st31/genomes_final/st31.ragtag_fc.final.fasta')
+asm=readDNAStringSet(fafile)
+
+startranges=GRanges(seqnames=c('scaffold_19_RagTag', 'contig_22_RagTag'), ranges=IRanges(start=1, end=100))
+endrange1=GRanges(seqnames=c('scaffold_19_RagTag'), ranges=IRanges(start=width(asm['scaffold_19_RagTag'])-100, end=width(asm['scaffold_19_RagTag'])))
+endrange2=GRanges(seqnames=c('contig_22_RagTag'), ranges=IRanges(start=width(asm['contig_22_RagTag'])-100, end=width(asm['contig_22_RagTag'])))
+starts=as.character(getSeq(asm, startranges))
+end1=as.character(getSeq(asm, endrange1))
+end2=as.character(getSeq(asm, endrange2))
