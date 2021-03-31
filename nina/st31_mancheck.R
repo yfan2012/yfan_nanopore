@@ -37,26 +37,30 @@ ggplot(weighted, aes(x=fracpos, y=..density.., weight=weight, colour=rname, fill
 dev.off()
 
 
-##check if any reads span
+####check if any reads span
+##get midpoints of alignments
 span=common %>%
-    filter(mapq!=0) %>%
+    filter(mapq!=0) %>% 
     group_by(qname, rname) %>%
     summarise(qpos=(qstart+qend)/2, len=mean(qlen)) %>%
-    mutate(qfrac=qpos/len) %>%
-    filter(qfrac>.6 || qfrac<.4)
+    mutate(qfrac=qpos/len) ##%>%
+    ##filter(qfrac>.55 || qfrac<.45)
 uniquespan=unique(span) %>%
     group_by(qname) %>%
-    filter(length(unique(rname))>1) %>%
-    filter(n()==2) %>%
-    filter(qfrac[1]-qfrac[2]>.2)
+    filter(length(unique(rname))>1) %>% ##reads must align to both tigs
+    filter(n()==2) %>% ##reads must have only two alignments
+    filter(qfrac[1]-qfrac[2]>.4) ##midpoints of alignments must be 40% read length away
 spanreads=unique(uniquespan$qname)
 
 spaninfo=common %>%
+    mutate(rpos=(rstart+rend)/2, rfrac=rpos/rlen) %>%
     rowwise() %>%
     filter(qname %in% spanreads) %>%
     filter(mapq==60) %>%
     group_by(qname) %>%
     filter(n()>1) %>%
+    filter(abs(rfrac[1]-rfrac[2])>.8) %>%
     arrange(qname)
+
 
 
