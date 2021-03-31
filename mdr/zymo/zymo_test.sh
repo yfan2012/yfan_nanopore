@@ -41,4 +41,14 @@ if [ $1 == index ] ; then
 fi
 
 	    
-    
+if [ $1 == call ] ; then
+    mkdir -p $datadir/barcode
+    { time python ~/Code/yfan_meth/utils/megalodon_barcode.py \
+           -m $datadir/megalodon/$prefix/per_read_modified_base_calls.txt \
+           -i $datadir/megalodon/$prefix/per_read_modified_base_calls.txt.idx \
+           -r $ref \
+           -b ~/Code/yfan_nanopore/mdr/qc/barcodes.txt \
+           -o $datadir/barcode/zymo_barcodes.txt \
+	   -n 100000000000 \
+           -t 36 ;} &> $datadir/barcode/zymo_time.txt
+fi
