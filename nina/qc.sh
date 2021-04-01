@@ -1,4 +1,4 @@
-x#!/bin/bash
+#!/bin/bash
 
 datadir=/pym/Data/Nanopore/projects/prolificans
 dbxdir=~/Dropbox/timplab_data/prolificans
@@ -208,3 +208,35 @@ fi
 
 
 
+if [ $1 == final ] ; then
+    for i in st31 st90853 st5317 ;
+    do
+	mkdir -p $datadir/$i/final
+    done
+
+    cp $datadir/st90853/genomes_final/st90853.ragtag_fc.final.fasta $datadir/st90853/final/st90853.final.fasta
+    cp $datadir/st31/genomes_final/st31.ragtag_fc.final.fasta $datadir/st31/final/st31.final.fasta
+    cp $datadir/st5317/genomes_final/st5317.ragtag_cf.final.fasta $datadir/st5317/final/st5317.final.fasta
+
+    for i in st31 st90853 st5317 ;
+    do
+	asm=$datadir/$i/final/$i.final.fasta
+	sed -i -e 's/000000//g' $asm
+	sed -i -e "s/st31.canu/$i/g" $asm
+    done
+fi
+
+
+if [ $1 == final_busco ] ; then
+    mkdir -p $datadir/st90853/final/busco
+    cp -r $datadir/st90853/busco/st90853.ragtag_fc/st90853.ragtag_fc/* $datadir/st90853/final/busco/
+
+    mkdir -p $datadir/st31/final/busco
+    cp -r $datadir/st31/busco/st31.ragtag_fc/st31.ragtag_fc/* $datadir/st31/final/busco/
+
+    mkdir -p $datadir/st5317/final/busco
+    cp -r $datadir/st5317/busco/st5317.ragtag_cf/st5317.ragtag_cf/* $datadir/st5317/final/busco/
+fi
+
+
+    

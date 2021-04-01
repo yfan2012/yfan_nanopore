@@ -1,18 +1,25 @@
 library(tidyverse)
 library(RColorBrewer)
+library(cowplot)
 
-plot_bc_dists <- function(bc){
-    ##takes barcode info and plots dists
+plot_bc_dists <- function(samp){
+    ##takes samp info and plots dists
+    bcfile=file.path(datadir, paste0(samp$samp, '_barcodes.txt'))
+    bc=read_tsv(bcfile, col_names=bc_cols) %>%
+        mutate(samp=samp$motif) %>%
+        gather('motif', 'count', -readname, -samp)
+    
     plot=ggplot(bc, aes(x=count, colour=motif, fill=motif, alpha=.2)) +
         geom_density() +
         ggtitle(paste0(samp$samp, '_', samp$motif)) +
-        xlab('Normalized Counts') +
+        xlab('Barcode Score') +
         scale_x_log10() +
         scale_fill_brewer(palette = 'Set2') +
         scale_colour_brewer(palette = 'Set2') +
         theme_bw()
     return(plot)
 }
+
 datadir='~/data/mdr/qc/barcode'
 dbxdir='~/Dropbox/timplab_data/mdr/barcode'
 sampinfo=tibble(samp=c('neb15', 'neb17', 'neb19', 'nebdcm', 'neb11'),
@@ -21,30 +28,21 @@ sampinfo=tibble(samp=c('neb15', 'neb17', 'neb19', 'nebdcm', 'neb11'),
 
 ### for plotting dists
 bc_cols=c('readname', 'GATC', 'GANTC', 'CCWGG', 'GCNGC')
-barcodeinfo=tibble(readname=as.character(),
-                   samp=as.character(),
-                   motif=as.character(),
-                   count=as.numeric())
-bcplots=NULL
-
-bcdistsfile=file.path(dbxdir, 'score_dists.pdf')
-pdf(bcdistfile, h=8, w=15)
+bcplots=list()
+singledistsfile=file.path(dbxdir, 'score_dists_single.pdf')
+pdf(singledistsfile, h=8, w=15)
 for (i in 1:dim(sampinfo)[1]) {
     samp=sampinfo[i,]
-    bcfile=file.path(datadir, paste0(samp$samp, '_barcodes.txt'))
-    bc=read_tsv(bcfile, col_names=bc_cols) %>%
-        mutate(samp=samp$motif) %>%
-        gather('motif', 'count', -readname, -samp)
-    barcodeinfo=bind_rows(barcodeinfo, bc)
-    plot=plot_bc_dists(bc)
+    plot=plot_bc_dists(samp)
     print(plot)
-    bcplots=bind_rows(tibble(samp=samp$samp, motif=samp$motif, plot=plot))
+    bcplots[[samp$samp]]=plot
 }
 dev.off()
-    
 
-
-
+bcdistfile=file.path(dbxdir, 'score_dists.pdf')
+pdf(bcdistfile, h=10, w=18)
+plot_grid(bcplots[[2]], bcplots[[1]], bcplots[[3]], bcplots[[4]], bcplots[[5]], ncol=2, align='v')
+dev.off()
 
 
 ### for pca
@@ -71,3 +69,21 @@ print(ggbiplot(pca, groups=bcs$samp) +
       theme(legend.direction = 'horizontal', legend.position = 'top')) 
 dev.off()
 
+
+
+### for zymo
+zymobcs=tibble(readname=as.character(),
+               GATC=as.numeric(),
+               GANTC=as.numeric(),
+               CCWGG=as.numeric(),
+               GCNGC=as.numeric(),
+               samp=as.character())
+zymobcfile=file.path('~/data/mdr/zymo/barcode/zymo_barcodes_sub.txt')
+zymobc=read_tsv(zymobcfile, col_names=bc_cols)
+zymopca=prcomp(zymobc[,c(2:5)], center=TRUE, scale.=TRUE)
+zymopcapdf=file.path(dbxdir, 'pca_zymo.pdf')
+pdf(zymopcapdf)
+print(ggbiplot(zymopca) +
+      theme_bw() +
+      theme(legend.direction = 'horizontal', legend.position = 'top'))
+dev.off()
