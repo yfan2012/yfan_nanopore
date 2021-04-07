@@ -132,3 +132,11 @@ if [ $1 == interproscan ] ; then
 fi
 
     
+if [ $1 == clean_transcriptome ] ; then
+    mkdir -p $datadir/transcriptome
+
+    python transcriptome.py \
+	   -i $datadir/interproscan/Trinity.fasta.transdecoder_clean.pep.tsv \
+	   -t $datadir/trinity/Trinity.fasta \
+	   -o $datadir/transcriptome/st5317.transcriptome.fasta
+fi
