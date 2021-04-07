@@ -98,3 +98,37 @@ if [ $1 == busco ] ; then
 	-c 36 \
 	-f
 fi
+
+
+if [ $1 == transdecoder ] ; then
+    mkdir -p $datadir/transdecoder
+
+    cp $datadir/trinity/Trinity.fasta $datadir/transdecoder
+
+    cd $datadir/transdecoder
+    TransDecoder.LongOrfs \
+	-t Trinity.fasta 
+
+    TransDecoder.Predict \
+	-t Trinity.fasta
+fi
+
+    
+if [ $1 == interproscan ] ; then
+    mkdir -p $datadir/interproscan
+
+    sed -e 's/*//g' $datadir/transdecoder/Trinity.fasta.transdecoder.pep > $datadir/transdecoder/Trinity.fasta.transdecoder_clean.pep
+    sed -e 's/*//g' $datadir/transdecoder/longest_orfs.pep > $datadir/transdecoder/longest_orfs_clean.pep
+    
+    ~/software/interproscan/interproscan-5.50-84.0/interproscan.sh \
+	-i $datadir/transdecoder/Trinity.fasta.transdecoder_clean.pep \
+	-d $datadir/interproscan \
+	-T $datadir/interproscan/temp \
+	-iprlookup \
+	-goterms \
+	-pa \
+	--verbose
+
+fi
+
+    
