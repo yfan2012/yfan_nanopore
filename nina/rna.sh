@@ -138,5 +138,52 @@ if [ $1 == clean_transcriptome ] ; then
     python transcriptome.py \
 	   -i $datadir/interproscan/Trinity.fasta.transdecoder_clean.pep.tsv \
 	   -t $datadir/trinity/Trinity.fasta \
-	   -o $datadir/transcriptome/st5317.transcriptome.fasta
+	   -o $datadir/transcriptome/st5317.transcriptome.fasta \
+	   -g $datadir/transcriptome/st5317.goterms.tsv \
+	   -d $datadir/transcriptome/st5317.description.tsv
+    
+fi
+
+
+if [ $1 == trim_individual ] ; then
+    for i in AMB ITR ND VRC ;
+    do
+	for rep in 1 2 3 ;
+	do
+	    java -jar ~/software/Trimmomatic-0.39/trimmomatic-0.39.jar PE \
+		 -threads 36 -phred33 \
+		 $datadir/raw/HF77KBCX3_1_5317_${i}${rep}_1_1.fq.gz $datadir/raw/HF77KBCX3_1_5317_${i}${rep}_1_2.fq.gz \
+		 $datadir/trimmed/5317_${i}${rep}_fwd_paired.fq.gz $datadir/trimmed/5317_${i}${rep}_fwd_unpaired.fq.gz \
+		 $datadir/trimmed/5317_${i}${rep}_rev_paired.fq.gz $datadir/trimmed/5317_${i}${rep}_rev_unpaired.fq.gz \
+		 ILLUMINACLIP:adapters.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:30 MINLEN:36
+	done
+    done
+fi
+
+
+if [ $1 == salmon_idx ] ; then
+
+    salmon index \
+	   -t $datadir/transcriptome/st5317.transcriptome.fasta \
+	   -i $datadir/transcriptome/st5317.transcriptome.salmonidx \
+	   -p 36
+fi
+
+if [ $1 == salmon ] ; then
+    mkdir $datadir/salmon
+    for i in AMB ITR ND VRC ;
+    do
+	for rep in 1 2 3 ;
+	do
+	    samp=5317_${i}${rep}
+	    salmon quant \
+		   -p 36 \
+		   --gcBias \
+		   -i $datadir/transcriptome/st5317.transcriptome.salmonidx \
+		   -l A \
+		   -1 $datadir/trimmed/${samp}_fwd_paired.fq.gz \
+		   -2 $datadir/trimmed/${samp}_rev_paired.fq.gz \
+		   -o $datadir/salmon/$samp
+	done
+    done
 fi
