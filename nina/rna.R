@@ -72,7 +72,8 @@ topgenes <- function(df, samp, goinfo, desinfo) {
         arrange(-importance) %>%
         mutate(samp=samp) %>%
         rowwise() %>%
-        mutate(des=desinfo$description[desinfo$gene==gene])
+        mutate(des=desinfo$description[desinfo$gene==gene]) %>%
+        filter(logpadj>=2)
 
     ##not sure why mutate/case_when didn't work in my testing
     go=c()
@@ -84,8 +85,12 @@ topgenes <- function(df, samp, goinfo, desinfo) {
         }
     }
     tib$go=go
-            
-    top=tib[1:30,]
+
+    if (dim(tib)[1]>100) {
+        top=tib[1:100,]
+    }else{
+        top=tib
+    }
     return(top)
 }
 
@@ -97,4 +102,22 @@ topgenes=bind_rows(ambtop, itrtop, vrctop)
 topcsv=file.path(dbxdir, 'top_diff_exp.csv')
 write_csv(topgenes, topcsv)
 
+##any genes common to all?
+test=intersect(intersect(ambtop$gene, itrtop$gene), vrctop$gene)
 
+get_go_set <- function(top) {
+    go=c()
+    for (i in top$go) {
+        if (i != 'unknown') {
+            terms=str_split(i, '\\|')[[1]]
+            go=append(go, terms)
+        }
+    }
+    return(go)
+}
+
+ambtopgo=get_go_set(ambtop)
+itrtopgo=get_go_set(itrtop)
+vrctopgo=get_go_set(vrctop)
+
+commongo=intersect(intersect(ambtopgo, itrtopgo), vrctopgo)
