@@ -187,3 +187,15 @@ if [ $1 == salmon ] ; then
 	done
     done
 fi
+
+
+if [ $1 == busco_unique ] ; then
+    busco \
+	-m transcriptome \
+	-l sordariomycetes_odb10 \
+	-i $datadir/transcriptome/st5317.transcriptome.fasta \
+	-o st5137_transcriptome \
+	--out_path $datadir/busco \
+	-c 36 \
+	-f
+fi

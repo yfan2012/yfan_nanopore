@@ -82,7 +82,7 @@ tscriptbuscos=tibble(
     status=as.character(),
     sum=as.numeric(),
     asm=as.character())
-transcriptomes=c('st5137_braker', 'st5137_trinity')
+transcriptomes=c('st5137_braker', 'st5137_trinity', 'st5137_transcriptome')
 for (i in transcriptomes) {
     buscofile=file.path(datadir, 'rna/busco', i, 'run_sordariomycetes_odb10/full_table.tsv')
     busco=read_tsv(buscofile, comment='#', col_names=busco_cols) %>%
@@ -93,7 +93,7 @@ for (i in transcriptomes) {
 }
 
 tscriptfile=file.path(dbxdir, 'busco_transcriptome.pdf')
-pdf(tscriptfile, height=6, width=19)
+pdf(tscriptfile, height=8, width=15)
 tscriptplot=ggplot(tscriptbuscos, aes(x=sum, y=asm, fill=status, alpha=.8)) +
     geom_col() +
     scale_fill_brewer(palette = "Set2") +
