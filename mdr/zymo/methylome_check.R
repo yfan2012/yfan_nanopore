@@ -74,7 +74,8 @@ infoii=tibble(org=unique(rebaseii$Organism)) %>%
     summarise(num=n()) %>%
     arrange(-num)
 
-
+barcode_to_motif <- function(bc, motifs) {
+    
 
 
 
