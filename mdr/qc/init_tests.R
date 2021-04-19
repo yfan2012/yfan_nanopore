@@ -3,10 +3,29 @@ library(RColorBrewer)
 library(cowplot)
 source('barcode_plot_functions.R')
 
-datadir='~/data/mdr/qc/barcode'
+##test some plotting functions initially
+
+
+##datadir='~/data/mdr/qc/barcode'
+datadir='/mithril/Data/Nanopore/projects/methbin/barcode'
 dbxdir='~/Dropbox/timplab_data/mdr/barcode'
 sampinfo=tibble(samp=c('neb15', 'neb17', 'neb19', 'nebdcm', 'neb11'),
                 motif=c('GCNGC', 'GANTC', 'GATC', 'CCWGG', 'unmeth'))
+
+### for plotting barnyard
+bcfile1=file.path(datadir, paste0(sampinfo[2,]$samp, '_barcodes.txt'))
+bcfile2=file.path(datadir, paste0(sampinfo[3,]$samp, '_barcodes.txt'))
+abarnplot=plot_barnyard(bcfile1, bcfile2, 'GATC', 'GANTC')
+
+cbcfile1=file.path(datadir, paste0(sampinfo[1,]$samp, '_barcodes.txt'))
+cbcfile2=file.path(datadir, paste0(sampinfo[4,]$samp, '_barcodes.txt'))
+cbarnplot=plot_barnyard(cbcfile1, cbcfile2, 'GCNGC', 'CCWGG')
+
+barnyardfile=file.path(dbxdir, 'barnyard.pdf')
+pdf(barnyardfile, h=8, w=11)
+print(abarnplot)
+print(cbarnplot)
+dev.off()
 
 
 ### for plotting dists
@@ -16,6 +35,7 @@ singledistsfile=file.path(dbxdir, 'score_dists_single.pdf')
 pdf(singledistsfile, h=8, w=15)
 for (i in 1:dim(sampinfo)[1]) {
     samp=sampinfo[i,]
+    bcfile=file.path(datadir, paste0(samp$samp, '_barcodes.txt'))
     plot=plot_bc_dists(samp)
     print(plot)
     bcplots[[samp$samp]]=plot
