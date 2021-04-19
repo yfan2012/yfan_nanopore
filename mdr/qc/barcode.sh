@@ -84,7 +84,8 @@ if [ $1 == test_thresholds ] ; then
     ##know that cmod roc sets thresh around 1 and amod sets thresh at around 0
     #for i in neb15 neb17 neb19 nebdcm neb11 ;
 
-    for i in nebdcm ;
+    ##for i in nebdcm ;
+    for i in neb15 neb17 neb19 neb11 ;
     do
 	for j in 9 8 7 6 5 4 3 2 1 ;
 	do
