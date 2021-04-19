@@ -5,16 +5,15 @@ datadir=/mithril/Data/Nanopore/projects/methbin
 ref=/mithril/Data/Nanopore/projects/methbin/reference/allsamps.fa
 
 if [ $1 == test ] ; then
-    mkdir -p $datadir/barcode
     for i in test ;
     do
 	{ time python ~/Code/yfan_meth/utils/megalodon_barcode.py \
-	       -m $datadir/test.txt \
-	       -i $datadir/test.txt.idx \
+	       -m $datadir/megalodon/test/testdcm_mod_basecalls.txt \
+	       -i $datadir/megalodon/test/testdcm_mod_basecalls.txt.idx \
 	       -r $ref \
 	       -b ~/Code/yfan_nanopore/mdr/qc/barcodes.txt \
-	       -o $datadir/barcode/test.txt \
-	       -t 12 ;} &> $datadir/barcode/test_time.txt
+	       -o $datadir/megalodon/test/testdcm_barcodes.txt \
+	       -t 12 ;} &> $datadir/megalodon/test/testdcm_time.txt
     done
 fi
 
@@ -77,35 +76,6 @@ if [ $1 == call_agg ] ; then
     done
     ##this didn't really work that well. forget this.
 fi
-
-
-if [ $1 == test_thresholds ] ; then
-    ##try setting really stricter thresholds to see if barcodes resolve better
-    ##know that cmod roc sets thresh around 1 and amod sets thresh at around 0
-    #for i in neb15 neb17 neb19 nebdcm neb11 ;
-
-    ##for i in nebdcm ;
-    for i in neb15 neb17 neb19 neb11 ;
-    do
-	for j in 9 8 7 6 5 4 3 2 1 ;
-	do
-	    cbound=1.$j
-	    abound=.$j
-	    { time python ~/Code/yfan_meth/utils/megalodon_barcode.py \
-		   -m $datadir/megalodon/$i/$i/${i}_mod_basecalls.txt \
-		   -i $datadir/megalodon/$i/$i/${i}_mod_basecalls.txt.idx \
-		   -r $ref \
-		   -b ~/Code/yfan_nanopore/mdr/qc/barcodes.txt \
-		   -a $abound \
-		   -c $cbound \
-		   -o $datadir/barcode/${i}_barcodes_${j}.txt \
-		   -t 36 ;} &> $datadir/barcode/${i}_time_${j}.txt
-	    
-	done
-    done
-fi
-
-	    
 
 
 	    
