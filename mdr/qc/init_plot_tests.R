@@ -28,6 +28,7 @@ print(cbarnplot)
 dev.off()
 
 
+
 ### for plotting dists
 bc_cols=c('readname', 'GATC', 'GANTC', 'CCWGG', 'GCNGC')
 bcplots=list()
@@ -46,6 +47,7 @@ bcdistfile=file.path(dbxdir, 'score_dists.pdf')
 pdf(bcdistfile, h=10, w=18)
 plot_grid(bcplots[[2]], bcplots[[1]], bcplots[[3]], bcplots[[4]], bcplots[[5]], ncol=2, align='v')
 dev.off()
+
 
 
 ### for pca
