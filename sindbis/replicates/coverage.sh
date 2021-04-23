@@ -51,3 +51,13 @@ if [ $1 == count ] ; then
 	echo $i,$sinv,$rat >> $dbxdir/cov/align_counts.csv
     done
 fi
+
+
+if [ $1 == pafalign ] ; then
+    for samp in $datadir/* ;
+    do
+	i=`basename $samp`
+	minimap2 -uf -k14 -t 36 $rat $datadir/$i/fqs/$i.fq.gz > \
+		 $datadir/$i/align/$i.rat.paf
+    done
+fi
