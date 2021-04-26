@@ -92,3 +92,5 @@ print(ggbiplot(zymopca) +
       theme_bw() +
       theme(legend.direction = 'horizontal', legend.position = 'top'))
 dev.off()
+
+

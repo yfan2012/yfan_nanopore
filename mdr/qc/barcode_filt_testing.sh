@@ -5,8 +5,30 @@ datadir=/mithril/Data/Nanopore/projects/methbin
 ref=/mithril/Data/Nanopore/projects/methbin/reference/allsamps.fa
 
 
-if [ $1 == test_thresholds ] ; then
-    ##try setting really stricter thresholds to see if barcodes resolve better
+if [ $1 == test ] ; then
+    python ~/Code/yfan_meth/utils/megalodon_barcode.py \
+	   -m $datadir/megalodon/test/testdcm_mod_basecalls.txt \
+	   -i $datadir/megalodon/test/testdcm_mod_basecalls.txt.idx \
+	   -r $ref \
+	   -b ~/Code/yfan_nanopore/mdr/qc/barcodes.txt \
+	   -o $datadir/megalodon/test/testdcm_barcodes.txt \
+	   -t 12
+fi
+
+if [ $1 == test_threshold_option ] ; then
+    python ~/Code/yfan_meth/utils/megalodon_barcode.py \
+	   -m $datadir/megalodon/test/testdcm_mod_basecalls.txt \
+	   -i $datadir/megalodon/test/testdcm_mod_basecalls.txt.idx \
+	   -r $ref \
+	   -a 0 \
+	   -c 1 \
+	   -b ~/Code/yfan_nanopore/mdr/qc/barcodes.txt \
+	   -o $datadir/megalodon/test/testdcm_barcodes.txt \
+	   -t 12
+fi
+
+if [ $1 == try_thresholds ] ; then
+    ##try setting stricter thresholds to see if barcodes resolve better
     ##know that cmod roc sets thresh around 1 and amod sets thresh at around 0
     #for i in neb15 neb17 neb19 nebdcm neb11 ;
 
@@ -31,25 +53,26 @@ if [ $1 == test_thresholds ] ; then
     done
 fi
 
-if [ $1 == test ] ; then
-    python ~/Code/yfan_meth/utils/megalodon_barcode.py \
-	   -m $datadir/megalodon/test/testdcm_mod_basecalls.txt \
-	   -i $datadir/megalodon/test/testdcm_mod_basecalls.txt.idx \
-	   -r $ref \
-	   -b ~/Code/yfan_nanopore/mdr/qc/barcodes.txt \
-	   -o $datadir/megalodon/test/testdcm_barcodes.txt \
-	   -t 12
+if [ $1 == test_filterer ] ; then
+    ##test the code that filters based on alignment info (readlen, mapq, nummotifs, etc)    
+    for i in neb15 neb17 neb19 neb11 nebdcm ;
+    do
+	for j in 5 10 15 20 25 30 ;
+	do
+	    echo $i
+	    python ~/Code/yfan_meth/utils/megalodon_barcode_filter.py \
+		   -m $datadir/barcode/${i}_barcodes.txt \
+		   -b ~/Code/yfan_nanopore/mdr/qc/barcodes.txt \
+		   -a $datadir/align/$i/${i}_sub.paf \
+		   -r $ref \
+		   -q 30 \
+		   -l 5000 \
+		   -n $j \
+		   -o $datadir/barcode/${i}_barcodes_filtered_${j}_motifs.txt
+	done
+    done
 fi
+
 	    
-	    
-if [ $1 == test_thresh ] ; then
-    python ~/Code/yfan_meth/utils/megalodon_barcode.py \
-	   -m $datadir/megalodon/test/testdcm_mod_basecalls.txt \
-	   -i $datadir/megalodon/test/testdcm_mod_basecalls.txt.idx \
-	   -r $ref \
-	   -a 0 \
-	   -c 1 \
-	   -b ~/Code/yfan_nanopore/mdr/qc/barcodes.txt \
-	   -o $datadir/megalodon/test/testdcm_barcodes.txt \
-	   -t 12
-fi
+
+

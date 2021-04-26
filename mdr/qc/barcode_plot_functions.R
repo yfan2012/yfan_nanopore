@@ -2,15 +2,32 @@ library(tidyverse)
 library(RColorBrewer)
 library(cowplot)
 
-plot_bc_dists <- function(bcfile){
+plot_bc_dists <- function(bcfile, title){
     ##takes samp info and plots dists
+    bc_cols=c('readname', 'GATC', 'GANTC', 'CCWGG', 'GCNGC')
     bc=read_tsv(bcfile, col_names=bc_cols) %>%
         mutate(samp=samp$motif) %>%
         gather('motif', 'count', -readname, -samp)
     
     plot=ggplot(bc, aes(x=count, colour=motif, fill=motif, alpha=.2)) +
         geom_density() +
-        ggtitle(paste0(samp$samp, '_', samp$motif)) +
+        ggtitle(title) +
+        xlab('Barcode Score') +
+        scale_x_log10() +
+        scale_fill_brewer(palette = 'Set2') +
+        scale_colour_brewer(palette = 'Set2') +
+        theme_bw()
+    return(plot)
+}
+
+plot_bc_dists_fromtibble <- function(bc, title){
+    bc=bc %>%
+        mutate(samp=samp$motif) %>%
+        gather('motif', 'count', -readname, -samp)
+    
+    plot=ggplot(bc, aes(x=count, colour=motif, fill=motif, alpha=.2)) +
+        geom_density() +
+        ggtitle(title) +
         xlab('Barcode Score') +
         scale_x_log10() +
         scale_fill_brewer(palette = 'Set2') +
