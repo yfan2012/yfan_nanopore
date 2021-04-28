@@ -5,7 +5,7 @@ library(UpSetR)
 datadir='/uru/Data/Nanopore/projects/mdr'
 dbxdir='~/Dropbox/timplab_data/mdr'
 rebasefiltcsv=file.path(datadir, 'refs', 'rebase_filtered.csv')
-zymoreffa='/uru/Data/Nanopore/projects/read_class/ref/zymo_all.fa'
+zymoreffa='/uru/Data/Nanopore/projects/read_class/zymo/ref/zymo_all.fa'
 
 rebase=read_csv(rebasefiltcsv)
 zymoref=readDNAStringSet(zymoreffa)

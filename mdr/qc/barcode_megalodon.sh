@@ -41,7 +41,7 @@ if [ $1 == call ] ; then
                -r $ref \
                -b ~/Code/yfan_nanopore/mdr/qc/barcodes.txt \
                -o $datadir/barcode/${i}_barcodes.txt \
-               -t 72 ;} &> $datadir/barcode/${i}_time.txt
+               -t 72 ;} &> $datadir/barcode/qc/${i}_time.txt
     done
 fi
 
@@ -53,10 +53,12 @@ if [ $1 == call_unmeth ] ; then
                -i $datadir/megalodon/$i/$i/${i}_mod_basecalls.txt.idx \
                -r $ref \
                -b ~/Code/yfan_nanopore/mdr/qc/barcodes.txt \
-               -o $datadir/barcode/${i}_barcodes.txt \
-               -t 36 ;} &> $datadir/barcode/${i}_time.txt
+               -o $datadir/barcode/qc/${i}_barcodes.txt \
+               -t 36 ;} &> $datadir/barcode/qc/${i}_time.txt
     done
 fi
+
+
 
 if [ $1 == test_agg ] ; then
     mkdir -p $datadir/barcode_agg

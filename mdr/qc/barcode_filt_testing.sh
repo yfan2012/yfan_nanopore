@@ -1,7 +1,8 @@
 #!/bin/bash
 
 #datadir=~/data/mdr/qc
-datadir=/mithril/Data/Nanopore/projects/methbin
+projdir=/mithril/Data/Nanopore/projects/methbin
+datadir=$projdir/barcode
 ref=/mithril/Data/Nanopore/projects/methbin/reference/allsamps.fa
 
 
@@ -46,8 +47,8 @@ if [ $1 == try_thresholds ] ; then
 		   -b ~/Code/yfan_nanopore/mdr/qc/barcodes.txt \
 		   -a $abound \
 		   -c $cbound \
-		   -o $datadir/barcode/${i}_barcodes_${j}.txt \
-		   -t 36 ;} &> $datadir/barcode/${i}_time_${j}.txt
+		   -o $datadir/qc/${i}_barcodes_${j}.txt \
+		   -t 36 ;} &> $datadir/qc/${i}_time_${j}.txt
 	    
 	done
     done
@@ -61,17 +62,18 @@ if [ $1 == test_filterer ] ; then
 	do
 	    echo $i
 	    python ~/Code/yfan_meth/utils/megalodon_barcode_filter.py \
-		   -m $datadir/barcode/${i}_barcodes.txt \
+		   -m $datadir/qc/${i}_barcodes.txt \
 		   -b ~/Code/yfan_nanopore/mdr/qc/barcodes.txt \
-		   -a $datadir/align/$i/${i}_sub.paf \
+		   -a $projdir/align/$i/${i}_sub.paf \
 		   -r $ref \
 		   -q 30 \
 		   -l 5000 \
 		   -n $j \
-		   -o $datadir/barcode/${i}_barcodes_filtered_${j}_motifs.txt
+		   -o $datadir/qc/${i}_barcodes_filtered_${j}_motifs.txt
 	done
     done
 fi
+
 
 	    
 
