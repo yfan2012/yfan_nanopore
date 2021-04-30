@@ -56,7 +56,9 @@ plot_barnyard <- function(bcfile1, bcfile2,  motif1, motif2) {
 }
     
 call_part_avg <- function(bcinfo, thresh) {
-    ##thresh is expressed as +/- proportion of average                                                                                                                                                                                           ##output [readname, chrname, bin_barcode]                                                                                                                                                                                                    scores=bcinfo[,-(1:2)]
+    ##thresh is expressed as +/- proportion of average
+    ##output [readname, chrname, bin_barcode]
+    scores=bcinfo[,-(1:2)]
     minscores=rowMeans(scores)*thresh
     test=scores>minscores
     barcode=apply(test, 1, function(x) paste0(as.character(as.numeric(x)), collapse=''))
