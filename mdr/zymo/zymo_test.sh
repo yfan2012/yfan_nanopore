@@ -51,11 +51,54 @@ if [ $1 == call ] ; then
            -i $ssddir/megalodon/$prefix/per_read_modified_base_calls.txt.idx \
            -r $ref \
            -b ~/Code/yfan_nanopore/mdr/zymo/zymo_barcodes.txt \
-           -o $ssddir/barcode/zymo_barcodes.txt \
+           -o $ssddir/barcode/${prefix}_barcodes.txt \
 	   -n 100000000000 \
-           -t 54 ;} &> $ssddir/barcode/zymo_time.txt
+           -t 54 ;} &> $ssddir/barcode/${prefix}_time.txt
+fi
+
+
+if [ $1 == basecall ] ; then
+    mkdir -p $ssddir/called
+
+    guppy_basecaller \
+	-i $ssddir/raw/$prefix/$prefix/fast5 \
+	-s $ssddir/called/$prefix \
+	--compress_fastq \
+	--flowcell FLO-MIN106 --kit SQK-LSK109 \
+	--device 'cuda:0'
+fi
+
+
+if [ $1 == gather ] ; then
+    mkdir -p $ssddir/fastq/$prefix
+
+    cat $ssddir/called/$prefix/pass/*fastq.gz > $ssddir/fastq/$prefix/$prefix.fq.gz
+fi
+
+
+if [ $1 == align ] ; then
+    mkdir -p $ssddir/align
+    
+    fq=$ssddir/fastq/$prefix/$prefix.fq.gz
+    minimap2 -t 36 -x map-ont $ref $fq \
+	     > $ssddir/align/$prefix.paf
 fi
 
 
 if [ $1 == filter ] ; then
+    
     python ~/Code/yfan_meth/utils/megalodon_barcode_filter.py \
+	   -a $ssddir/align/$prefix.paf \
+	   -r $ref \
+	   -o $ssddir/barcode/${prefix}_barcodes_filtered.txt \
+	   -m $ssddir/barcode/${prefix}_barcodes.txt \
+	   -b ~/Code/yfan_nanopore/mdr/zymo/zymo_barcodes.txt \
+	   -q 40 \
+	   -l 5000 \
+	   -n 5 \
+	   -v
+fi
+
+    
+
+    

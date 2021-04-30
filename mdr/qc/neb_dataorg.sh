@@ -12,6 +12,12 @@ if [ $1 == cp_multiraw_sub ] ; then
     cp -r $rawdir/multiraw_sub $datadir
 fi
 
+if [ $1 == clean_ctrl ] ; then
+    for i in neb12 neb13 neb15 neb16 neb17 neb19 nebdcm ;
+    do
+	rm $datadir/multiraw_sub/$i/neb11*
+    done
+fi
 
 
 if [ $1 == basecall ] ; then
