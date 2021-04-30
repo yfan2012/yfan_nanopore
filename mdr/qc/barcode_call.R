@@ -2,6 +2,7 @@ library(tidyverse)
 library(BMS)
 library(cowplot)
 library(doParallel)
+source('barcode_plot_functions.R')
 cl=makeCluster(8)
 registerDoParallel(cl, cores=8)
 clusterCall(cl, function() library(tidyverse))
@@ -20,26 +21,6 @@ bcinfo=read_tsv(testfile, col_names=bc_cols) %>%
 ctrlinfo=read_tsv(ctrlfile, col_names=bc_cols) %>%
     select(-start, -end, -mapq)
 
-call_part_avg <- function(bcinfo, thresh) {
-    ##thresh is expressed as +/- proportion of average
-    ##output [readname, chrname, bin_barcode]
-    scores=bcinfo[,-(1:2)]
-    minscores=rowMeans(scores)*thresh
-    test=scores>minscores
-    barcode=apply(test, 1, function(x) paste0(as.character(as.numeric(x)), collapse=''))
-
-    barcodedreads=bcinfo %>%
-        select(readname, chrname) %>%
-        mutate(barcode=barcode)
-
-    return(barcodedreads)
-}
-
-##call_direct_thresh <- function(bcinfo, thresh) {
-    ##thresh is just a lim
-
-
-    
 
 barcode='0010'
 ##realizing that you can't really reduce this to a binary classification
@@ -84,15 +65,6 @@ for (i in samps) {
     bcpops=bind_rows(bcpops, pops)
 }
 
-plot_pops <- function(pops, name) {
-    plot=ggplot(pops, aes(x=barcode, y=pops, colour=samp, fill=samp, alpha=.2)) +
-        geom_bar(stat='identity') +
-        ggtitle(name) +
-        scale_color_brewer(palette='Set2') +
-        scale_fill_brewer(palette='Set2') +
-        theme_bw()
-    return(plot)
-}
 
 popplots=list()
 for (i in samps) {
