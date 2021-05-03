@@ -21,7 +21,7 @@ bs=rebase %>%
 ef=rebase %>%
     rowwise() %>%
     filter(grepl('faecalis', Organism, fixed=TRUE)) #%>%
-    filter(Strain=='ATCC 7080')
+    #filter(Strain=='ATCC 7080')
 ##https://ecoliwiki.org/colipedia/index.php/Escherichia_coli_(Migula_1895)_Castellani_and_Chalmers_1919
 ec=rebase %>%
     rowwise() %>%
