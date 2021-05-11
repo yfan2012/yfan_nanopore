@@ -17,3 +17,5 @@ if [ $1 == unpack ] ; then
 	tar -xzf $rawdir/$i.tar.gz -C $ssddir
     done
 fi
+
+

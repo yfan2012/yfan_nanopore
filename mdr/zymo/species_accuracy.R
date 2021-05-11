@@ -44,16 +44,6 @@ bcdata=bacbcinfo %>%
 
 bcumap=umap(bcdata)
 
-plot_umap <- function(layout, labels) {
-    data=tibble(x=layout[,1],
-                y=layout[,2],
-                label=labels)
-    plot=ggplot(data, aes(x=x, y=y, colour=label, alpha=.1)) +
-        geom_point() +
-        scale_colour_brewer(palette='Set2') +
-        theme_bw()
-    return(plot)
-}
 
 umappdf=file.path(dbxdir, 'umap.pdf')
 pdf(umappdf, h=7, w=13)
