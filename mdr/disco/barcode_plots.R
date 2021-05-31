@@ -25,7 +25,7 @@ for (i in samps) {
 
     barcodeinfo=barcodeinfo %>%
         mutate(samp=i)
-    bcinfo=bind_rows(bcinfo, barcodeinfo)
+    bcinfo=bind_rows(bcinfo, barcodeinfo[1:10000,])
 }
 
 discodistspdf=file.path(dbxdir, 'dist_plots.pdf')
@@ -38,4 +38,19 @@ bcdata=bcinfo %>%
     select(-readname, -chrname, -samp)
 
 bcumap=umap(bcdata)
+umaps=list()
+
+for (i in samps) {
+    readpos=bcinfo$samp==i
+    readlab=bcinfo$samp[readpos]
+    readlay=bcumap$layout[readpos,]
+    plot=plot_umap(readlay, readlab)
+    umaps[[i]]=plot
+}
+
+umappdf=file.path(dbxdir, 'umap.pdf')
+pdf(umappdf, h=7, w=13)
+print(plot_umap(bcumap$layout, bcinfo$samp))
+plot_grid(umaps[[1]], umaps[[2]], umaps[[3]], umaps[[4]], umaps[[5]], umaps[[6]], ncol=3, align='v')
+dev.off()
     
