@@ -44,7 +44,6 @@ if [ $1 == barcode ] ; then
                -r $ref \
                -b ~/Code/yfan_nanopore/mdr/disco/disco_barcodes.txt \
                -o $ssddir/barcode/$i/${i}_barcodes.txt \
-	       -n 100000000000 \
                -t 36 ;} &> $ssddir/barcode/$i/${i}_time.txt
     done
 fi

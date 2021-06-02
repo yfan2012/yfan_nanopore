@@ -3,7 +3,8 @@
 ssddir=~/data/mdr/disco
 datadir=/mithril/Data/Nanopore/projects/methbin/disco
 
-samps='MinION_BF_NAT MinION_CP_NAT MinION_HP_NAT MinION_MH_NAT MinION_NG_NAT MinION_TP_NAT '
+#samps='MinION_BF_NAT MinION_CP_NAT MinION_HP_NAT MinION_MH_NAT MinION_NG_NAT MinION_TP_NAT MinION_BA_NAT'
+samps=MinION_BA_NAT
 
 ref=$datadir/ref/disco_refs.fasta
 if [ $1 == makeref ] ; then
