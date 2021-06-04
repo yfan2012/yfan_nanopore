@@ -3,7 +3,8 @@
 ssddir=~/data/mdr/disco
 datadir=/mithril/Data/Nanopore/projects/methbin/disco
 
-samps='MinION_BF_NAT MinION_CP_NAT MinION_HP_NAT MinION_MH_NAT MinION_NG_NAT MinION_TP_NAT '
+samps='MinION_BA_NAT MinION_BF_NAT MinION_CP_NAT MinION_HP_NAT MinION_MH_NAT MinION_NG_NAT MinION_TP_NAT '
+#samps=MinION_BA_NAT
 
 ref=$datadir/ref/disco_refs.fasta
 
@@ -50,9 +51,12 @@ fi
 
 
 if [ $1 == copy ] ; then
-    cp -r $ssddir/barcode $datadir/
-    cp -r $ssddir/called $datadir/
-    cp -r $ssddir/megalodon $datadir/
+    for i in $samps ;
+    do
+	cp -r $ssddir/barcode/$i $datadir/barcode/
+	cp -r $ssddir/called/$i $datadir/called/
+	cp -r $ssddir/megalodon/$i $datadir/megalodon/
+    done
 fi
 
 if [ $1 == gather ] ; then
@@ -99,20 +103,35 @@ fi
 
 
 
+if [ $1 == rebarcode ] ; then
+    ##barocde on nas after fixing bugs 
+    mkdir -p $datadir/barcode
+    for i in $samps ;
+    do
+	mkdir -p $datadir/barcode/$i
+	{ time python ~/Code/yfan_meth/utils/megalodon_barcode.py \
+               -m $datadir/megalodon/$i/per_read_modified_base_calls.txt \
+               -i $datadir/megalodon/$i/per_read_modified_base_calls.txt.idx \
+               -r $ref \
+               -b ~/Code/yfan_nanopore/mdr/disco/disco_barcodes.txt \
+               -o $datadir/barcode/$i/${i}_barcodes.txt \
+               -t 36 ;} &> $datadir/barcode/$i/${i}_time.txt
+    done
+fi
 
+if [ $1 == rebarcode_test ] ; then
+    mkdir -p $datadir/barcode
+    for i in MinION_BA_NAT ;
+    do
+	mkdir -p $datadir/barcode/$i
+	{ time python ~/Code/yfan_meth/utils/megalodon_barcode.py \
+               -m $datadir/megalodon/$i/per_read_modified_base_calls.txt \
+               -i $datadir/megalodon/$i/per_read_modified_base_calls.txt.idx \
+               -r $ref \
+               -b ~/Code/yfan_nanopore/mdr/disco/disco_barcodes.txt \
+               -o $datadir/barcode/$i/${i}_barcodes_test.txt \
+               -t 36 ;} &> $datadir/barcode/$i/${i}_time_test.txt
+    done
+fi
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+	
