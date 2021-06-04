@@ -7,13 +7,22 @@ ref=/mithril/Data/Nanopore/projects/methbin/reference/allsamps.fa
 
 
 if [ $1 == test ] ; then
-    python ~/Code/yfan_meth/utils/megalodon_barcode.py \
-	   -m $datadir/megalodon/test/testdcm_mod_basecalls.txt \
-	   -i $datadir/megalodon/test/testdcm_mod_basecalls.txt.idx \
+    testdir=$projdir/megalodon/test
+    { time python ~/Code/yfan_meth/utils/megalodon_barcode.py \
+	   -m $testdir/testdcm_mod_basecalls.txt \
+	   -i $testdir/testdcm_mod_basecalls.txt.idx \
 	   -r $ref \
 	   -b ~/Code/yfan_nanopore/mdr/qc/barcodes.txt \
-	   -o $datadir/megalodon/test/testdcm_barcodes.txt \
-	   -t 12
+	   -o $testdir/testdcm_barcodes.txt \
+	   -t 12 ;} &> $testdir/testdcm_time.txt
+    { time python ~/Code/yfan_meth/utils/megalodon_barcode_test.py \
+	   -m $testdir/testdcm_mod_basecalls.txt \
+	   -i $testdir/testdcm_mod_basecalls.txt.idx \
+	   -r $ref \
+	   -b ~/Code/yfan_nanopore/mdr/qc/barcodes.txt \
+	   -o $testdir/testdcm_barcodes2.txt \
+	   -t 12 ;} &> $testdir/testdcm_time2.txt
+
 fi
 
 if [ $1 == test_threshold_option ] ; then

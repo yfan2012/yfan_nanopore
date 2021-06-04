@@ -2,14 +2,23 @@ library(tidyverse)
 library(RColorBrewer)
 library(cowplot)
 
-plot_umap <- function(layout, labels) {
+plot_umap <- function(layout, labels, xlim=NULL, ylim=NULL) {
     data=tibble(x=layout[,1],
                 y=layout[,2],
                 label=labels)
-    plot=ggplot(data, aes(x=x, y=y, colour=label, alpha=.1)) +
-        geom_point() +
-        scale_colour_brewer(palette='Set2') +
-        theme_bw()
+    if (missing(xlim)) {
+        plot=ggplot(data, aes(x=x, y=y, colour=label)) +
+            geom_point(alpha=.2, size=.1) +
+            scale_colour_brewer(palette='Set2') +
+            theme_bw()
+    }else{
+        plot=ggplot(data, aes(x=x, y=y, colour=label)) +
+            geom_point(alpha=.2, size=.1) +
+            xlim(xlim) +
+            ylim(ylim) +
+            scale_colour_brewer(palette='Set2') +
+            theme_bw()
+    }
     return(plot)
 }
 
