@@ -99,6 +99,14 @@ if [ $1 == filter ] ; then
 	   -v
 fi
 
-    
-
+if [ $1 == call_moved ] ; then
+    mkdir -p $datadir/barcode
+    { time python ~/Code/yfan_meth/utils/megalodon_barcode.py \
+           -m $datadir/zymo/megalodon/$prefix/per_read_modified_base_calls.txt \
+           -i $datadir/zymo/megalodon/$prefix/per_read_modified_base_calls.txt.idx \
+           -r $ref \
+           -b ~/Code/yfan_nanopore/mdr/zymo/zymo_barcodes.txt \
+           -o $datadir/zymo/barcode/${prefix}_barcodes.txt \
+           -t 36 ;} &> $datadir/zymo/barcode/${prefix}_time.txt
+fi
     
