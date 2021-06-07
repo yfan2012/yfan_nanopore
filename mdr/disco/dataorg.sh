@@ -1,6 +1,7 @@
 #!/bin/bash
 
 rawdir=/uru/Data/Nanopore/projects/read_class/disco
+datadir=/mithril/Data/Nanopore/projects/methbin/disco
 ssddir=~/data/mdr/disco
 
 #https://sra-download.ncbi.nlm.nih.gov/traces/sra71/SRZ/010032/SRR10032544/MinION_HP_NAT.tar.gz
@@ -17,6 +18,11 @@ if [ $1 == unpack ] ; then
     do
 	tar -xzf $rawdir/$i.tar.gz -C $ssddir
     done
+fi
+
+if [ $1 == grab_metagenomes ] ; then
+    aws s3 cp s3://sra-pub-src-1/SRR10139835/MinION_JM3T_NAT.tar.gz.1 $rawdir/
+    aws s3 cp s3://sra-pub-src-2/SRR10038437/MinION_JM3O_NAT.tar.gz.1 $rawdir/
 fi
 
 
