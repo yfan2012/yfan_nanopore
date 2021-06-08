@@ -2,7 +2,8 @@ library(tidyverse)
 library(umap)
 source('~/Code/yfan_nanopore/mdr/qc/barcode_plot_functions.R')
 
-datadir='~/data/mdr/zymo/barcode'
+##datadir='~/data/mdr/zymo/barcode'
+datadir='/mithril/Data/Nanopore/projects/methbin/zymo/barcode'
 dbxdir='~/Dropbox/timplab_data/mdr/zymo'
 
 barcodefile=file.path(datadir, '20190809_zymo_control_barcodes_filtered.txt')
