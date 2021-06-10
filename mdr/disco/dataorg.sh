@@ -36,7 +36,6 @@ if [ $1 == unpackmouse1 ] ; then
     tar -xzf $rawdir/$i.tar.gz.1 -C $ssddir/raw
 fi
 
-    
 if [ $1 == ref_meta ] ; then
    mkdir -p $datadir/ref_meta
    wget https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/004/803/915/GCF_004803915.1_ASM480391v1/GCF_004803915.1_ASM480391v1_genomic.fna.gz -O $datadir/ref_meta/DUDU.fa.gz
@@ -53,8 +52,12 @@ if [ $1 == ref_meta ] ; then
    wget https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/240/185/GCF_000240185.1_ASM24018v2/GCF_000240185.1_ASM24018v2_genomic.fna.gz -O $datadir/ref_meta/KLPN.fa.gz
 fi
 
-
 if [ $1 == make_ref_meta ] ; then
     cat $datadir/ref_meta/*.fa.gz > $datadir/ref_meta/meta10.fa.gz
     gunzip $datadir/ref_meta/meta10.fa.gz
+fi
+
+if [ $1 == move_mouse ] ; then
+    mv $ssddir/megalodon/$i $datadir/megalodon/$i
+    mv $ssddir/megalodon/${i}_meta $datadir/megalodon/${i}_meta
 fi

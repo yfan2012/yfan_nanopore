@@ -33,6 +33,46 @@ if [ $1 == gather ] ; then
     done
 fi
 
+if [ $1 == flye ] ; then
+    mkdir -p $datadir/flye
+    for i in $samps ;
+    do
+	mkdir -p $datadir/flye/$i
+	flye \
+	    --nano-raw $datadir/fastqs/$i/$i.fq.gz \
+	    -o $datadir/flye/$i \
+	    -t 36 \
+	    -g 100m \
+	    --plasmids \
+	    --meta
+	mv $datadir/flye/$i/assembly.fasta $datadir/flye/$i/$i.assembly.fasta
+    done
+fi
+
+if [ $1 == megalodon_metagenome ] ; then
+    mkdir -p $ssddir/megalodon/${i}_meta
+    for i in $samps ;
+    do
+	asm=$datadir/flye/$i/$i.assembly.fasta
+	echo $i
+	megalodon \
+	    $ssddir/raw/$i \
+	    --overwrite \
+	    --suppress-progress-bars \
+	    --verbose-read-progress 0 \
+	    --guppy-server-path "/usr/bin/guppy_basecall_server" \
+	    --guppy-params "-d /home/yfan/software/rerio/basecall_models/ --num_callers 5 --ipc_threads 6" \
+	    --guppy-config res_dna_r941_min_modbases-all-context_v001.cfg \
+	    --reference $asm \
+	    --outputs per_read_mods \
+	    --output-directory $ssddir/megalodon/${i}_meta \
+	    --write-mods-text \
+	    --devices "cuda:0" \
+	    --processes 36
+	rm $ssddir/megalodon/${i}_meta/per_read_modified_base_calls.db
+    done
+fi
+	
 dbdir=/mithril/Data/Nanopore/ref/kraken2
 
 if [ $1 == kraken ] ; then
@@ -79,9 +119,12 @@ if [ $1 == megalodon ] ; then
 	    --output-directory $ssddir/megalodon/$i \
 	    --write-mods-text \
 	    --devices "cuda:0" \
-	    --processes 36     
+	    --processes 36
+	rm $ssddir/megalodon/$i/per_read_modified_base_calls.db
     done
 fi
+
+
 
 
 if [ $1 == megaidx ] ; then
