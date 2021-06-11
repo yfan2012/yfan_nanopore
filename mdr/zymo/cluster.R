@@ -58,6 +58,10 @@ bcumap=umap(bcdata)
 
 umappdf=file.path(dbxdir, 'umap_6motif.pdf')
 pdf(umappdf, h=7, w=13)
+plot=plot_umap(bcumap$layout, bc$chrname)
+print(plot)
+sep=plot + facet_wrap(~label)
+print(sep)
 plot=plot_umap(bcumap$layout, bc$chrname, c(-25,25), c(-25,25))
 print(plot)
 sep=plot + facet_wrap(~label)
@@ -68,18 +72,22 @@ dev.off()
 ##try with 5 motifs
 red=bc %>%
     select(-GTCGAC)
-elim_motif=elim_motifs(red, 'umap_5motif.pdf', c(-25,25), c(-25,25))
+elim_motif=elim_motifs(red, 'umap_5motif.pdf')
+elim_motif_z=elim_motifs(red, 'umap_5motif_zoom.pdf', c(-25,25), c(-25,25))
 
 ##try with 4 motifs
 red2=bc %>%
     select(-GTCGAC, -CTCCAG)
-elim2_motif=elim_motifs(red2, 'umap_4motif.pdf', c(-25,25), c(-25,25))
+elim2_motif=elim_motifs(red2, 'umap_4motif.pdf')
+elim2_motif_z=elim_motifs(red2, 'umap_4motif_zoom.pdf', c(-25,25), c(-25,25))
 
 ##try with 3 motifs
 red3=bc %>%
     select(-GTCGAC, -CTCCAG, -ATGCAT)
-elim3_motif=elim_motifs(red3, 'umap_3motif.pdf', c(-25,25), c(-25,25))
+elim3_motif=elim_motifs(red3, 'umap_3motif.pdf')
+elim3_motif_z=elim_motifs(red3, 'umap_3motif_zoom.pdf', c(-25,25), c(-25,25))
 
-        
-    
+
+
+
 

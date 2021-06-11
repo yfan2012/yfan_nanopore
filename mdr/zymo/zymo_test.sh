@@ -8,7 +8,7 @@ datadir=/mithril/Data/Nanopore/projects/methbin
 
 if [ $1 == untar ] ; then
     mkdir -p $datadir/raw/$prefix
-    tar -xzf $rawdir/$prefix.tar.gz -C $datadir/raw/$prefix
+    tar -xzf $rawdir/$prefix.tar.gz -C $ssddir/raw/$prefix
 fi
 
 ##ref from https://s3.amazonaws.com/zymo-files/BioPool/D6322.refseq.zip
