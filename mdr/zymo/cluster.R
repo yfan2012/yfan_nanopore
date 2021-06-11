@@ -90,4 +90,24 @@ elim3_motif_z=elim_motifs(red3, 'umap_3motif_zoom.pdf', c(-25,25), c(-25,25))
 
 
 
+##try throwing out reads
+bcfilt=bcinfo %>%
+    select(-GTCGAC, -CTCCAG)
+bcnames=bcfilt[complete.cases(bcfilt),] %>%
+    filter(!grepl('tig', chrname, fixed=TRUE)) %>%
+    filter(!grepl('plasmid', chrname, fixed=TRUE)) %>%
+    group_by(chrname) %>%
+    sample_n(20000) %>%
+    ungroup()
+bcfilt=bcnames %>%
+    select(-readname, -chrname)
 
+filtumap=umap(bcfilt)
+
+filtpdf=file.path(dbxdir, 'umap_readfilt.pdf')
+pdf(filtpdf, h=7, w=13)
+plot=plot_umap(filtumap$layout, bcnames$chrname)
+sep=plot + facet_wrap(~label)
+print(plot)
+print(sep)
+dev.off()
