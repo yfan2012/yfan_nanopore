@@ -86,7 +86,6 @@ fi
 
 
 if [ $1 == filter ] ; then
-    
     python ~/Code/yfan_meth/utils/megalodon_barcode_filter.py \
 	   -a $ssddir/align/$prefix.paf \
 	   -r $ref \
@@ -110,3 +109,13 @@ if [ $1 == call_moved ] ; then
            -t 36 ;} &> $datadir/zymo/barcode/${prefix}_time.txt
 fi
     
+if [ $1 == filtercount ] ; then
+    python ~/Code/yfan_meth/utils/megalodon_barcode_filter.py \
+	   -a $datadir/zymo/align/$prefix.paf \
+	   -r $ref \
+	   -o $datadir/zymo/barcode/${prefix}_motifcounts.txt \
+	   -m $datadir/zymo/barcode/${prefix}_barcodes.txt \
+	   -b ~/Code/yfan_nanopore/mdr/zymo/zymo_barcodes.txt \
+	   -q 40 \
+	   -v
+fi
