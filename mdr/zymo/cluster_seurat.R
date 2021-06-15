@@ -12,7 +12,7 @@ bcinfo=read_tsv(barcodefile, col_names=bc_cols, na=c('NA', 'None')) %>%
     filter(!grepl('tig', chrname, fixed=TRUE)) %>%
     filter(!grepl('plasmid', chrname, fixed=TRUE)) %>%
     group_by(chrname) %>%
-    sample_n(20000) %>%
+    sample_n(10000) %>%
     ungroup()
 bcinfo[is.na(bcinfo)]=0
 

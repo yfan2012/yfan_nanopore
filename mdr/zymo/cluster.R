@@ -17,7 +17,7 @@ bc=bcinfo %>%
     filter(!grepl('tig', chrname, fixed=TRUE)) %>%
     filter(!grepl('plasmid', chrname, fixed=TRUE)) %>%
     group_by(chrname) %>%
-    sample_n(20000) %>%
+    sample_n(10000) %>%
     ungroup()
 
     
@@ -97,7 +97,7 @@ bcnames=bcfilt[complete.cases(bcfilt),] %>%
     filter(!grepl('tig', chrname, fixed=TRUE)) %>%
     filter(!grepl('plasmid', chrname, fixed=TRUE)) %>%
     group_by(chrname) %>%
-    sample_n(20000) %>%
+    sample_n(10000) %>%
     ungroup()
 bcfilt=bcnames %>%
     select(-readname, -chrname)
