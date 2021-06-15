@@ -1,6 +1,7 @@
 library(tidyverse)
 library(RColorBrewer)
 
+srcdir='~/Code/yfan_nanopore/mdr/rebase'
 datadir='/uru/Data/Nanopore/projects/mdr'
 krakendir='/uru/Data/Nanopore/projects/mdr/MDRstool_16/kraken'
 dbxdir='~/Dropbox/yfan/methylation/rebase'
@@ -24,6 +25,12 @@ motifcounts=rebase %>%
     group_by(Specificity) %>%
     summarise(count=n(), type=Type[1]) %>%
     arrange(-count)
+top10pdf=file.path(srcdir, 'barcodes10.txt')
+write_tsv(motifcounts[1:10,1], top10pdf)
+top15pdf=file.path(srcdir, 'barcodes15.txt')
+write_tsv(motifcounts[1:15,1], top15pdf)
+top20pdf=file.path(srcdir, 'barcodes20.txt')
+write_tsv(motifcounts[1:20,1], top20pdf)
 
 countsfile=file.path(dbxdir, 'motif_abundance.pdf')
 pdf(countsfile, h=9, w=15)

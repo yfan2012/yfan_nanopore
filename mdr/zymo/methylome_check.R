@@ -50,6 +50,7 @@ zymo=bind_rows(bs,ec,lm,pa,se,sa) %>%
     filter(Type=='II', nchar(Specificity)>3)
 motifs=unique(zymo$Specificity)
 
+
 library(BMS)
 barcode_num <- function(org, motifs, zymo) {
     orgzymo=zymo %>%

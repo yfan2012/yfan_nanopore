@@ -23,6 +23,12 @@ bcscaled=apply(bcinfo[,3:8], 2, scale)
 pca=prcomp(bcscaled)
 pcared=pca$x[,1:4]
 
-
 ##umap
 pcaumap=umap(pcared)
+seuratfile=file.path(dbxdir, 'seurat_umap.pdf')
+pdf(seuratfile, h=7, w=13)
+plot=plot_umap(pcaumap$layout, bcinfo$chrname)
+print(plot)
+sep=plot + facet_wrap(~label)
+print(sep)
+dev.off()
