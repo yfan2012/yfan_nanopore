@@ -129,7 +129,7 @@ if [ $1 == call10 ] ; then
            -b ~/Code/yfan_nanopore/mdr/rebase/barcodes10.txt \
            -o $datadir/zymo/barcode/${prefix}_barcodes10.txt \
 	   -n 100000000000 \
-           -t 36 ;} &> $datadir/barcode/${prefix}_time10.txt
+           -t 36 ;} &> $datadir/zymo/barcode/${prefix}_time10.txt
 fi
 
 
@@ -142,7 +142,7 @@ if [ $1 == call15 ] ; then
            -b ~/Code/yfan_nanopore/mdr/rebase/barcodes15.txt \
            -o $datadir/zymo/barcode/${prefix}_barcodes15.txt \
 	   -n 100000000000 \
-           -t 12 ;} &> $datadir/barcode/${prefix}_time15.txt
+           -t 12 ;} &> $datadir/zymo/barcode/${prefix}_time15.txt
 fi
 
 
@@ -155,5 +155,5 @@ if [ $1 == call20 ] ; then
            -b ~/Code/yfan_nanopore/mdr/rebase/barcodes20.txt \
            -o $datadir/zymo/barcode/${prefix}_barcodes20.txt \
 	   -n 100000000000 \
-           -t 12 ;} &> $datadir/barcode/${prefix}_time20.txt
+           -t 12 ;} &> $datadir/zymo/barcode/${prefix}_time20.txt
 fi
