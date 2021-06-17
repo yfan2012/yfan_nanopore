@@ -24,13 +24,14 @@ write_csv(rebase, rebasefiltcsv)
 motifcounts=rebase %>%
     group_by(Specificity) %>%
     summarise(count=n(), type=Type[1]) %>%
-    arrange(-count)
-top10pdf=file.path(srcdir, 'barcodes10.txt')
-write_tsv(motifcounts[1:10,1], top10pdf)
-top15pdf=file.path(srcdir, 'barcodes15.txt')
-write_tsv(motifcounts[1:15,1], top15pdf)
-top20pdf=file.path(srcdir, 'barcodes20.txt')
-write_tsv(motifcounts[1:20,1], top20pdf)
+    arrange(-count) %>%
+    filter(type!='I')
+top10file=file.path(srcdir, 'barcodes10.txt')
+write_tsv(motifcounts[1:10,1], top10file, col_names=FALSE)
+top15file=file.path(srcdir, 'barcodes15.txt')
+write_tsv(motifcounts[1:15,1], top15file, col_names=FALSE)
+top20file=file.path(srcdir, 'barcodes20.txt')
+write_tsv(motifcounts[1:21,1], top20file, col_names=FALSE)
 
 countsfile=file.path(dbxdir, 'motif_abundance.pdf')
 pdf(countsfile, h=9, w=15)

@@ -120,40 +120,33 @@ if [ $1 == filtercount ] ; then
 	   -v
 fi
 
-if [ $1 == call10 ] ; then
+if [ $1 == callcommon ] ; then
     mkdir -p $datadir/zymo/barcode
-    { time python ~/Code/yfan_meth/utils/megalodon_barcode.py \
-           -m $datadir/zymo/megalodon/$prefix/per_read_modified_base_calls.txt \
-           -i $datadir/zymo/megalodon/$prefix/per_read_modified_base_calls.txt.idx \
-           -r $ref \
-           -b ~/Code/yfan_nanopore/mdr/rebase/barcodes10.txt \
-           -o $datadir/zymo/barcode/${prefix}_barcodes10.txt \
-	   -n 100000000000 \
-           -t 36 ;} &> $datadir/zymo/barcode/${prefix}_time10.txt
+    #for i in 10 15 20 ;
+    for i in 20 ;
+    do
+	{ time python ~/Code/yfan_meth/utils/megalodon_barcode.py \
+               -m $datadir/zymo/megalodon/$prefix/per_read_modified_base_calls.txt \
+               -i $datadir/zymo/megalodon/$prefix/per_read_modified_base_calls.txt.idx \
+               -r $ref \
+               -b ~/Code/yfan_nanopore/mdr/rebase/barcodes${i}.txt \
+               -o $datadir/zymo/barcode/${prefix}_barcodes${i}.txt \
+	       -n 100000000000 \
+               -t 12 ;} &> $datadir/zymo/barcode/${prefix}_time${i}.txt
+    done
 fi
 
-
-if [ $1 == call15 ] ; then
-    mkdir -p $datadir/zymo/barcode
-    { time python ~/Code/yfan_meth/utils/megalodon_barcode.py \
-           -m $datadir/zymo/megalodon/$prefix/per_read_modified_base_calls.txt \
-           -i $datadir/zymo/megalodon/$prefix/per_read_modified_base_calls.txt.idx \
-           -r $ref \
-           -b ~/Code/yfan_nanopore/mdr/rebase/barcodes15.txt \
-           -o $datadir/zymo/barcode/${prefix}_barcodes15.txt \
-	   -n 100000000000 \
-           -t 12 ;} &> $datadir/zymo/barcode/${prefix}_time15.txt
-fi
-
-
-if [ $1 == call20 ] ; then
-    mkdir -p $datadir/zymo/barcode
-    { time python ~/Code/yfan_meth/utils/megalodon_barcode.py \
-           -m $datadir/zymo/megalodon/$prefix/per_read_modified_base_calls.txt \
-           -i $datadir/zymo/megalodon/$prefix/per_read_modified_base_calls.txt.idx \
-           -r $ref \
-           -b ~/Code/yfan_nanopore/mdr/rebase/barcodes20.txt \
-           -o $datadir/zymo/barcode/${prefix}_barcodes20.txt \
-	   -n 100000000000 \
-           -t 12 ;} &> $datadir/zymo/barcode/${prefix}_time20.txt
+if [ $1 == filtcommon ] ; then
+    #for i in 10 15 20 ;
+    for i in 20 ;
+    do
+	python ~/Code/yfan_meth/utils/megalodon_barcode_filter.py \
+	       -a $datadir/zymo/align/$prefix.paf \
+	       -r $ref \
+	       -o $datadir/zymo/barcode/${prefix}_motifcounts${i}.txt \
+	       -m $datadir/zymo/barcode/${prefix}_barcodes${i}.txt \
+	       -b ~/Code/yfan_nanopore/mdr/rebase/barcodes${i}.txt \
+	       -q 40 \
+	       -v
+    done
 fi

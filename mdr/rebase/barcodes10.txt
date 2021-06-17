@@ -1,4 +1,3 @@
-Specificity
 GATC
 CCWGG
 ATGCAT
