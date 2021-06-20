@@ -32,7 +32,6 @@ fi
 
 if [ $1 == unpackmouse1 ] ; then
     mkdir -p $ssddir/raw
-    
     tar -xzf $rawdir/$i.tar.gz.1 -C $ssddir/raw
 fi
 
@@ -59,5 +58,6 @@ fi
 
 if [ $1 == move_mouse ] ; then
     mv $ssddir/megalodon/$i $datadir/megalodon/$i
-    mv $ssddir/megalodon/${i}_meta $datadir/megalodon/${i}_meta
+    ##mv $ssddir/megalodon/${i}_meta $datadir/megalodon/${i}_meta
 fi
+

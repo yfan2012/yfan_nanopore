@@ -46,3 +46,28 @@ if [ $1 == megalodon ] ; then
         --devices "cuda:0" \
         --processes 36
 fi
+
+if [ $1 == move_meta ] ; then
+    mkdir -p $datadir/megalodon/${prefix}_meta
+
+    mv $ssddir/megalodon/${prefix}_meta/* $datadir/megalodon/${prefix}_meta/
+fi
+
+
+if [ $1 == megaidx ] ; then
+    python3 ~/Code/yfan_meth/utils/megalodon_mod_basecalls_idx.py \
+	    -i $datadir/megalodon/${prefix}_meta/per_read_modified_base_calls.txt \
+	    -o $datadir/megalodon/${prefix}_meta/pre_read_modified_base_calls.txt.idx
+fi
+
+if [ $1 == barcode_commmon ] ; then
+    mkdir -p $datadir/barcode/${prefix}_meta
+    { time python ~/Code/yfan_meth/utils/megalodon_barcode.py \
+           -m $datadir/megalodon/${prefix}_meta/per_read_modified_base_calls.txt \
+           -i $datadir/megalodon/${prefix}_meta/per_read_modified_base_calls.txt.idx \
+           -r $asm \
+           -b ~/Code/yfan_nanopore/mdr/rebase/barcodes15.txt \
+           -o $datadir/barcode/${prefix}_meta/${prefix}_contigs_barcodes15.txt \
+           -t 36 ;} &> $datadir/barcode/${prefix}_meta/${prefix}_contigs_barcodes15_time.txt
+fi
+    

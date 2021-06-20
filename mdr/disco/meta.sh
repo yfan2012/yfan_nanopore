@@ -4,7 +4,8 @@ ssddir=~/data/mdr/disco
 datadir=/mithril/Data/Nanopore/projects/methbin/disco
 samps=MinION_JM3O_NAT
 
-ref=$datadir/ref/disco_refs.fasta
+ref=$datadir/ref_meta/meta10.fa
+
 if [ $1 == makeref ] ; then
     cat $datadir/ref/*fa > $ref
 fi
@@ -49,7 +50,8 @@ if [ $1 == flye ] ; then
     done
 fi
 
-if [ $1 == megalodon_metagenome ] ; then
+
+if [ $1 == megalodon_contigs ] ; then
     mkdir -p $ssddir/megalodon/${i}_meta
     for i in $samps ;
     do
@@ -125,8 +127,6 @@ if [ $1 == megalodon ] ; then
 fi
 
 
-
-
 if [ $1 == megaidx ] ; then
     for i in $samps ;
     do
@@ -197,6 +197,14 @@ if [ $1 == filter ] ; then
     done
 fi
 
+if [ $1 == remegaidx ] ; then
+    for i in $samps ;
+    do
+	python3 ~/Code/yfan_meth/utils/megalodon_mod_basecalls_idx.py \
+		-i $datadir/megalodon/$i/per_read_modified_base_calls.txt \
+		-o $datadir/megalodon/$i/per_read_modified_base_calls.txt.idx
+    done
+fi
 
 
 if [ $1 == rebarcode ] ; then
@@ -231,3 +239,44 @@ if [ $1 == rebarcode_test ] ; then
 fi
 
 	
+if [ $1 == barcode_common ] ; then
+    mkdir -p $datadir/barcode
+    for i in $samps ;
+    do
+	mkdir -p $datadir/barcode/$i
+	{ time python ~/Code/yfan_meth/utils/megalodon_barcode.py \
+               -m $datadir/megalodon/$i/per_read_modified_base_calls.txt \
+               -i $datadir/megalodon/$i/per_read_modified_base_calls.txt.idx \
+               -r $ref \
+               -b ~/Code/yfan_nanopore/mdr/rebase/barcodes15.txt \
+               -o $datadir/barcode/$i/${i}_barcodes15.txt \
+               -t 12 ;} &> $datadir/barcode/$i/${i}_time15.txt
+    done
+fi
+
+
+if [ $1 == megaidx_contig ] ; then
+    for i in $samps ;
+    do
+	python ~/Code/yfan_meth/utils/megalodon_mod_basecalls_idx.py \
+	       -i $datadir/megalodon/${i}_meta/per_read_modified_base_calls.txt \
+	       -o $datadir/megalodon/${i}_meta/per_read_modified_base_calls.txt.idx
+    done
+fi
+
+
+if [ $1 == barcode_contig ] ; then
+    mkdir -p $datadir/barcode
+    for i in $samps ;
+    do
+	asm=$datadir/flye/$i/$i.assembly.fasta
+	mkdir -p $datadir/barcode/${i}_meta
+	{ time python ~/Code/yfan_meth/utils/megalodon_barcode.py \
+               -m $datadir/megalodon/${i}_meta/per_read_modified_base_calls.txt \
+               -i $datadir/megalodon/${i}_meta/per_read_modified_base_calls.txt.idx \
+               -r $asm \
+               -b ~/Code/yfan_nanopore/mdr/rebase/barcodes15.txt \
+               -o $datadir/barcode/${i}_meta/${i}_meta_barcodes15.txt \
+               -t 12 ;} &> $datadir/barcode/${i}_meta/${i}_meta_time15.txt
+    done
+fi
