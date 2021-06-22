@@ -57,10 +57,10 @@ fi
 if [ $1 == megaidx ] ; then
     python3 ~/Code/yfan_meth/utils/megalodon_mod_basecalls_idx.py \
 	    -i $datadir/megalodon/${prefix}_meta/per_read_modified_base_calls.txt \
-	    -o $datadir/megalodon/${prefix}_meta/pre_read_modified_base_calls.txt.idx
+	    -o $datadir/megalodon/${prefix}_meta/per_read_modified_base_calls.txt.idx
 fi
 
-if [ $1 == barcode_commmon ] ; then
+if [ $1 == barcode_common ] ; then
     mkdir -p $datadir/barcode/${prefix}_meta
     { time python ~/Code/yfan_meth/utils/megalodon_barcode.py \
            -m $datadir/megalodon/${prefix}_meta/per_read_modified_base_calls.txt \
