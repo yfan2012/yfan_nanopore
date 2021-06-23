@@ -132,6 +132,7 @@ newregions=tibble(asm=as.character(),
                  start=as.numeric(),
                  end=as.numeric())
 
+
 for (i in 1:dim(allbreaks)[1]) {
     region=allbreaks[i,]
     if (region$tigname != 'none') {
