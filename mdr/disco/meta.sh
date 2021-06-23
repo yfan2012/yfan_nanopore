@@ -249,7 +249,7 @@ if [ $1 == barcode_common ] ; then
                -i $datadir/megalodon/$i/per_read_modified_base_calls.txt.idx \
                -r $ref \
                -b ~/Code/yfan_nanopore/mdr/rebase/barcodes15.txt \
-               -o $datadir/barcode/$i/${i}_barcodes15.txt \
+               -o $datadir/barcode/$i/${i}_barcodes.txt \
                -t 12 ;} &> $datadir/barcode/$i/${i}_time15.txt
     done
 fi
@@ -278,5 +278,43 @@ if [ $1 == barcode_contig ] ; then
                -b ~/Code/yfan_nanopore/mdr/rebase/barcodes15.txt \
                -o $datadir/barcode/${i}_meta/${i}_meta_barcodes15.txt \
                -t 12 ;} &> $datadir/barcode/${i}_meta/${i}_meta_time15.txt
+    done
+fi
+
+
+if [ $1 == align ] ; then
+    for i in $samps ;
+    do
+	mkdir -p $datadir/align/$i
+	minimap2 -t 36 -x map-ont $ref $datadir/fastqs/$i/$i.fq.gz \
+		 > $datadir/align/$i/$i.paf
+
+	asm=$datadir/flye/$i/$i.assembly.fasta
+	mkdir -p $datadir/align/${i}_meta
+	minimap2 -t 36 -x map-ont $asm $datadir/fastqs/$i/$i.fq.gz \
+		 > $datadir/align/${i}_meta/${i}_meta.paf
+    done
+fi
+
+if [ $1 == motifcounts ] ; then
+    for i in $samps ;
+    do
+	asm=$datadir/flye/$i/$i.assembly.fasta
+	python ~/Code/yfan_meth/utils/megalodon_barcode_filter.py \
+	       -a $datadir/align/$i/${i}.paf \
+	       -r $ref \
+	       -o $datadir/barcode/$i/${i}_motifcounts.txt \
+	       -m $datadir/megalodon/$i/${i}_barcodes.txt \
+	       -b ~/Code/yfan_nanopore/mdr/rebase/barcodes15.txt \
+	       -q 40 \
+	       -v
+	python ~/Code/yfan_meth/utils/megalodon_barcode_filter.py \
+	       -a $datadir/align/${i}_meta/${i}_meta.paf \
+	       -r $asm \
+	       -o $datadir/barcode/${i}_meta/${i}_meta_motifcounts.txt \
+	       -m $datadirx/barcode/${i}_meta/${i}_meta_barcodes15.txt \
+	       -b ~/Code/yfan_nanopore/mdr/rebase/barcodes15.txt \
+	       -q 40 \
+	       -v
     done
 fi

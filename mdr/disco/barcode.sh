@@ -135,3 +135,16 @@ if [ $1 == rebarcode_test ] ; then
 fi
 
 	
+if [ $1 == countmotifs ] ; then
+    for i in $samps ;
+    do
+	python ~/Code/yfan_meth/utils/megalodon_barcode_filter.py \
+	       -a $datadir/align/$i/$i.paf \
+	       -r $ref \
+	       -o $datadir/barcode/$i/${i}_motifcounts.txt \
+	       -m $datadir/barcode/$i/${i}_barcodes.txt \
+	       -b ~/Code/yfan_nanopore/mdr/disco/disco_barcodes.txt \
+	       -q 40 \
+	       -v
+    done
+fi
