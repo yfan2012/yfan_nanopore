@@ -27,3 +27,30 @@ if [ $1 == bismark ] ; then
     done
 fi
     
+if [ $1 == bamtosam ] ; then
+    for i in $rawdir/raw/*_1.fastq.gz ;
+    do
+	prefix=`basename $i _1.fastq.gz`
+	samtools view \
+		 -@ 36 \
+		 -O SAM \
+		 -o $datadir/bisulfite/$prefix/${prefix}_pe.sam \
+		 $datadir/bisulfite/$prefix/${prefix}_pe.bam
+    done
+fi
+
+if [ $1 == getmeth ] ; then
+    for i in $rawdir/raw/*_1.fastq.gz ;
+    do
+	prefix=`basename $i _1.fastq.gz`
+	bismark_methylation_extractor \
+	    -o $datadir/bisulfite/$prefix \
+	    --paired-end \
+	    --parallel 18 \
+	    --cytosine_report \
+	    --CX \
+	    --genome_folder $refdir \
+	    $datadir/bisulfite/$prefix/${prefix}_pe.sam
+	gunzip $datadir/bisulfite/$prefix/*.gz
+    done
+fi
