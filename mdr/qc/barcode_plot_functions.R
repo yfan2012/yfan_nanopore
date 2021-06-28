@@ -6,17 +6,19 @@ plot_umap <- function(layout, labels, xlim=NULL, ylim=NULL) {
     data=tibble(x=layout[,1],
                 y=layout[,2],
                 label=labels)
+    numcolors=length(table(labels))
+    mycolors=colorRampPalette(brewer.pal(8, 'Set2'))(numcolors)
     if (missing(xlim)) {
         plot=ggplot(data, aes(x=x, y=y, colour=label)) +
             geom_point(alpha=.2, size=.1) +
-            scale_colour_brewer(palette='Set2') +
+            scale_colour_manual(values=mycolors) +
             theme_bw()
     }else{
         plot=ggplot(data, aes(x=x, y=y, colour=label)) +
             geom_point(alpha=.2, size=.1) +
             xlim(xlim) +
             ylim(ylim) +
-            scale_colour_brewer(palette='Set2') +
+            scale_colour_manual(values=colors) +
             theme_bw()
     }
     return(plot)
