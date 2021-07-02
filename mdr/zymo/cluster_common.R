@@ -8,7 +8,7 @@ cluster_library(cluster, 'tidyverse')
 
 datadir='/mithril/Data/Nanopore/projects/methbin/zymo/barcode'
 srcdir='~/Code/yfan_nanopore/mdr/rebase'
-dbxdir='~/Dropbox/timplab_data/mdr/zymo'
+dbxdir='~/gdrive/mdr/zymo'
 
 conds=c('10', '15', '20')
 
@@ -153,7 +153,7 @@ plotstuff <- function(bcfilt, pcasub, name, xlim=NULL, ylim=NULL) {
 
 
 
-##top 10 most common motifs as barcodes
+####most common motifs as barcodes
 bcfilt=read_filter(conds[1], cluster, 3)
 bcfilt=bcfilt[complete.cases(bcfilt),]
 bcpca=pcastuff(bcfilt)
@@ -173,11 +173,13 @@ plotstuff(bcfilt3, pcasub3, 'common20', c(-25, 25), c(-25,25))
 
 
 
-##plasmid analysis - take min occurence requirement to 2 or else you don't get any plasmid representation
+####plasmid analysis
+##take min occurence requirement to 2 or else you don't get any plasmid representation
 bcfilt=read_filter(conds[2], cluster, 2)
 bcfilt=bcfilt[complete.cases(bcfilt),]
 plasfilt=read_plasmid(conds[2])
 allfilt=bind_rows(bcfilt, plasfilt)
+
 allpca=pcastuff(allfilt)
 pcasub=allpca$x[,1:5]
 plotstuff(allfilt, pcasub, 'plasmid')
@@ -195,7 +197,6 @@ embedplas=embed %>%
     select(-label)
 embedchr=embed %>%
     filter(shape=='chr')
-
 
 mycolors=c(brewer.pal(8, 'Set2'), '#000000')
 myshapes=c(3,18)
@@ -217,4 +218,19 @@ sep=plot +
     theme(legend.position = "none")
 print(sep)
 dev.off()
+
+##contig analysis
+tiginfo=allfilt %>%
+    select(-readname) %>%
+    group_by(chrname) %>%
+    summarise_each(funs(mean))
+tigscaled=scale(as.data.frame(tiginfo[,2:12]))
+rownames(tigscaled)=tiginfo$chrname
+
+heatmappdf=file.path(dbxdir, 'heatmap_ref.pdf')
+pdf(heatmappdf, h=7, w=14)
+hm=heatmap(tigscaled, scale='none')
+print(hm)
+dev.off()
+
 

@@ -37,4 +37,24 @@ if [ $1 == ref ] ; then
     cat *fa.gz > mdr_refs.fasta.gz
 fi
 
-    
+dbdir=/atium/Data/ref/bacteria
+if [ $1 == get_refseq_info ] ; then
+    wget -O $dbdir/assembly_summary.txt ftp://ftp.ncbi.nih.gov/genomes/refseq/bacteria/assembly_summary.txt
+fi
+
+if [ $1 == filt_refseq_info ] ; then
+    awk -F '\t' '{if($12=="Complete Genome") print $20}' $dbdir/assembly_summary.txt > $dbdir/assembly_summary_complete_genomes.txt
+    awk -F '\t' '{if($5!="na") print $20}' $dbdir/assembly_summary.txt > $dbdir/assembly_summary_rep_genomes.txt
+fi
+
+
+if [ $1 == dl_bacteria ] ; then
+    mkdir -p $dbdir/genomes
+    for next in $(cat $dbdir/assembly_summary_rep_genomes.txt) ;
+    do
+	name=`echo $next | rev | cut -d / -f 1 | rev `
+	wget -P $dbdir/genomes "$next"/${name}_genomic.fna.gz ;
+    done
+fi
+
+	

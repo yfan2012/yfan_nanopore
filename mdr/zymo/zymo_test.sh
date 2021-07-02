@@ -150,3 +150,39 @@ if [ $1 == filtcommon ] ; then
 	       -v
     done
 fi
+
+
+if [ $1 == contig_common_test ] ; then
+    i=15
+    head -100 $datadir/zymo/megalodon/$prefix/per_read_modified_base_calls.txt.idx \
+	 > $datadir/zymo/megalodon/$prefix/per_read_modified_base_calls.txt.small.idx
+    
+    { time python ~/Code/yfan_meth/utils/megalodon_contig.py \
+           -m $datadir/zymo/megalodon/$prefix/per_read_modified_base_calls.txt \
+           -i $datadir/zymo/megalodon/$prefix/per_read_modified_base_calls.txt.small.idx \
+           -r $ref \
+           -b ~/Code/yfan_nanopore/mdr/rebase/barcodes${i}.txt \
+           -o $datadir/zymo/contig/${prefix}_contig${i}.txt \
+	   -v $datadir/zymo/contig/${prefix}_contig${i}_cov.txt \
+	   -c 1 \
+	   -a 0 \
+           -t 12 ;} &> $datadir/zymo/contig/${prefix}_time${i}.small.txt
+fi
+    
+
+if [ $1 == contig_common ] ; then
+    mkdir -p $datadir/zymo/contig
+    for i in 15 ;
+    do
+	{ time python ~/Code/yfan_meth/utils/megalodon_contig.py \
+               -m $datadir/zymo/megalodon/$prefix/per_read_modified_base_calls.txt \
+               -i $datadir/zymo/megalodon/$prefix/per_read_modified_base_calls.txt.idx \
+               -r $ref \
+               -b ~/Code/yfan_nanopore/mdr/rebase/barcodes${i}.txt \
+               -o $datadir/zymo/contig/${prefix}_contig${i}.txt \
+	       -v $datadir/zymo/contig/${prefix}_contig${i}_cov.txt \
+	       -c 1 \
+	       -a 0 \
+               -t 12 ;} &> $datadir/zymo/contig/${prefix}_time${i}.txt
+    done
+fi
