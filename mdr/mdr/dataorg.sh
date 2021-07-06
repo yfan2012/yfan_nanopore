@@ -57,4 +57,16 @@ if [ $1 == dl_bacteria ] ; then
     done
 fi
 
-	
+if [ $1 == cat_bacteria ] ; then
+    ##some genomes corrupted? had to go thru and figure out which
+    cat $dbdir/genomes/*fna.gz > $dbdir/all_bacteria_refs.fa.gz
+    gunzip $dbdir/all_bacteria_refs.fa.gz
+fi
+
+if [ $1 == makeblastdb ] ; then
+    mkdir -p $dbdir/blastdb
+    makeblastdb \
+	-in $dbdir/all_bacteria_refs.fa \
+	-out $dbdir/blastdb/all_bacteria_refs \
+	-dbtype nucl
+fi

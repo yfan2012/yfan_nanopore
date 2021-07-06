@@ -318,3 +318,16 @@ if [ $1 == motifcounts ] ; then
 	       -v
     done
 fi
+
+blastdbdir=/atium/Data/ref/bacteria/blastdb
+if [ $1 == blast_contigs ] ; then
+    mkdir -p $datadir/blast_contigs
+
+    i=MinION_JM3O_NAT
+    blastn \
+	-query $datadir/flye/$i/$i.assembly.fasta \
+	-db $blastdbdir/all_bacteria_refs \
+	-outfmt 7 \
+	-num_threads 36 \
+	-out $datadir/blast_contigs/flye_blast.tsv
+fi
