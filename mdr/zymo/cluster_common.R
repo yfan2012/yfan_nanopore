@@ -224,13 +224,21 @@ tiginfo=allfilt %>%
     select(-readname) %>%
     group_by(chrname) %>%
     summarise_each(funs(mean))
+clusttig=as.matrix(tiginfo %>% select(-chrname))
+rownames(clusttig)=tiginfo$chrname
 tigscaled=scale(as.data.frame(tiginfo[,2:12]))
 rownames(tigscaled)=tiginfo$chrname
 
 heatmappdf=file.path(dbxdir, 'heatmap_ref.pdf')
 pdf(heatmappdf, h=7, w=14)
 hm=heatmap(tigscaled, scale='none')
+noscale=heatmap(clusttig, scale='none')
+distplot=plot(hclust(dist(tigscaled)))
+tiginfodist=plot(hclust(dist(clusttig)))
 print(hm)
+print(noscale)
+print(distplot)
+print(tiginfodist)
 dev.off()
 
 

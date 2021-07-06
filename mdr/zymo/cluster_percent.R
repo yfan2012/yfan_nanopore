@@ -1,7 +1,7 @@
 library(tidyverse)
 library(umap)
 source('~/Code/yfan_nanopore/mdr/qc/barcode_plot_functions.R')
-source('~/Code/yfan_nanopore/mdr/zymo/cluster_common.R')
+
 
 datadir='/mithril/Data/Nanopore/projects/methbin/zymo/contig'
 dbxdir='~/gdrive/mdr/zymo'
@@ -31,14 +31,25 @@ tiginfo=bcfilt %>%
     group_by(chrname) %>%
     summarise(across(everything(), mean)) %>%
     ungroup()
+clusttig=as.matrix(tiginfo %>% select(-chrname))[1:9,]
+rownames(clusttig)=tiginfo$chrname[1:9]
 tigdata=as.data.frame(tiginfo[1:9,-1])
 scaletig=scale(tigdata)
 rownames(scaletig)=tiginfo$chrname[1:9]
 
+
+##get distance plot
+##http://www.opiniomics.org/you-probably-dont-understand-heatmaps/
 heatmappdf=file.path(dbxdir, 'heatmap_contig_calls_filt.pdf')
 pdf(heatmappdf, h=7, w=13)
 hm=heatmap(scaletig, scale='none')
+noscale=heatmap(clusttig, scale='none')
+tiginfodist=plot(hclust(dist(clusttig)))
+distplot=plot(hclust(dist(scaletig)))
 print(hm)
+print(noscale)
+print(distplot)
+print(tiginfodist)
 dev.off()
 
 
