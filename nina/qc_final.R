@@ -3,7 +3,7 @@ library(Biostrings)
 library(RColorBrewer)
 source('prolificans_asm_functions.R')
 datadir='/pym/Data/Nanopore/projects/prolificans'
-dbxdir='~/Dropbox/timplab_data/prolificans'
+dbxdir='~/gdrive/prolificans'
 strains=c('st31', 'st90853', 'st5317')    
 
 
