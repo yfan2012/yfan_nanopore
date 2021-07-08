@@ -70,3 +70,25 @@ if [ $1 == makeblastdb ] ; then
 	-out $dbdir/blastdb/all_bacteria_refs \
 	-dbtype nucl
 fi
+
+if [ $1 == get_fa_headers ] ; then
+    ##species name is encoded in header most of the time
+    grep '>' $dbdir/all_bacteria_refs.fa > $dbdir/all_bacteria_refs_faheaders.txt
+    sed -i -e 's/>//g' $dbdir/all_bacteria_refs_faheaders.txt
+    sed -i -e 's/[][]//g' $dbdir/all_bacteria_refs_faheaders.txt
+fi
+
+
+if [ $1 == get_tax_info ] ; then
+    mkdir -p $dbdir/taxonomy
+    wget https://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump.tar.gz \
+	 -O $dbdir/taxonomy/taxdump.tar.gz
+    tar -xzf $dbdir/taxonomy/taxdump.tar.gz \
+	-C $dbdir/taxonomy
+fi
+
+if [ $1 == clean_taxo ] ; then
+    sed -e 's/[\t]*//g' $dbdir/taxonomy/names.dmp |\
+	sed -e 's/|/,/g' | \
+	sed -e 's/"//g' > $dbdir/taxonomy/names_clean.dmp
+fi
