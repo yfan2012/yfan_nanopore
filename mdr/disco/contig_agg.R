@@ -1,9 +1,12 @@
 library(tidyverse)
+library(gplots)
 library(umap)
 source('~/Code/yfan_nanopore/mdr/qc/barcode_plot_functions.R')
 
-datadir='/mithril/Data/Nanopore/projects/methbin/disco/barcode'
-dbxdir='~/Dropbox/timplab_data/mdr/disco'
+discodir='/mithril/Data/Nanopore/projects/methbin/disco'
+datadir=file.path(discodir, 'barcode')
+blastdir=file.path(discodir, 'blast_contigs')
+dbxdir='~/gdrive/mdr/disco'
 
 
 ####contig based single read stuff
@@ -40,6 +43,11 @@ tiginfo=bcfilt %>%
     summarise(across(everything(), mean))
 
 
+####identify contigs
+contiginfofile=file.path(blastdir, 'classify_keys.csv')
+tiglabs=read_csv(contiginfofile)
+
+
 ####try heatmap
 tigscaled=scale(as.data.frame(tiginfo[,2:8]))
 rownames(tigscaled)=tiginfo$chrname
@@ -49,7 +57,6 @@ pdf(heatmappdf, h=10, w=7)
 hm=heatmap(tigscaled, scale='none')
 print(hm)
 dev.off()
-
 
 
 ####try umap
@@ -69,3 +76,27 @@ print(plot)
 dev.off()
 
 
+
+####heatmap with labels
+tiginfolab=tiginfo %>%
+    rowwise() %>%
+    filter(chrname %in% tiglabs$tig) %>%
+    mutate(label=tiglabs$name[which(tiglabs$tig==chrname)])
+
+unscaledhm=as.matrix(tiginfolab[,2:8])
+rownames(unscaledhm)=tiginfolab$label
+
+
+distmat=dist(unscaledhm, method='euclidean')
+hclustavg=hclust(distmat, method='average')
+
+heatmappdf=file.path(dbxdir, 'contig_heatmap_unscaled.pdf')
+pdf(heatmappdf, h=10, w=7)
+hm=heatmap(unscaledhm, scale='none')
+print(hm)
+dev.off()
+
+clustpdf=file.path(dbxdir, 'contig_hclust.pdf')
+pdf(clustpdf, h=4, w=25)
+plot(hclustavg)
+dev.off()

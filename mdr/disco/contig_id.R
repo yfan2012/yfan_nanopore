@@ -81,12 +81,51 @@ taxid=read_csv(taxidfile, col_names=taxcols) %>%
     ##apparently there is a genus of stick insect also called Bacillus. filter that out
     filter(id!=55087) %>%
     select(-c(idk, specific))
-
+##load tax tree
+treefile=file.path(dbdir, 'taxonomy', 'nodes_clean.dmp')
+nodecols=c('tid', 'parent', 'rank', 'embl', 'divid', 'inheritdiv', 'genid', 'GC', 'mito', 'mgc', 'gb', 'hidden', 'comment', 'idk')
+tree=read_csv(treefile, col_names=nodecols) %>%
+    select(tid, parent)
+    
 idinfo=mergecollapse %>%
     rowwise() %>%
-    mutate(a=case_when(length(which(g==taxid$name))==1 ~ taxid$id[which(g==taxid$name)],
+    mutate(taxid=case_when(length(which(g==taxid$name))==1 ~ taxid$id[which(g==taxid$name)][1],
                        length(which(g==taxid$name))==0 & length(which(paste0(g, ' ', s)==taxid$name))==1
                        ~ taxid$id[which(paste0(g, ' ', s)==taxid$name)][1]))
 
+followback <- function(tid, tree) {
+    ids=c(tid)
+    lastid=tail(ids, n=1)
+    newid=0
+    while (newid!=lastid) {
+        lastid=tail(ids, n=1)
+        newid=tree$parent[which(tree$tid==lastid)]
+        ids=c(ids, newid)
+    }
+    return(ids)
+}
 
+find_lca <- function(block, tree) {
+    ##find lowest common ancestor of contig
+    taxlist=followback(block$taxid[1], tree)
+    if (dim(block)[1]>1) {
+        for (i in 2:length(block$taxid)) {
+            newlist=followback(block$taxid[i], tree)
+            keepafter=which(taxlist %in% newlist)[1]
+            end=length(taxlist)
+            taxlist=taxlist[keepafter:end]
+        }
+    }
+    result=tibble(tig=block$tig[1], id=taxlist[1])
+    return(result)
+}
+
+classified=idinfo %>%
+    group_by(tig) %>%
+    do(find_lca(.,tree)) %>%
+    rowwise() %>%
+    mutate(name=taxid$name[which(taxid$id==id)])
+
+classkeyfile=file.path(datadir, 'blast_contigs', 'classify_keys.csv')
+write_csv(classified, classkeyfile)
                        
