@@ -75,3 +75,7 @@ species_motifs=rebase %>%
 motifs=unique(species_motifs$Specificity)
 
 
+genomelist=tibble(acc=unique(rebase$GenBank))
+methdbdir='/atium/Data/ref/mtases'
+listfile=file.path(methdbdir, 'genomelist.txt')
+write_tsv(genomelist, listfile, col_names=FALSE)

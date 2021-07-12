@@ -91,4 +91,9 @@ if [ $1 == clean_taxo ] ; then
     sed -e 's/[\t]*//g' $dbdir/taxonomy/names.dmp |\
 	sed -e 's/|/,/g' | \
 	sed -e 's/"//g' > $dbdir/taxonomy/names_clean.dmp
+
+    sed -e 's/[\t*]//g' $dbdir/taxonomy/nodes.dmp |\
+	sed -e 's/|/,/g' > $dbdir/taxonomy/nodes_clean.dmp
 fi
+
+
