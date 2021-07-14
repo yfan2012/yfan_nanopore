@@ -47,3 +47,33 @@ if [ $1 == crossmap ] ; then
     samtools index $datadir/compare/st31_vs_st90853/align/st90853.st31reads.sorted.bam
 fi
     
+if [ $1 == last_mummer ] ; then
+    ##compare everything to the perfect st90853 to see if any broken tigs can be joined
+
+    ref=$datadir/st90853/final/st90853.final2.fasta
+    
+    for i in st31.final st5317.final2 ;
+    do
+	strain=`echo $i | cut -d "." -f 1`
+	mumdir=$datadir/$strain/mummer_against_st90853
+	mkdir -p $mumdir
+	
+	nucmer \
+	    -p $mumdir/${strain}_against_st90853 \
+	    $ref \
+	    $datadir/$strain/final/$i.fasta
+	
+	mummerplot --filter --fat --postscript \
+		   -p $mumdir/${strain}_against_st90853 \
+		   $mumdir/${strain}_against_st90853.delta
+	mummerplot --filter --fat --png \
+		   -p $mumdir/${strain}_against_st90853 \
+		   $mumdir/${strain}_against_st90853.delta
+	dnadiff \
+	    -p $mumdir/${strain}_against_st90853 \
+	    $ref \
+	    $datadir/$strain/final/$i.fasta
+    done
+fi
+
+    
