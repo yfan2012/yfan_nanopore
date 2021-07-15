@@ -36,7 +36,7 @@ names(missing)=c("tig38_RagTag_break1")
 
 
 ####cat together
-newgenome=c(genome[-c(7,17)], newmito, missing)
+newgenome=c(genome[-c(7,17)], newmito, missing, newtig)
 newgenomefile=file.path(datadir, 'final/st5317.final2.fasta')
 writeXStringSet(newgenome, newgenomefile)
 
