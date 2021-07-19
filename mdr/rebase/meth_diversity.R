@@ -61,6 +61,7 @@ for (i in datasets) {
     setreport=read_tsv(reportfile, col_names=reportcols)
     krakeninfo=bind_rows(krakeninfo, setreport)
 }
+
 speciesinfo=krakeninfo %>%
     group_by(name) %>%
     summarise(name=name[1], rank=rank[1], prevalance=sum(percent)) %>%
