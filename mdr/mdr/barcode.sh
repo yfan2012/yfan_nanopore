@@ -1,8 +1,10 @@
 #!/bin/bash
 
 ssddir=~/data/mdr/mdr
-datadir=/mithril/Data/Nanopore/projects/methbin/disco
+datadir=/mithril/Data/Nanopore/projects/methbin/mdr
 prefix=200708_mdr_stool16native
+
+ref=$datadir/ref/mdr_refs.fa
 
 if [ $1 == megaidx ] ; then
     python3 ~/Code/yfan_meth/utils/megalodon_mod_basecalls_idx.py \
@@ -24,24 +26,22 @@ if [ $1 == guppy_call ] ; then
     
 fi
 
-if [ $1 == barcode ] ; then
-    mkdir -p $ssddir/barcode
-    for i in $samps ;
-    do
-	mkdir -p $ssddir/barcode/$i
-	{ time python ~/Code/yfan_meth/utils/megalodon_barcode.py \
-               -m $ssddir/megalodon/$i/per_read_modified_base_calls.txt \
-               -i $ssddir/megalodon/$i/per_read_modified_base_calls.txt.idx \
-               -r $ref \
-               -b ~/Code/yfan_nanopore/mdr/disco/disco_barcodes.txt \
-               -o $ssddir/barcode/$i/${i}_barcodes.txt \
-               -t 36 ;} &> $ssddir/barcode/$i/${i}_time.txt
-    done
-fi
-
-
 if [ $1 == copy ] ; then
-    cp -r $ssddir/barcode $datadir/
     cp -r $ssddir/called $datadir/
     cp -r $ssddir/megalodon $datadir/
 fi
+
+
+if [ $1 == barcode ] ; then
+    mkdir -p $datadir/barcode
+    mkdir -p $datadir/barcode/$prefix
+    { time python ~/Code/yfan_meth/utils/megalodon_barcode.py \
+           -m $datadir/megalodon/$prefix/per_read_modified_base_calls.txt \
+           -i $datadir/megalodon/$prefix/per_read_modified_base_calls.txt.idx \
+           -r $ref \
+           -b ~/Code/yfan_nanopore/mdr/rebase/barcodes15.txt \
+           -o $datadir/barcode/$prefix/${prefix}_barcodes.txt \
+           -t 12 ;} &> $datadir/barcode/$prefix/${prefix}_time.txt
+fi
+
+

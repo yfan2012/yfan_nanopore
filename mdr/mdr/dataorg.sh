@@ -34,7 +34,7 @@ if [ $1 == ref ] ; then
 
     wget https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/949/455/GCF_000949455.1_ASM94945v1/GCF_000949455.1_ASM94945v1_genomic.fna.gz -O ruthenibacterium_lactatiformans.fa.gz
     
-    cat *fa.gz > mdr_refs.fasta.gz
+    cat *fa.gz > mdr_refs.fa.gz
 fi
 
 dbdir=/atium/Data/ref/bacteria
@@ -97,3 +97,45 @@ if [ $1 == clean_taxo ] ; then
 fi
 
 
+if [ $1 == getplasmids ] ; then
+    prefix=200708_mdr_stool16native
+    acclist=`awk '(NR>1) {print $13}' $datadir/amr/$prefix.plasmidfinder.tsv`
+    for i in $acclist ;
+    do
+	esearch -db nuccore -query $i | efetch -format fasta > $datadir/ref/$i.fa
+    done
+fi
+
+if [ $1 == lastfaecalis ] ; then
+    ##one of the plasmid finder hits above I think is this facalis
+    for i in 0 1 2 3 4 5 6 ;
+    do
+	acc=CP00662${i}
+	esearch -db nuccore -query $acc | efetch -format fasta > $datadir/ref/$acc.fa
+    done
+fi
+
+if [ $1 == mergerefs ] ; then
+    cat $datadir/ref/*.fa > $datadir/ref/mdr_refs_plas.fa
+fi
+
+if [ $1 == mummer ] ; then
+    mkdir -p $datadir/ref/mummer_self
+
+    nucmer \
+	-p $datadir/ref/mummer_self/mdr_refs_plas \
+	$datadir/ref/mdr_refs_plas.fa \
+	$datadir/ref/mdr_refs_plas.fa
+
+    mummerplot --postscript \
+	       -p $datadir/ref/mummer_self/mdr_refs_plas \
+	       $datadir/ref/mummer_self/mdr_refs_plas.delta
+
+    dnadiff \
+	-p $datadir/ref/mummer_self/mdr_refs_plas \
+	$datadir/ref/mdr_refs_plas.fa \
+	$datadir/ref/mdr_refs_plas.fa
+
+    show-coords -l -T $datadir/ref/mummer_self/mdr_refs_plas.delta \
+		> $datadir/ref/mummer_self/mdr_refs_plas.sc.tsv
+fi

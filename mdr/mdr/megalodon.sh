@@ -5,10 +5,10 @@ datadir=/mithril/Data/Nanopore/projects/methbin/mdr
 i=200708_mdr_stool16native
 
 
-ref=$datadir/ref/mdr_refs.fasta
+ref=$datadir/ref/mdr_refs.fa
 if [ $1 == makeref ] ; then
     ##probs not strictly needed idk
-    gunzip $datadir/ref/mdr_refs.fasta.gz
+    gunzip $datadir/ref/mdr_refs.fa.gz
 fi
 
 
