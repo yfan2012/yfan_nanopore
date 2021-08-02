@@ -31,6 +31,9 @@ if [ $1 == copy ] ; then
     cp -r $ssddir/megalodon $datadir/
 fi
 
+if [ $1 == copy_mega ] ; then
+    cp -r $ssddir/megalodon $datadir/
+fi
 
 if [ $1 == barcode ] ; then
     mkdir -p $datadir/barcode
@@ -44,4 +47,23 @@ if [ $1 == barcode ] ; then
            -t 12 ;} &> $datadir/barcode/$prefix/${prefix}_time.txt
 fi
 
+if [ $1 == align ] ; then
+    mkdir -p $datadir/align
+    
+    fq=$datadir/fastqs/$prefix.fq.gz
+    minimap2 -t 36 -x map-ont $ref $fq \
+	     > $datadir/align/$prefix.paf
+fi
 
+
+if [ $1 == motifcounts ] ; then
+    
+    python ~/Code/yfan_meth/utils/megalodon_barcode_filter.py \
+	   -r $ref \
+	   -b ~/Code/yfan_nanopore/mdr/rebase/barcodes15.txt \
+	   -a $datadir/align/$prefix.paf \
+	   -m $datadir/barcode/${prefix}_barcodes.txt \
+	   -o $datadir/barcode/${prefix}_barcodes_motifcounts.txt \
+	   -q 40 \
+	   -v
+fi

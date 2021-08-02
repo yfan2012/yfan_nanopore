@@ -12,22 +12,7 @@ dbxdir='~/gdrive/mdr/zymo'
 
 conds=c('10', '15', '20')
 
-checkfilt <- function(chrblock, num, countsfilter) {
-    ##subsample reads from chr
-    blockfilt=countsfilter %>%
-        filter(chrname==chrblock$chrname[1])
-    sub=tibble()
-    read=1
-    while (dim(sub)[1]<num && read<dim(chrblock)[1]) {
-        readinfo=chrblock[read,]
-        read=read+1
-        if (readinfo$readname %in% blockfilt$readname) {
-            sub=bind_rows(sub, readinfo)
-        }
-    }
-    print(chrblock$chrname[1])
-    return(sub)
-}
+
 cluster_copy(cluster, 'checkfilt')
 
 
