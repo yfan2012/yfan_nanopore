@@ -107,9 +107,9 @@ if [ $1 == busco ] ; then
     do
 	mkdir -p $datadir/$i/busco
 
-	for asm in $datadir/$i/genomes_final/*fasta ;
+	for asm in $datadir/$i/final/*final2.fasta ;
 	do
-	    prefix=`basename $asm .final.fasta`
+	    prefix=`basename $asm .final2.fasta`
 	    mkdir -p $datadir/$i/busco/$prefix
 	    busco \
 		-m genome \

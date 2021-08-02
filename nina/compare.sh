@@ -77,3 +77,30 @@ if [ $1 == last_mummer ] ; then
 fi
 
     
+if [ $1 == final_crossmap ] ; then
+    
+    a=st31
+    b=st90853
+    ##b=st31
+    ##a=st90853
+    mkdir -p $datadir/compare_final/
+    for a in st31 st90853 ;
+    do
+	for b in st31 st90853 ;
+	do
+	    
+	    mkdir -p $datadir/compare_final/${a}_vs_${b}
+	    mkdir -p $datadir/compare_final/${a}_vs_${b}/align
+	    
+	    genomea=$datadir/$a/final/$a.final2.fasta
+	    readsa=$datadir/$a/reads/ont/${a}_long.fastq.gz 
+	    genomeb=$datadir/$b/final/$b.final2.fasta
+	    readsb=$datadir/$b/reads/ont/${b}_long.fastq.gz
+	    
+	    minimap2 -t 36 -ax map-ont $genomea $readsb |
+		samtools view -@ 36 -b |
+		samtools sort -@ 36 -o $datadir/compare_final/${a}_vs_${b}/align/$a.${b}reads.sorted.bam
+	    samtools index $datadir/compare_final/${a}_vs_${b}/align/$a.${b}reads.sorted.bam
+	done
+    done
+fi

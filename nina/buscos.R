@@ -3,7 +3,7 @@ source('prolificans_asm_functions.R')
 library(ggforce)
 
 datadir='/pym/Data/Nanopore/projects/prolificans'
-dbxdir='~/Dropbox/timplab_data/prolificans'
+dbxdir='~/gdrive/prolificans'
 
 
 strains=c('st31', 'st90853', 'st5317')
@@ -172,3 +172,34 @@ missingall=trinitymissing %>%
     filter(buscoid %in% tscriptmissing$buscoid)
 totalmissing=file.path(dbxdir, 'missing_buscos_genome_and_transcriptome.tsv')
 write_tsv(missingall, totalmissing)
+
+
+
+
+allbuscos=tibble(
+    status=as.character(),
+    sum=as.numeric(),
+    asm=as.character())
+for (i in strains) {
+    buscofile=file.path(datadir, i, 'busco', i, i, '/run_sordariomycetes_odb10/full_table.tsv')
+    busco=read_tsv(buscofile, comment='#', col_names=busco_cols) %>%
+        group_by(status) %>%
+        summarise(sum=length(unique(buscoid))) %>%
+        mutate(asm=i)
+    allbuscos=bind_rows(allbuscos, busco)
+}
+
+buscoplot=file.path(dbxdir, 'busco_genome_final.pdf')
+pdf(buscoplot, height=8, width=19)
+barplot=ggplot(allbuscos, aes(x=sum, y=asm, fill=status, alpha=.8)) +
+    geom_col() +
+    scale_fill_brewer(palette = "Set2") +
+    ggtitle('BUSCO') +
+    ylab('Genome') +
+    xlab('Number of BUSCOs') +
+    theme_bw()
+print(barplot)
+dev.off()
+
+buscofinalcsv=file.path(dbxdir, 'busco_genome_final.csv')
+write_csv(allbuscos, buscofinalcsv)
