@@ -40,3 +40,14 @@ if [ $1 == amr ] ; then
     done
 fi
 
+spadesasm=/uru/Data/Nanopore/projects/mdr/MDRstool_16/metaspades/181127_hiC_stool_shotgun.contigs.fasta
+if [ $1 == illumina_amr ] ; then
+    prefix=`basename $spadesasm .contigs.fasta`
+    for i in ecoh card ncbi resfinder plasmidfinder vfdb ecoli_vf megares argannot ;
+    do
+	abricate \
+	    --threads 36 \
+	    --db $i \
+	    $spadesasm > $datadir/amr/$prefix.$i.tsv
+    done
+fi
