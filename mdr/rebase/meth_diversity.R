@@ -32,6 +32,8 @@ top15file=file.path(srcdir, 'barcodes15.txt')
 write_tsv(motifcounts[1:15,1], top15file, col_names=FALSE)
 top20file=file.path(srcdir, 'barcodes20.txt')
 write_tsv(motifcounts[1:21,1], top20file, col_names=FALSE)
+top50file=file.path(srcdir, 'barcodes50.txt')
+write_tsv(motifcounts[1:50,1], top50file, col_names=FALSE)
 
 countsfile=file.path(dbxdir, 'motif_abundance.pdf')
 pdf(countsfile, h=9, w=15)
