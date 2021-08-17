@@ -58,5 +58,14 @@ if [ $1 == illumina_amr ] ; then
     done
 fi
    
-	      
+if [ $1 == blast ] ; then
+    mkdir -p $datadir/blast_contigs
+
+    blastn \
+	-num_threads 36 \
+	-query $spadesasm \
+	-db /atium/Data/ref/ncbi/nt \
+	-outfmt 7 \
+	-out $datadir/blast_contigs/$prefix.tsv
+fi
     
