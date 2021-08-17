@@ -139,3 +139,13 @@ if [ $1 == mummer ] ; then
     show-coords -l -T $datadir/ref/mummer_self/mdr_refs_plas.delta \
 		> $datadir/ref/mummer_self/mdr_refs_plas.sc.tsv
 fi
+
+
+if [ $1 == dl_nt_ncbi ] ; then
+    ##download nt database for blasting
+    ##written after the fact - downloaded on board winry first and moved, but this is the line of code
+    mkdir -p /atium/Data/ref/ncbi
+    cd /atium/Data/ref/ncbi
+
+    update_blastdb.pl --decompress --num_threads 12 nt
+fi
