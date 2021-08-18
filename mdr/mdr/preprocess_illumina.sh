@@ -68,4 +68,4 @@ if [ $1 == blast ] ; then
 	-outfmt 7 \
 	-out $datadir/blast_contigs/$prefix.tsv
 fi
-    
+

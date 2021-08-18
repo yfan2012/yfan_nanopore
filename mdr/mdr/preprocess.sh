@@ -41,3 +41,16 @@ if [ $1 == amr ] ; then
 fi
 
 
+if [ $1 == blastreads ] ; then
+    mkdir -p $datadir/blast_reads
+
+    seqtk seq -a $datadir/fastqs/$prefix.fq.gz > $datadir/fastqs/$prefix.fasta
+    
+    blastn \
+	-num_threads 36 \
+	-query $datadir/fastqs/$prefix.fasta \
+	-db /atium/Data/ref/ncbi/nt \
+	-outfmt 7 \
+	-out $datadir/blast_reads/$prefix.reads.tsv
+fi
+    
