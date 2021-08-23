@@ -96,9 +96,8 @@ if [ $1 == clean_taxo ] ; then
 	sed -e 's/|/,/g' > $dbdir/taxonomy/nodes_clean.dmp
 fi
 
-
+prefix=200708_mdr_stool16native
 if [ $1 == getplasmids ] ; then
-    prefix=200708_mdr_stool16native
     acclist=`awk '(NR>1) {print $13}' $datadir/amr/$prefix.plasmidfinder.tsv`
     for i in $acclist ;
     do
@@ -149,3 +148,43 @@ if [ $1 == dl_nt_ncbi ] ; then
 
     update_blastdb.pl --decompress --num_threads 12 nt
 fi
+
+
+if [ $1 == dl_nt_fa ] ; then
+    ##download the fasta of the nt database
+    ##done at command line and recorded after the fact
+    wget https://ftp.ncbi.nlm.nih.gov/blast/db/FASTA/nt.gz -O /atium/Data/ref/ncbi/nt.gz
+fi
+
+
+if [ $1 == minimap_idx ] ; then
+    minimap2 -t 36 -d /atium/Data/ref/ncbi/nt.mmi /atium/Data/ref/ncbi/nt.gz
+fi
+
+dbdir=/atium/Data/ref
+
+if [ $1 == get_mdr_nt ] ; then
+    ##try a different method to get all bacteria
+    ##ecoli taxid is 562
+    ##kleb taxid is 573
+    mkdir -p $dbdir/mdr_nt
+
+    ##get taxid from kraken
+    awk '$5 != 9606 {print $5}' $datadir/kraken/$prefix.report.top40.txt \
+	> $dbdir/mdr_nt/mdr_nt.taxid.txt
+
+    ##get accessions
+    touch $dbdir/mdr_nt/mdr_nt.acc.txt
+    part=`echo $i | rev | cut -d _ -f 1 | rev`
+    while read p; do
+	echo $p
+	blastdbcmd -db $dbdir/ncbi/nt -outfmt "%T %t %a" -entry all \
+	    | awk -v var="$p" '$1 == var {print $0}' \
+	    | grep 'plasmid\|chromosome\|genome' \
+	    | grep complete \
+	    | grep -v -w gene \
+	    | grep -v -w genes \
+	    | awk '{print $NF}' >> $dbdir/mdr_nt/mdr_nt.acc.txt
+    done < $dbdir/mdr_nt/mdr_nt.taxid.txt
+fi
+

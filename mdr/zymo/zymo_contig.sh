@@ -17,9 +17,9 @@ if [ $1 == assemble ] ; then
 	-o $datadir/flye/$prefix \
 	-t 36 \
 	-g 100m \
-	--plasmids \
 	--meta
     mv $datadir/flye/$prefix/assembly.fasta $datadir/flye/$prefix/$prefix.fasta
+    ##was rerun with v2.9
 fi
 
 

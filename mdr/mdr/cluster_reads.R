@@ -2,6 +2,7 @@ library(tidyverse)
 library(umap)
 library(multidplyr)
 source('~/Code/yfan_nanopore/mdr/qc/barcode_plot_functions.R')
+source('~/Code/yfan_nanopore/mdr/mdr/cluster_functions.R')
 
 cluster=new_cluster(6)
 cluster_library(cluster, 'tidyverse')
@@ -17,7 +18,7 @@ bc_cols=c('readname', 'chrname', motifinfo$X1)
 
 barcodedatafile=file.path(datadir, 'barcode', prefix, paste0(prefix, '_barcodes.txt'))
 fullbcinfo=read_tsv(barcodedatafile, col_names=bc_cols, na=c('None'))
-barcodecountsfile=file.path(datadir, 'barcode', paste0(prefix, '_barcodes_motifcounts.txt'))
+barcodecountsfile=file.path(datadir, 'barcode', prefix,paste0(prefix, '_barcodes_motifcounts.txt'))
 fullbccounts=read_tsv(barcodecountsfile, col_names=bc_cols)
 
 ##chr vs plasmid labels
