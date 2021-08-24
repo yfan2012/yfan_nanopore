@@ -2,9 +2,11 @@
 
 ssddir=~/data/mdr/mdr
 datadir=/mithril/Data/Nanopore/projects/methbin/mdr
+dbdir=/atium/Data/ref/mdr_nt
 prefix=200708_mdr_stool16native
 
-ref=$datadir/ref/mdr_refs.fa
+oldref=$datadir/ref/mdr_refs.fa
+ref=$dbdir/mdr_reduced.fa
 
 if [ $1 == megaidx ] ; then
     python3 ~/Code/yfan_meth/utils/megalodon_mod_basecalls_idx.py \

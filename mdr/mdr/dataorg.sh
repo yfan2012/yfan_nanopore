@@ -188,3 +188,11 @@ if [ $1 == get_mdr_nt ] ; then
     done < $dbdir/mdr_nt/mdr_nt.taxid.txt
 fi
 
+
+if [ $1 == dl_fasta_nt ] ; then
+    ##actually download sequences
+    blastdbcmd \
+	-entry_batch $dbdir/mdr_nt/mdr_nt.acc.txt \
+	-db $dbdir/ncbi/nt \
+	-out $dbdir/mdr_nt/mdr_nt.fa
+fi
