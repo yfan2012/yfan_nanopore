@@ -100,6 +100,46 @@ if [ $1 == barcode_polished ] ; then
            -t 12 ;} &> $datadir/barcode/${prefix}_polished/${prefix}_contigs_barcodes15_time.txt
 fi
 
+if [ $1 == align_polished ] ; then
+    minimap2 -t 36 -x map-ont $datadir/medaka/consensus.fasta $datadir/fastq/$prefix/$prefix.fq.gz \
+	     > $datadir/align/${prefix}_polished.paf
+    
+    minimap2 -t 36 -ax map-ont $datadir/medaka/consensus.fasta $datadir/fastq/$prefix/$prefix.fq.gz | \
+	samtools view -@ 36 -b | \
+	samtools sort -@ 36 -o $datadir/align/${prefix}_polished.sorted.bam
+    samtools index $datadir/align/${prefix}_polished.sorted.bam
+fi
+
+if [ $1 == motifcounts_polished ] ; then
+    python ~/Code/yfan_meth/utils/megalodon_barcode_filter.py \
+	   -r $datadir/medaka/consensus.fasta \
+	   -b ~/Code/yfan_nanopore/mdr/rebase/barcodes15.txt \
+	   -a $datadir/align/${prefix}_polished.paf \
+	   -m $datadir/barcode/${prefix}_polished/${prefix}_barcodes15.txt \
+	   -o $datadir/barcode/${prefix}_polished/${prefix}_barcodes15_motifcounts.txt \
+	   -q 40
+fi
+		       
+if [ $1 == makeblastdb ] ; then
+    name=`echo $ref | cut -d . -f 1`
+    makeblastdb \
+	-in $ref \
+	-out $name \
+	-dbtype nucl
+fi
+
+if [ $1 == blast_polished ] ; then
+    name=`echo $ref | cut -d . -f 1`
+    blastn \
+	-num_threads 36 \
+	-query $datadir/medaka/consensus.fasta \
+	-db $name \
+	-outfmt 7 \
+	-out $datadir/barcode/${prefix}_polished/${prefix}_polished_blast.tsv
+fi
+
+	
+    
 
 asm=$datadir/flye/$prefix/$prefix.fasta
 if [ $1 == megalodon ] ; then
