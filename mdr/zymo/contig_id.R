@@ -1,8 +1,10 @@
 library(tidyverse)
+library(Biostrings)
 source('~/Code/yfan_nanopore/mdr/disco/contig_id_functions.R')
 
 prefix='20190809_zymo_control_polished'
-datadir=file.path('/mithril/Data/Nanopore/projects/methbin/zymo/barcode', prefix)
+projdir='/mithril/Data/Nanopore/projects/methbin/zymo'
+datadir=file.path(projdir,'barcode', prefix)
 
 
 blasttsv=file.path(datadir, paste0(prefix, '_blast.tsv'))
@@ -21,5 +23,18 @@ key=merged %>%
     group_by(tig) %>%
     summarise(species=case_when(length(table(org))==1 ~ org[1], TRUE ~ 'mixed')) %>%
     filter(species!='yeast')
+##using mummer (zymo_contig.sh), figured out that there actually is a 35kb section shared by listeria/faecalis
+key$species[key$tig=='contig_64']='Enterococcus_faecalis_complete_genome'
+key$species[key$tig=='contig_65']='Listeria_monocytogenes_complete_genome'
 
+keyfile=file.path(projdir, 'medaka/consensus_key.csv')
+write_csv(key, keyfile)
+
+asmfile=file.path(projdir, 'medaka/consensus.fasta')
+asmraw=readDNAStringSet(asmfile, format='fasta')
+asm=asmraw[key$tig]
+names(asm)=key$species
+
+newasmfile=file.path(projdir, 'medaka/consensus_bacteria.fasta')
+writeXStringSet(asm, newasmfile)
 

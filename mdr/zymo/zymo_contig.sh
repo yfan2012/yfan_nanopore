@@ -138,9 +138,68 @@ if [ $1 == blast_polished ] ; then
 	-out $datadir/barcode/${prefix}_polished/${prefix}_polished_blast.tsv
 fi
 
-	
+if [ $1 == mummer_check_asm ] ; then
+    ref=/uru/Data/Nanopore/projects/read_class/zymo/ref/zymo_all.fa
+    asm=$datadir/medaka/consensus.fasta
+    
+    mkdir -p $datadir/mummer
+
+    nucmer \
+	-p $datadir/mummer/polished_ref \
+	$asm \
+	$ref
+    
+    mummerplot --filter --fat --png \
+	       -p $datadir/mummer/polished_ref \
+	       $datadir/mummer/polished_ref.delta
+
+    dnadiff \
+	-p $datadir/mummer/polished_ref \
+	$asm \
+	$ref
+    
+fi
+
+if [ $1 == mummer_listeria ] ; then
+    ##from asm and blast, it looks like listeria and faecalis have a 35kb region like exactly in common
+    refdir=/uru/Data/Nanopore/projects/read_class/zymo/ref/D6322.refseq/Genomes
+    listeria=$refdir/Listeria_monocytogenes_complete_genome.fasta
+    faecalis=$refdir/Enterococcus_faecalis_complete_genome.fasta
+
+    nucmer \
+	-p $datadir/mummer/listeria_faecalis \
+	$listeria \
+	$faecalis
+    
+    mummerplot --filter --fat --png \
+	       -p $datadir/mummer/listeria_faecalis \
+	       $datadir/mummer/listeria_faecalis.delta
+    
+    dnadiff \
+	-p $datadir/mummer/listeria_faecalis \
+	$listeria \
+	$faecalis
+fi
+
+if [ $1 == id_contigs ] ; then
+    Rscript contig_id.R
+fi
+
+if [ $1 == align_polished ] ; then
+    mkdir -p $datadir/align_polished
+
+    minimap2 -t 36 -ax map-ont $datadir/medaka/consensus_bacteria.fasta $fq \
+	| samtools view -@ 36 -b \
+	| samtools sort -@ 36 -o $datadir/align_polished/$prefix.sorted.bam
+    samtools index $datadir/align_polished/$prefix.sorted.bam
+
+    minimap2 -t 36 -x map-ont $datadir/medaka/consensus_bacteria.fasta $fq \
+	     > $datadir/align_polished/$prefix.paf
+fi
+
     
 
+################################################################
 asm=$datadir/flye/$prefix/$prefix.fasta
 if [ $1 == megalodon ] ; then
     mkdir -p $ssddir/megalodon
