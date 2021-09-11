@@ -100,6 +100,18 @@ if [ $1 == barcode_polished ] ; then
            -t 12 ;} &> $datadir/barcode/${prefix}_polished/${prefix}_contigs_barcodes15_time.txt
 fi
 
+if [ $1 == barcode_polished_50 ] ; then
+    mkdir -p $datadir/barcode/${prefix}_polished
+    { time python ~/Code/yfan_meth/utils/megalodon_barcode.py \
+           -m $datadir/megalodon/${prefix}_polished/per_read_modified_base_calls.txt \
+           -i $datadir/megalodon/${prefix}_polished/per_read_modified_base_calls.txt.idx \
+           -r $datadir/medaka/consensus.fasta \
+           -b ~/Code/yfan_nanopore/mdr/rebase/barcodes50.txt \
+           -o $datadir/barcode/${prefix}_polished/${prefix}_contigs_barcodes50.txt \
+           -t 36 ;} &> $datadir/barcode/${prefix}_polished/${prefix}_contigs_barcodes50_time.txt
+fi
+
+
 if [ $1 == align_polished ] ; then
     minimap2 -t 36 -x map-ont $datadir/medaka/consensus.fasta $datadir/fastq/$prefix/$prefix.fq.gz \
 	     > $datadir/align/${prefix}_polished.paf
@@ -119,7 +131,18 @@ if [ $1 == motifcounts_polished ] ; then
 	   -o $datadir/barcode/${prefix}_polished/${prefix}_barcodes15_motifcounts.txt \
 	   -q 40
 fi
-		       
+
+if [ $1 == motifcounts_polished_50 ] ; then
+    python ~/Code/yfan_meth/utils/megalodon_barcode_filter.py \
+	   -r $datadir/medaka/consensus.fasta \
+	   -b ~/Code/yfan_nanopore/mdr/rebase/barcodes50.txt \
+	   -a $datadir/align/${prefix}_polished.paf \
+	   -m $datadir/barcode/${prefix}_polished/${prefix}_barcodes50.txt \
+	   -o $datadir/barcode/${prefix}_polished/${prefix}_barcodes50_motifcounts.txt \
+	   -q 40
+fi
+
+
 if [ $1 == makeblastdb ] ; then
     name=`echo $ref | cut -d . -f 1`
     makeblastdb \
@@ -242,3 +265,4 @@ if [ $1 == barcode_common ] ; then
            -t 36 ;} &> $datadir/barcode/${prefix}_meta/${prefix}_contigs_barcodes15_time.txt
 fi
     
+
