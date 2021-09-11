@@ -19,42 +19,8 @@ if [ $1 == dlref ] ; then
 fi
 
 if [ $1 == catref ] ; then
-    cat $datadir/ref/ecoli.fa.gz $datadir/ref/pJW792.fa.gz $datadir/ref/staph.fa.gz > $datadir/ref/allrefs.fa.gz
+    cat $datadir/ref/ecoli.fa.gz $datadir/ref/pLZ12-pGG32.fa.gz $datadir/ref/staph.fa.gz > $datadir/ref/allrefs.fa.gz
     gunzip $datadir/ref/allrefs.fa.gz
 fi
 
-if [ $1 == untar ] ; then
-    mkdir -p $ssddir/raw
-    tar -xzf $rawdir/$prefix.tar.gz -C $ssddir/raw/
-fi
-
-if [ $1 == slim ] ; then
-    ##assumes tarball is appropriately exploded
-    ##delete things that aren't in the subset so analysis doesn't take forever
-    
-    npid=`basename $ssddir/raw/$prefix/no_sample/*/fast5_pass/*_0.fast5 _0.fast5`
-    for i in 0 1 2 3 4 ;
-    do
-	rm $ssddir/raw/$prefix/no_sample/*/fast5_pass/$npid*_$i*.fast5
-    done
-
-    for i in 5 6 7 8 9 ;
-    do
-	rm $ssddir/raw/$prefix/no_sample/*/fast5_pass/$npid*_$i.fast5
-    done
-
-    for i in {50..99} ;
-    do
-	rm $ssddir/raw/$prefix/no_sample/*/fast5_pass/$npid*_$i.fast5
-    done
-fi
-	
-if [ $1 == subset ] ; then
-    ##grab subset of 2 million reads for toying with later, just in case it's needed
-    ##do this after the 'slim' step above
-    mkdir -p $datadir/raw_subset
-    mkdir -p $datadir/raw_subset/$prefix
-
-    cp $ssddir/raw/$prefix/no_sample/*/fast5_pass/*.fast5 $datadir/raw_subset/$prefix/
-fi
    

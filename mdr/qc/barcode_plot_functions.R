@@ -19,7 +19,7 @@ checkfilt <- function(chrblock, num, countsfilter) {
     return(sub)
 }
 
-plot_umap <- function(layout, labels, xlim=NULL, ylim=NULL, alpha=NULL) {
+plot_umap <- function(layout, labels, xlim=NULL, ylim=NULL, alpha=NULL, size=NULL) {
     data=tibble(x=layout[,1],
                 y=layout[,2],
                 label=labels)
@@ -28,14 +28,17 @@ plot_umap <- function(layout, labels, xlim=NULL, ylim=NULL, alpha=NULL) {
     if (missing(alpha)) {
         alpha=.2
     }
+    if (missing(size)) {
+        size=.1
+    }
     if (missing(xlim)) {
         plot=ggplot(data, aes(x=x, y=y, colour=label)) +
-            geom_point(alpha=alpha, size=.1) +
+            geom_point(alpha=alpha, size=size) +
             scale_colour_manual(values=mycolors) +
             theme_bw()
     }else{
         plot=ggplot(data, aes(x=x, y=y, colour=label)) +
-            geom_point(alpha=alpha, size=.1) +
+            geom_point(alpha=alpha, size=size) +
             xlim(xlim) +
             ylim(ylim) +
             scale_colour_manual(values=colors) +

@@ -3,11 +3,11 @@
 datadir=/mithril/Data/Nanopore/projects/methbin/barnyard
 ssddir=~/data/mdr/barnyard
 ref=/mithril/Data/Nanopore/projects/methbin/barnyard/ref/allrefs.fa
+name=210730_mdr_barnyard_mix
 
-name=210908_mdr_barnyard_mix
 
 if [ $1 == megaidx ] ; then
-    for i in 1 2 ;
+    for i in 1 2 3 4 ;
     do
 	(prefix=${name}$i
 	python3 ~/Code/yfan_meth/utils/megalodon_mod_basecalls_idx.py \
@@ -16,14 +16,24 @@ if [ $1 == megaidx ] ; then
     done
 fi
 
+if [ $1 == subsetidx ] ; then
+    for i in 1 2 3 4 ;
+    do
+	prefix=${name}$i
+	head $datadir/megalodon/$prefix/per_read_modified_base_calls.txt.idx -n 50000 \
+	     > $datadir/megalodon/$prefix/per_read_modified_base_calls.subset50k.txt.idx
+    done
+fi
+
+	
 if [ $1 == barcode ] ; then
     mkdir -p $datadir/barcode
-    for i in 1 2 ;
+    for i in 1 2 3 4 ;
     do
 	(prefix=${name}$i
 	python ~/Code/yfan_meth/utils/megalodon_barcode.py \
            -m $datadir/megalodon/$prefix/per_read_modified_base_calls.txt \
-           -i $datadir/megalodon/$prefix/per_read_modified_base_calls.txt.idx \
+           -i $datadir/megalodon/$prefix/per_read_modified_base_calls.subset50k.txt.idx \
            -r $ref \
            -b ~/Code/yfan_nanopore/mdr/rebase/barcodes15.txt \
            -o $datadir/barcode/${prefix}_barcodes.txt \
@@ -33,7 +43,7 @@ fi
 
 
 if [ $1 == motifcounts ] ; then
-    for i in 1 2 ;
+    for i in 1 2 3 4 ;
     do
 	(prefix=${name}$i
 	python ~/Code/yfan_meth/utils/megalodon_barcode_filter.py \
