@@ -1,9 +1,10 @@
 library(tidyverse)
 library(umap)
+library(lazyeval)
 library(multidplyr)
 source('~/Code/yfan_nanopore/mdr/qc/barcode_plot_functions.R')
 source('~/Code/yfan_nanopore/mdr/mdr/cluster_functions.R')
-
+source('~/Code/yfan_nanopore/mdr/qc/classify_plasmid_functions.R')
 
 datadir='/mithril/Data/Nanopore/projects/methbin/zymo'
 dbxdir='~/gdrive/mdr/zymo'
@@ -90,3 +91,54 @@ mainplot=plot +
 print(mainplot)
 dev.off()
 
+
+
+
+####plasmid classification
+classinfo=classify_umap_neighbors(embedplas, embedchr, 50)
+
+ecoliplas=classinfo %>%
+    filter(label=='Escherichia_coli_plasmid') %>%
+    gather(key='bacteria', value='count', -x, -y, -label)
+
+staphplas=classinfo %>%
+    filter(label=='Staphylococcus_aureus_plasmid1') %>%
+    gather(key='bacteria', value='count', -x, -y, -label)
+
+
+classifypdf=file.path(dbxdir, 'classify_plasmid_dists.pdf')
+pdf(classifypdf, w=15, h=7)
+ecoliplot=ggplot(ecoliplas, aes(x=count, colour=bacteria, fill=bacteria, alpha=.3)) +
+    geom_histogram(alpha=.1, position='identity') +
+    scale_y_log10() +
+    ggtitle('ecoli') +
+    facet_wrap(~bacteria) +
+    theme_bw()
+print(ecoliplot)
+staphplot=ggplot(staphplas, aes(x=count, colour=bacteria, fill=bacteria, alpha=.3)) +
+    geom_histogram(alpha=.1, position='identity') +
+    scale_y_log10() +
+    ggtitle('staph') +
+    facet_wrap(~bacteria) +
+    theme_bw()
+print(staphplot)
+dev.off()
+
+
+##figure out some percentages about what's correct
+votekey=names(classinfo[4:10])
+classinfo$vote=votekey[max.col(classinfo[,4:10])]
+majority=classinfo %>%
+    select(label, vote, ans) %>%
+    rowwise() %>%
+    mutate(short=strsplit(vote, '_', fixed=TRUE)[[1]][1]) %>%
+    mutate(shorter=strsplit(short, '.', fixed=TRUE)[[1]][1])
+
+classifypdf=file.path(dbxdir, 'classify_plasmid_majority.pdf')
+pdf(classifypdf, w=15, h=7)
+plot=ggplot(majority, aes(x=shorter)) +
+    geom_bar() +
+    facet_wrap(~label) +
+    theme_bw()
+print(plot)
+dev.off()

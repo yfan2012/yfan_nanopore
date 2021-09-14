@@ -1,8 +1,8 @@
 library(tidyverse)
 library(multidplyr)
 
-cluster=new_cluster(6)
-cluster_library(cluster, 'tidyverse')
+#cluster=new_cluster(6)
+#cluster_library(cluster, 'tidyverse')
 
 
 get_distances <- function(plasread, embedchr) {
@@ -25,7 +25,7 @@ get_distances <- function(plasread, embedchr) {
     return(plasclass)
 }
 
-get_classifications_from_umap <- function(embedplas, embedchr, numnear) {
+classify_umap_neighbors <- function(embedplas, embedchr, numnear) {
     ##take each read in embedplas, return classifications of nearest reads in the umap
     ##numnear is how many nearest reads to return
     tigclass=embedplas %>%
@@ -34,3 +34,5 @@ get_classifications_from_umap <- function(embedplas, embedchr, numnear) {
 
     return(tigclass)
 }
+
+
