@@ -23,11 +23,14 @@ bc_cols=c('readname', 'chrname', motifinfo$X1)
 
 universal=c('readname', 'chrname', 'GATC', 'GANTC', 'RAATTY', 'CCTC', 'CATG', 'GTAC')
 
-
 plotfile=file.path(dbxdir, '210908_mixes_chrcheck.pdf')
 pdf(plotfile, w=13, h=7)
-for (i in c(1,2)) {
-    prefix=paste0('210908_mdr_barnyard_mix', as.character(i))
+for (i in c(1,2,3,4)) {
+    if (i %in% c(1,2)) {
+        prefix=paste0('210908_mdr_barnyard_mix', as.character(i))
+    }else{
+        prefix=paste0('210912_mdr_barnyard_mix', as.character(i))
+    }
     barcodefile=file.path(datadir, paste0(prefix, '_barcodes.txt'))
     countsfile=file.path(datadir, paste0(prefix, '_barcodes_motifcounts.txt'))
     fullbcinfo=read_tsv(barcodefile, col_name=bc_cols, na=c('None'))
@@ -77,8 +80,12 @@ dev.off()
 
 plotfile=file.path(dbxdir, '210908_mixes.pdf')
 pdf(plotfile, w=13, h=7)
-for (i in c(1,2)) {
-    prefix=paste0('210908_mdr_barnyard_mix', as.character(i))
+for (i in c(1,2,3,4)) {
+    if (i %in% c(1,2)) {
+        prefix=paste0('210908_mdr_barnyard_mix', as.character(i))
+    }else{
+        prefix=paste0('210912_mdr_barnyard_mix', as.character(i))
+    }
     barcodefile=file.path(datadir, paste0(prefix, '_barcodes.txt'))
     countsfile=file.path(datadir, paste0(prefix, '_barcodes_motifcounts.txt'))
     fullbcinfo=read_tsv(barcodefile, col_name=bc_cols, na=c('None'))

@@ -5,7 +5,9 @@ ssddir=~/data/mdr/barnyard
 ref=/mithril/Data/Nanopore/projects/methbin/barnyard/ref/allrefs.fa
 
 ##prefix=210908_mdr_barnyard_mix1
-prefix=210908_mdr_barnyard_mix2
+##prefix=210908_mdr_barnyard_mix2
+##prefix=210912_mdr_barnyard_mix3
+prefix=210912_mdr_barnyard_mix4
 
 if [ $1 == megalodon ] ; then
     mkdir -p $ssddir/megalodon

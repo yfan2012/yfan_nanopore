@@ -4,10 +4,12 @@ datadir=/mithril/Data/Nanopore/projects/methbin/barnyard
 ssddir=~/data/mdr/barnyard
 ref=/mithril/Data/Nanopore/projects/methbin/barnyard/ref/allrefs.fa
 
-name=210908_mdr_barnyard_mix
+#name=210908_mdr_barnyard_mix
+name=210912_mdr_barnyard_mix
 
 if [ $1 == megaidx ] ; then
-    for i in 1 2 ;
+    ##for i in 1 2 ;
+    for i in 3 4 ;
     do
 	(prefix=${name}$i
 	python3 ~/Code/yfan_meth/utils/megalodon_mod_basecalls_idx.py \
@@ -18,7 +20,8 @@ fi
 
 if [ $1 == barcode ] ; then
     mkdir -p $datadir/barcode
-    for i in 1 2 ;
+    ##for i in 1 2 ;
+    for i in 3 4 ;
     do
 	(prefix=${name}$i
 	python ~/Code/yfan_meth/utils/megalodon_barcode.py \
@@ -33,7 +36,8 @@ fi
 
 
 if [ $1 == motifcounts ] ; then
-    for i in 1 2 ;
+    ##for i in 1 2 ;
+    for i in 3 4 ;
     do
 	(prefix=${name}$i
 	python ~/Code/yfan_meth/utils/megalodon_barcode_filter.py \
