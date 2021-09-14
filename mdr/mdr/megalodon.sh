@@ -33,10 +33,11 @@ if [ $1 == megalodon ] ; then
 fi
 
 
-if [ $1 == megalodon_flye ] ; then
+
+if [ $1 == megalodon_asm ] ; then
     ##run megalodon with the metagenomic asm
     mkdir -p $ssddir/megalodon
-    asm=$datadir/flye/$i/$i.assembly.fasta
+    asm=$datadir/medaka/consensus.fasta
     
     megalodon \
 	$ssddir/raw/$i \

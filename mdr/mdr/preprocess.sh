@@ -27,6 +27,38 @@ if [ $1 == flye ] ; then
     mv $datadir/flye/$prefix/assembly.fasta $datadir/flye/$prefix/$prefix.assembly.fasta
 fi
 
+fq=$datadir/fastqs/200708_mdr_stool16native.fq.gz
+if [ $1 == racon_align ] ; then
+    mkdir -p $datadir/racon
+
+    minimap2 -t 36 -ax map-ont $datadir/flye/$prefix/$prefix.assembly.fasta $fq \
+	| samtools view -@ 36 -b \
+	| samtools sort -@ 36 -o $datadir/racon/${prefix}_asm.sorted.bam
+    samtools index $datadir/racon/${prefix}_asm.sorted.bam
+fi
+
+if [ $1 == racon ] ; then
+    mkdir -p $datadir/racon
+
+    samtools view -@ 36 $datadir/racon/${prefix}_asm.sorted.bam > $datadir/racon/${prefix}_asm.sorted.sam
+    racon -m 8 -x -6 -g -8 -w 500 -t 54\
+	  $fq \
+	  $datadir/racon/${prefix}_asm.sorted.sam \
+	  $datadir/flye/$prefix/$prefix.assembly.fasta > $datadir/racon/$prefix.racon.contigs.fasta
+fi
+
+if [ $1 == medaka ] ; then
+    mkdir -p $datadir/medaka
+
+    medaka_consensus \
+	-i $fq \
+	-d $datadir/racon/$prefix.racon.contigs.fasta \
+	-o $datadir/medaka \
+	-t 54 \
+	-m r941_min_high_g360
+fi
+
+
 if [ $1 == amr ] ; then
     mkdir -p $datadir/amr
 
