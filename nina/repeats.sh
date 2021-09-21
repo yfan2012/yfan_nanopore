@@ -12,3 +12,9 @@ if [ $1 == trf ] ; then
     done
 fi
 	
+
+
+if [ $1 == repeatmodel ] ; then
+    for i in st31 st5317 st90853 ;
+    do
+	
