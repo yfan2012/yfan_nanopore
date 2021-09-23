@@ -55,3 +55,11 @@ if [ $1 == megalodon_asm ] ; then
 	--processes 36     
     
 fi
+
+
+if [ $1 == move_asm ] ; then
+    rm $ssddir/megalodon/${i}_asm/per_read_modified_base_calls.db
+
+    mkdir -p $datadir/megalodon/${i}_asm
+    mv $ssddir/megalodon/${i}_asm/* $datadir/megalodon/${i}_asm/
+fi

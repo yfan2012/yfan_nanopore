@@ -14,6 +14,11 @@ if [ $1 == megaidx ] ; then
 	    -o $ssddir/megalodon/$prefix/per_read_modified_base_calls.txt.idx
 fi
 
+if [ $1 == megaidx_asm ] ; then
+    python3 ~/Code/yfan_meth/utils/megalodon_mod_basecalls_idx.py \
+	    -i $datadir/megalodon/${prefix}_asm/per_read_modified_base_calls.txt \
+	    -o $datadir/megalodon/${prefix}_asm/per_read_modified_base_calls.txt.idx
+fi
 
 if [ $1 == guppy_call ] ; then
     mkdir -p $ssddir/called
@@ -49,6 +54,19 @@ if [ $1 == barcode ] ; then
            -t 12 ;} &> $datadir/barcode/$prefix/${prefix}_time.txt
 fi
 
+if [ $1 == barcode_asm ] ; then
+    mkdir -p $datadir/barcode
+    mkdir -p $datadir/barcode/${prefix}_asm
+    { time python ~/Code/yfan_meth/utils/megalodon_barcode.py \
+           -m $datadir/megalodon/${prefix}_asm/per_read_modified_base_calls.txt \
+           -i $datadir/megalodon/${prefix}_asm/per_read_modified_base_calls.txt.idx \
+           -r $datadir/medaka/consensus.fasta \
+           -b ~/Code/yfan_nanopore/mdr/rebase/barcodes50.txt \
+           -o $datadir/barcode/${prefix}_asm/${prefix}_barcodes50.txt \
+           -t 12 ;} &> $datadir/barcode/${prefix}_asm/${prefix}_time.txt
+fi
+
+
 if [ $1 == align ] ; then
     mkdir -p $datadir/align
     
@@ -57,15 +75,33 @@ if [ $1 == align ] ; then
 	     > $datadir/align/$prefix.paf
 fi
 
+if [ $1 == align_asm ] ; then
+    mkdir -p $datadir/align
+    
+    fq=$datadir/fastqs/$prefix.fq.gz
+    minimap2 -t 36 -x map-ont $datadir/medaka/consensus.fasta $fq \
+	     > $datadir/align/${prefix}_asm.paf
+fi
+
 
 if [ $1 == motifcounts ] ; then
-    
     python ~/Code/yfan_meth/utils/megalodon_barcode_filter.py \
 	   -r $ref \
 	   -b ~/Code/yfan_nanopore/mdr/rebase/barcodes15.txt \
 	   -a $datadir/align/$prefix.paf \
 	   -m $datadir/barcode/$prefix/${prefix}_barcodes.txt \
 	   -o $datadir/barcode/$prefix/${prefix}_barcodes_motifcounts.txt \
+	   -q 40 \
+	   -v
+fi
+
+if [ $1 == motifcounts_asm ] ; then
+    python ~/Code/yfan_meth/utils/megalodon_barcode_filter.py \
+	   -r $datadir/medaka/consensus.fasta \
+	   -b ~/Code/yfan_nanopore/mdr/rebase/barcodes50.txt \
+	   -a $datadir/align/${prefix}_asm.paf \
+	   -m $datadir/barcode/${prefix}_asm/${prefix}_barcodes50.txt \
+	   -o $datadir/barcode/${prefix}_asm/${prefix}_barcodes50_motifcounts.txt \
 	   -q 40 \
 	   -v
 fi

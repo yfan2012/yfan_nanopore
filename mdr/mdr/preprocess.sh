@@ -6,6 +6,7 @@ prefix=200708_mdr_stool16native
 
 ref=$datadir/ref/mdr_refs.fa
 asm=$datadir/flye/$prefix/$prefix.assembly.fasta
+asmpolished=$datadir/medaka/consensus.fasta
 
 if [ $1 == gatherfq ] ; then
     mkdir -p $datadir/fastqs
@@ -58,7 +59,6 @@ if [ $1 == medaka ] ; then
 	-m r941_min_high_g360
 fi
 
-
 if [ $1 == amr ] ; then
     mkdir -p $datadir/amr
 
@@ -67,7 +67,7 @@ if [ $1 == amr ] ; then
 	abricate \
 	    --threads 36 \
 	    --db $i \
-	    $asm > $datadir/amr/$prefix.$i.tsv
+	    $asmpolished > $datadir/amr/$prefix.$i.tsv
     done
 fi
 
@@ -96,6 +96,25 @@ if [ $1 == blastflye ] ; then
 	-out $datadir/blast_contigs/$prefix.assembly.tsv
 fi
 
+if [ $1 == blastpolished ] ; then
+    mkdir -p $datadir/blast_contigs
+    blastn \
+	-num_threads 36 \
+	-query $asmpolished \
+	-db /atium/Data/ref/bacteria/blastdb/all_bacteria_refs \
+	-outfmt 7 \
+	-out $datadir/blast_contigs/${prefix}_polished.assembly.tsv
+fi
+
+if [ $1 == blastpolished_ntdb ] ; then
+    mkdir -p $datadir/blast_contigs
+    blastn \
+	-num_threads 36 \
+	-query $asmpolished \
+	-db /atium/Data/ref/ncbi/nt \
+	-outfmt 7 \
+	-out $datadir/blast_contigs/${prefix}_ntdb_polished.assembly.tsv
+fi    
 
 dbdir=/mithril/Data/Nanopore/ref/kraken2
 
