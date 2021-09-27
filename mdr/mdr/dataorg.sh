@@ -196,3 +196,20 @@ if [ $1 == dl_fasta_nt ] ; then
 	-db $dbdir/ncbi/nt \
 	-out $dbdir/mdr_nt/mdr_nt.fa
 fi
+
+
+if [ $1 == CATdb ] ; then
+    dbdir=$dbdir/CATdb
+    mkdir -p $dbdir
+    mkdir -p $dbdir/db
+    mkdir -p $dbdir/tax
+    
+    CAT prepare --fresh \
+	-d $dbdir/db \
+	-t $dbdir/tax
+    
+    ##running CAT in a preprocess.sh
+fi
+
+
+    

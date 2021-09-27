@@ -142,3 +142,18 @@ if [ $1 == top40 ] ; then
 	sort -r -k2 -n | \
 	head -n 40 > $datadir/kraken/$prefix.report.top40_phylum.txt
 fi
+
+
+if [ $1 == cattigs ] ; then
+    catdir=/atium/Data/ref/CATdb
+    mkdir -p $datadir/contig_id/CAT
+
+    CAT contigs \
+	-c $datadir/medaka/consensus.fasta \
+	-d $catdir/db \
+	-t $catdir/tax \
+	-o $datadir/contig_id/CAT/$prefix.CAT \
+	--force \
+	--sensitive
+    
+fi

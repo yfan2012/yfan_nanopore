@@ -24,7 +24,11 @@ plot_umap <- function(layout, labels, xlim=NULL, ylim=NULL, alpha=NULL, size=NUL
                 y=layout[,2],
                 label=labels)
     numcolors=length(table(labels))
-    mycolors=colorRampPalette(brewer.pal(8, 'Set2'))(numcolors)
+    if (numcolors>8) {
+        mycolors=colorRampPalette(brewer.pal(8, 'Set2'))(numcolors)
+    }else{
+        mycolors=brewer.pal(8,'Set2')[1:numcolors]
+    }
     if (missing(alpha)) {
         alpha=.2
     }
