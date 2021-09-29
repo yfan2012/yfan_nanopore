@@ -93,7 +93,6 @@ dev.off()
 
 
 
-
 ####plasmid classification
 classinfo=classify_umap_neighbors(embedplas, embedchr, 50)
 
@@ -104,6 +103,7 @@ ecoliplas=classinfo %>%
 staphplas=classinfo %>%
     filter(label=='Staphylococcus_aureus_plasmid1') %>%
     gather(key='bacteria', value='count', -x, -y, -label)
+
 
 
 classifypdf=file.path(dbxdir, 'classify_plasmid_dists.pdf')
@@ -129,16 +129,23 @@ dev.off()
 votekey=names(classinfo[4:10])
 classinfo$vote=votekey[max.col(classinfo[,4:10])]
 majority=classinfo %>%
-    select(label, vote, ans) %>%
+    select(label, vote) %>%
     rowwise() %>%
     mutate(short=strsplit(vote, '_', fixed=TRUE)[[1]][1]) %>%
     mutate(shorter=strsplit(short, '.', fixed=TRUE)[[1]][1])
 
+majoritycount=majority %>%
+    group_by(shorter, label) %>%
+    summarise(count=n())
+majoritycount=bind_rows(majoritycount, tibble(shorter='Listeria', label='Escherichia_coli_plasmid', count=0))
+
 classifypdf=file.path(dbxdir, 'classify_plasmid_majority.pdf')
 pdf(classifypdf, w=15, h=7)
-plot=ggplot(majority, aes(x=shorter)) +
-    geom_bar() +
+plot=ggplot(majoritycount, aes(x=shorter, y=count, colour=shorter, fill=shorter, alpha=.5)) +
+    geom_bar(stat='identity') +
     facet_wrap(~label) +
+    scale_colour_brewer(palette='Set2') +
+    scale_fill_brewer(palette='Set2') +
     theme_bw()
 print(plot)
 dev.off()

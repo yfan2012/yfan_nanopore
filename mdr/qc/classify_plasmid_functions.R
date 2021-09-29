@@ -36,3 +36,30 @@ classify_umap_neighbors <- function(embedplas, embedchr, numnear) {
 }
 
 
+classify_plasmid_reads_distance <- function(plasinforow, tigsbulk) {
+    ##take a plasmid read
+    ##take bulk info
+    ##get euclidean distance from each tig
+    ##make sure everything is already scaled
+    plasinforow=as_tibble(plasinforow)
+    colnames=c(tigsbulk$chrname)
+    dists=matrix(0, 1, length(colnames))
+    colnames(dists)=colnames
+
+    for (i in 1:dim(tigsbulk)[1]) {
+        tigsbulkrow=tigsbulk[i,]
+        rowdata=plasinforow %>%
+            select(-readname, -chrname)
+        tigsbulkdata=tigsbulkrow %>%
+            select(-chrname)
+        pair=bind_rows(rowdata, tigsbulkdata)
+        distance=dist(pair)
+        
+        dists[1,tigsbulkrow$chrname]=distance
+    }
+
+    distinfo=tibble(chrname=plasinforow$chrname)
+    distinfo=bind_cols(distinfo, as_tibble(dists))
+    
+    return(distinfo)
+}
