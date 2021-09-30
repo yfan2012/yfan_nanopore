@@ -99,11 +99,18 @@ plascounts=plasclass %>%
     mutate(short=strsplit(plasclass, '_', fixed=TRUE)[[1]][1]) %>%
     mutate(name=strsplit(short, '.', fixed=TRUE)[[1]][1])
 
+plasvotes=plascounts %>%
+    group_by(chrname, name) %>%
+    summarise(counts=n()) %>%
+    ungroup() %>%
+    group_by(chrname) %>%
+    mutate(frac=counts/sum(counts))
+    
 
 plascountspdf=file.path(dbxdir, 'classify_plasmid_majority_dist.pdf')
 pdf(plascountspdf, w=15, h=7)
-plot=ggplot(plascounts, aes(x=name, colour=name, fill=name, alpha=.5)) +
-    geom_bar() +
+plot=ggplot(plasvotes, aes(x=name, y=frac, colour=name, fill=name, alpha=.5)) +
+    geom_bar(stat='identity') +
     facet_wrap(~chrname) +
     scale_colour_brewer(palette='Set2') +
     scale_fill_brewer(palette='Set2') +

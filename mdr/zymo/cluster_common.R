@@ -227,3 +227,47 @@ print(tiginfodist)
 dev.off()
 
 
+
+
+####plasmid read classification
+embedchr=embedchr %>%
+    select(-shape, -colour)
+embedplas=embedplas %>%
+    select(-colour) %>%
+    rename(label = shape)
+
+source('~/Code/yfan_nanopore/mdr/qc/classify_plasmid_functions.R')
+classinfo=classify_umap_neighbors(embedplas, embedchr, 50)
+ecoliclass=classinfo %>%
+    filter(label=='Escherichia_coli_plasmid') %>%
+    gather(key='bacteria', value='count', -x, -y, -label)
+staphclass=classinfo %>%
+    filter(label=='Staphylococcus_aureus_plasmid1') %>%
+    gather(key='bacteria', value='count', -x, -y, -label)
+
+votekey=names(classinfo[4:10])
+classinfo$vote=votekey[max.col(classinfo[,4:10])]
+majority=classinfo %>%
+    select(label, vote) %>%
+    rowwise() %>%
+    mutate(short=strsplit(vote, '_', fixed=TRUE)[[1]][1]) %>%
+    mutate(shorter=strsplit(short, '.', fixed=TRUE)[[1]][1])
+
+majoritycount=majority %>%
+    group_by(shorter, label) %>%
+    summarise(count=n()) %>%
+    ungroup() %>%
+    group_by(label) %>%
+    mutate(frac=count/sum(count))
+
+
+classifypdf=file.path(dbxdir, 'classify_plasmid_majority_refbased.pdf')
+pdf(classifypdf, w=15, h=7)
+plot=ggplot(majoritycount, aes(x=shorter, y=frac, colour=shorter, fill=shorter, alpha=.5)) +
+    geom_bar(stat='identity') +
+    facet_wrap(~label) +
+    scale_colour_brewer(palette='Set2') +
+    scale_fill_brewer(palette='Set2') +
+    theme_bw()
+print(plot)
+dev.off()

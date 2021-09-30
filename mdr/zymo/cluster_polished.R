@@ -139,9 +139,14 @@ majoritycount=majority %>%
     summarise(count=n())
 majoritycount=bind_rows(majoritycount, tibble(shorter='Listeria', label='Escherichia_coli_plasmid', count=0))
 
+majoritycount=majoritycount %>%
+    ungroup() %>%
+    group_by(label) %>%
+    mutate(frac=count/sum(count))
+
 classifypdf=file.path(dbxdir, 'classify_plasmid_majority.pdf')
 pdf(classifypdf, w=15, h=7)
-plot=ggplot(majoritycount, aes(x=shorter, y=count, colour=shorter, fill=shorter, alpha=.5)) +
+plot=ggplot(majoritycount, aes(x=shorter, y=frac, colour=shorter, fill=shorter, alpha=.5)) +
     geom_bar(stat='identity') +
     facet_wrap(~label) +
     scale_colour_brewer(palette='Set2') +
