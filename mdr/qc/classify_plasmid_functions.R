@@ -63,3 +63,41 @@ classify_plasmid_reads_distance <- function(plasinforow, tigsbulk) {
     
     return(distinfo)
 }
+
+
+get_read_distances <- function(read1, read2) {
+    ##take two reads
+    ##assume same columns, starting with readname, chrname
+    ##return distance
+
+    info=bind_rows(read1, read2)
+    distance=tibble(readname=read1$readname, chrname=read1$chrname, dist=dist(info))
+    return(distance)
+}
+
+
+classify_by_top_reads <- function(plasinforow, bcfilt, num) {
+    ##take a plasmid read
+    ##get 50 closest reads and tally them
+
+    dists=bcfilt %>%
+        group_by(readname, chrname) %>%
+        do(get_read_distances(., plasinforow))
+
+    orderdists=dists %>%
+        arrange(dist)
+    votes=table(orderdists$chrname[1:num])
+
+    info=tibble(data.frame(table(bcfilt$chrname))) %>%
+        spread(key=Var1, value=Freq) * 0
+
+    for (i in 1:length(votes)) {
+        pos=which(colnames(info)==names(votes[i]))
+        info[pos]=votes[i]
+    }
+        
+    info$readname=plasinforow$readname
+    info$chrname=plasinforow$chrname
+
+    return(info)
+}
