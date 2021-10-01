@@ -2,11 +2,12 @@ library(tidyverse)
 library(umap)
 library(multidplyr)
 source('~/Code/yfan_nanopore/mdr/qc/barcode_plot_functions.R')
+source('~/Code/yfan_nanopore/mdr/qc/classify_plasmid_functions.R')
 
 cluster=new_cluster(7)
 cluster_library(cluster, 'tidyverse')
-
-datadir='/mithril/Data/Nanopore/projects/methbin/zymo/barcode'
+projdir='/mithril/Data/Nanopore/projects/methbin/zymo'
+datadir=file.path(projdir, 'barcode')
 srcdir='~/Code/yfan_nanopore/mdr/rebase'
 dbxdir='~/gdrive/mdr/zymo'
 
@@ -229,14 +230,14 @@ dev.off()
 
 
 
-####plasmid read classification
+####plasmid read classification by umap neighbors
 embedchr=embedchr %>%
     select(-shape, -colour)
 embedplas=embedplas %>%
     select(-colour) %>%
     rename(label = shape)
 
-source('~/Code/yfan_nanopore/mdr/qc/classify_plasmid_functions.R')
+
 classinfo=classify_umap_neighbors(embedplas, embedchr, 50)
 ecoliclass=classinfo %>%
     filter(label=='Escherichia_coli_plasmid') %>%
@@ -266,6 +267,58 @@ pdf(classifypdf, w=15, h=7)
 plot=ggplot(majoritycount, aes(x=shorter, y=frac, colour=shorter, fill=shorter, alpha=.5)) +
     geom_bar(stat='identity') +
     facet_wrap(~label) +
+    scale_colour_brewer(palette='Set2') +
+    scale_fill_brewer(palette='Set2') +
+    theme_bw()
+print(plot)
+dev.off()
+
+
+####plasmid read classification by euclidean distance
+cluster=new_cluster(36)
+cluster_library(cluster, 'tidyverse')
+cluster_copy(cluster, 'get_read_distances')
+cluster_copy(cluster, 'classify_by_top_reads')
+cluster_copy(cluster, 'bcfilt')
+
+plasvote=plasfilt %>%
+    rowwise() %>%
+    partition(cluster) %>%
+    do(classify_by_top_reads(., bcfilt, 50)) %>%
+    collect() %>%
+    ungroup()
+
+voteinfocsv=file.path(projdir, 'read_classification', 'voteinfo_distance_refbased.csv')
+write_csv(plasvote, voteinfocsv)
+
+voteclass=tibble(chrname=as.character(),
+                 class=as.character())
+
+for (i in 1:dim(plasvote)[1]) {
+    readdata=plasvote[i,]
+    nearest=colnames(readdata)[1:7][which(readdata[1:7]==max(readdata[1:7]))]
+
+    readclass=tibble(chrname=readdata$chrname, class=nearest)
+    voteclass=bind_rows(voteclass, readclass)
+}
+
+
+votecounts=voteclass %>%
+    group_by(chrname, class) %>%
+    summarise(counts=n()) %>%
+    ungroup() %>%
+    rowwise() %>%
+    mutate(abrevclass=strsplit(class, split='_', fixed=TRUE)[[1]][1]) %>%
+    mutate(shortclass=strsplit(abrevclass, split='.', fixed=TRUE)[[1]][1]) %>%
+    select(-abrevclass, -class) %>%
+    group_by(chrname) %>%
+    mutate(frac=counts/sum(counts))
+
+plascountspdf=file.path(dbxdir, 'classify_plasmid_nearest_dist_refbased.pdf')
+pdf(plascountspdf, w=15, h=7)
+plot=ggplot(votecounts, aes(x=shortclass, y=frac, colour=shortclass, fill=shortclass, alpha=.5)) +
+    geom_bar(stat='identity') +
+    facet_wrap(~chrname) +
     scale_colour_brewer(palette='Set2') +
     scale_fill_brewer(palette='Set2') +
     theme_bw()
