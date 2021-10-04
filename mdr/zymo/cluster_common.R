@@ -12,8 +12,6 @@ srcdir='~/Code/yfan_nanopore/mdr/rebase'
 dbxdir='~/gdrive/mdr/zymo'
 
 conds=c('10', '15', '20')
-
-
 cluster_copy(cluster, 'checkfilt')
 
 
@@ -262,7 +260,7 @@ majoritycount=majority %>%
     mutate(frac=count/sum(count))
 
 
-classifypdf=file.path(dbxdir, 'classify_plasmid_majority_refbased.pdf')
+classifypdf=file.path(dbxdir, 'classify_plasmid_umap_refbased.pdf')
 pdf(classifypdf, w=15, h=7)
 plot=ggplot(majoritycount, aes(x=shorter, y=frac, colour=shorter, fill=shorter, alpha=.5)) +
     geom_bar(stat='identity') +
@@ -290,6 +288,8 @@ plasvote=plasfilt %>%
 
 voteinfocsv=file.path(projdir, 'read_classification', 'voteinfo_distance_refbased.csv')
 write_csv(plasvote, voteinfocsv)
+plasvote=read_csv(voteinfocsv)
+
 
 voteclass=tibble(chrname=as.character(),
                  class=as.character())
@@ -317,6 +317,49 @@ votecounts=voteclass %>%
 plascountspdf=file.path(dbxdir, 'classify_plasmid_nearest_dist_refbased.pdf')
 pdf(plascountspdf, w=15, h=7)
 plot=ggplot(votecounts, aes(x=shortclass, y=frac, colour=shortclass, fill=shortclass, alpha=.5)) +
+    geom_bar(stat='identity') +
+    facet_wrap(~chrname) +
+    scale_colour_brewer(palette='Set2') +
+    scale_fill_brewer(palette='Set2') +
+    theme_bw()
+print(plot)
+dev.off()
+
+
+refbulk=bcfilt %>%
+    group_by(chrname) %>%
+    summarise_if(is.numeric, mean)
+
+plasdists=plasfilt %>%
+    rowwise() %>%
+    do(classify_plasmid_reads_distance(.,refbulk))
+
+plasclass=tibble(chrname=as.character(),
+                 plasclass=as.character())
+for (i in 1:dim(plasdists)[1]) {
+    readdata=plasdists[i,]
+    nearest=colnames(readdata)[-1][which(readdata[-1]==min(readdata[-1]))]
+
+    readclass=tibble(chrname=readdata$chrname, plasclass=nearest)
+    plasclass=bind_rows(plasclass, tibble(chrname=readdata$chrname, plasclass=nearest))
+}
+
+plascounts=plasclass %>%
+    rowwise() %>%
+    mutate(tally=strsplit(chrname, '_', fixed=TRUE)[[1]][1]==strsplit(plasclass, '_', fixed=TRUE)[[1]][1]) %>%
+    mutate(short=strsplit(plasclass, '_', fixed=TRUE)[[1]][1]) %>%
+    mutate(name=strsplit(short, '.', fixed=TRUE)[[1]][1])
+
+plasvotes=plascounts %>%
+    group_by(chrname, name) %>%
+    summarise(counts=n()) %>%
+    ungroup() %>%
+    group_by(chrname) %>%
+    mutate(frac=counts/sum(counts))
+
+plascountspdf=file.path(dbxdir, 'classify_plasmid_pseudobulk_dist_refbased.pdf')
+pdf(plascountspdf, w=15, h=7)
+plot=ggplot(plasvotes, aes(x=name, y=frac, colour=name, fill=name, alpha=.5)) +
     geom_bar(stat='identity') +
     facet_wrap(~chrname) +
     scale_colour_brewer(palette='Set2') +
