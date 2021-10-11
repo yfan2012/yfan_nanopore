@@ -21,7 +21,6 @@ if [ $1 == call_test ] ; then
            -r $ref \
            -b ~/Code/yfan_nanopore/mdr/rebase/barcodes20.txt \
            -o $datadir/barcode/test.txt \
-	   -n 100000000000 \
            -t 12 ;} &> $datadir/barcode/test_time.txt
 fi
 
