@@ -34,10 +34,19 @@ if [ $1 == call ] ; then
            -m $datadir/megalodon/$prefix/per_read_modified_base_calls.txt \
            -i $datadir/megalodon/$prefix/per_read_modified_base_calls.txt.idx \
            -r $ref \
-           -b ~/Code/yfan_nanopore/mdr/zymo/zymo_barcodes.txt \
+           -b ~/Code/yfan_nanopore/mdr/rebase/barcodes20.txt \
            -o $datadir/barcode_v2/$prefix/${prefix}_barcodes20.txt \
 	   -n 100000000000 \
            -t 36 ;} &> $datadir/barcode_v2/$prefix/${prefix}_time20.txt
 fi
 
 
+if [ $1 == filtcommon ] ; then
+    python ~/Code/yfan_meth/utils/megalodon_barcode_filter.py \
+	   -a $datadir/align/$prefix.paf \
+	   -r $ref \
+	   -o $datadir/barcode_v2/$prefix/${prefix}_motifcounts20.txt \
+	   -b ~/Code/yfan_nanopore/mdr/rebase/barcodes20.txt \
+	   -q 40
+
+fi

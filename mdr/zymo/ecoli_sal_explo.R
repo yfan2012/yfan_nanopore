@@ -90,5 +90,46 @@ salnonzerofiltpaf=salnonzeropaf %>%
     mutate(percmatch=matches/qlen) %>%
     filter(mapq==60)
 
-    
 ##THE MOTIF DEFINING SALMONELLA FROM ECOLI IS NON PALINDROMIC WHICH IS WHY MY SHIT ISN'T DETECTING WELL. 
+
+
+
+####see if the palindrome thing has been fixed
+barcodelist=file.path('~/Code/yfan_nanopore/mdr/rebase/barcodes20.txt')
+motifinfo=read_tsv(barcodelist, col_names=FALSE)
+bc_cols=c('readname', 'chrname', motifinfo$X1)
+prefix='20190809_zymo_control'
+
+plasnames=c('Staphylococcus_aureus_plasmid1' ,'Escherichia_coli_plasmid')
+
+ref2datafile=file.path(datadir, 'barcode_v2', prefix, '20190809_zymo_control_barcodes20.txt')
+fullref2info=read_tsv(ref2datafile, col_names=bc_cols, na=c('None'))
+ref2countsfile=file.path(datadir, 'barcode_v2', prefix, '/20190809_zymo_control_motifcounts20.txt')
+ref2bccounts=read_tsv(ref2countsfile, col_name=bc_cols, na=c('None'))
+ref2na=colSums(is.na(fullref2info)/dim(fullref2info)[1])
+ref2na=ref2na[ref2na<.2]
+keepmotifs=names(ref2na)
+
+ref2counts=ref2bccounts %>%
+    select(all_of(keepmotifs)) %>%
+    filter(across(c(-readname, -chrname), ~ .x>=2))
+ref2filt=fullref2info %>%
+    select(all_of(keepmotifs)) %>%
+    filter(chrname %in% ref2counts$chrname) %>%
+    filter(complete.cases(.)) %>%
+    filter(chrname %in% c('Escherichia_coli_chromosome', 'Salmonella_enterica_complete_genome')) %>%
+    select(c(readname, chrname, CAGAG))
+
+plotfile=file.path(dbxdir, 'ecoli_sal_explo_v2.R')
+ecolicolor=brewer.pal(3, 'Set2')[1]
+salcolor=brewer.pal(3, 'Set2')[2]
+pdf(plotfile, h=7, w=15)
+CAGAGdensity=ggplot(ref2filt, aes(x=CAGAG, colour=chrname, fill=chrname, alpha=.3)) +
+    geom_histogram(data=subset(ref2filt, chrname=='Escherichia_coli_chromosome'), fill=ecolicolor, colour=ecolicolor, alpha=.3) +
+    geom_histogram(data=subset(ref2filt, chrname=='Salmonella_enterica_complete_genome'), fill=salcolor, colour=salcolor, alpha=.3) +
+    scale_colour_brewer(palette='Set2') +
+    scale_fill_brewer(palette='Set2') +
+    xlim(-3,25) +
+    theme_bw()
+print(CAGAGdensity)
+dev.off()
