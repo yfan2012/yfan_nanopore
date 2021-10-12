@@ -7,7 +7,7 @@ source('~/Code/yfan_nanopore/mdr/qc/classify_plasmid_functions.R')
 cluster=new_cluster(12)
 cluster_library(cluster, 'tidyverse')
 projdir='/mithril/Data/Nanopore/projects/methbin/zymo'
-datadir=file.path(projdir, 'barcode_v2', '20190809_zymo_control')
+datadir=file.path(projdir, 'kmer_control', '20190809_zymo_control')
 srcdir='~/Code/yfan_nanopore/mdr/rebase'
 dbxdir='~/gdrive/mdr/zymo'
 
@@ -23,7 +23,7 @@ bc_cols=c('readname', 'chrname', motifinfo$X1)
 ##read in data
 barcodefile=file.path(datadir, paste0('20190809_zymo_control_barcodes', i,'.txt'))
 bcinfo=read_tsv(barcodefile, col_names=bc_cols, na=c('NA', 'None'))    
-countsfile=file.path(datadir, paste0('20190809_zymo_control_motifcounts', i,'.txt'))
+countsfile=file.path(projdir, 'barcode_v2', '20190809_zymo_control', paste0('20190809_zymo_control_motifcounts', i,'.txt'))
 bccounts=read_tsv(countsfile, col_names=bc_cols, na=c('NA', 'None'))
 
 ##count NA and filter motif selections
@@ -73,9 +73,10 @@ embedplas=embed %>%
 embedchr=embed %>%
     filter(shape=='chr')
 
+
 mycolors=c(brewer.pal(8, 'Set2'), '#000000')
 myshapes=c(3,18)
-plasfile=file.path(dbxdir, 'plasmid_shown_v2.pdf')
+plasfile=file.path(dbxdir, 'plasmid_shown_kmer_control.pdf')
 pdf(plasfile, h=9, w=13)
 plot=ggplot(embedchr, aes(x=x, y=y, colour=colour)) +
     geom_point(alpha=.2, size=.1) +
@@ -107,7 +108,7 @@ plasvote=plasfilt %>%
     collect() %>%
     ungroup()
 
-voteinfocsv=file.path(projdir, 'read_classification', 'voteinfo_distance_refbased_v2.csv')
+voteinfocsv=file.path(projdir, 'read_classification', 'voteinfo_distance_refbased_kmer_control.csv')
 write_csv(plasvote, voteinfocsv)
 plasvote=read_csv(voteinfocsv)
 
@@ -135,7 +136,7 @@ votecounts=voteclass %>%
     group_by(chrname) %>%
     mutate(frac=counts/sum(counts))
 
-plascountspdf=file.path(dbxdir, 'classify_plasmid_nearest_dist_refbased_v2.pdf')
+plascountspdf=file.path(dbxdir, 'classify_plasmid_nearest_dist_refbased_kmer_control.pdf')
 pdf(plascountspdf, w=15, h=7)
 plot=ggplot(votecounts, aes(x=shortclass, y=frac, colour=shortclass, fill=shortclass, alpha=.5)) +
     geom_bar(stat='identity') +
