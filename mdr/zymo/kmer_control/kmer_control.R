@@ -143,6 +143,7 @@ plot=ggplot(votecounts, aes(x=shortclass, y=frac, colour=shortclass, fill=shortc
     facet_wrap(~chrname) +
     scale_colour_brewer(palette='Set2') +
     scale_fill_brewer(palette='Set2') +
+    ylim(0,1) +
     theme_bw()
 print(plot)
 dev.off()
