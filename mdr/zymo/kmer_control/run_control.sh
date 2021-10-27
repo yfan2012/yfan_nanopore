@@ -54,6 +54,15 @@ if [ $1 == run_motifs ] ; then
            -t 12 ;} &> $datadir/kmer_control/${prefix}_motif/${prefix}_time20.txt
 fi
 
+if [ $1 == motifcounts ] ; then
+    python ~/Code/yfan_meth/utils/megalodon_barcode_filter.py \
+	   -a $datadir/align/$prefix.paf \
+	   -r $ref \
+	   -o $datadir/kmer_control/${prefix}_motif/${prefix}_motifcounts20.txt \
+	   -b $datadir/kmer_control/${prefix}_motif/shuffled_barcodes20.txt \
+	   -q 40
+fi
+
 if [ $1 == run_log ] ; then
     mkdir -p $datadir/kmer_control/${prefix}_log
 

@@ -4,41 +4,41 @@ library(multidplyr)
 source('~/Code/yfan_nanopore/mdr/qc/barcode_plot_functions.R')
 source('~/Code/yfan_nanopore/mdr/qc/classify_plasmid_functions.R')
 
+
+
 cluster=new_cluster(12)
 cluster_library(cluster, 'tidyverse')
 projdir='/mithril/Data/Nanopore/projects/methbin/zymo'
-datadir=file.path(projdir, 'kmer_control', '20190809_zymo_control_motif')
+datadir=file.path(projdir, 'kmer_control', '20190809_zymo_control_log')
 srcdir='~/Code/yfan_nanopore/mdr/rebase'
 dbxdir='~/gdrive/mdr/zymo'
 
 i=20
 cluster_copy(cluster, 'checkfilt')
 
+
 ##read in motifs info
-motiffile=file.path(datadir, 'shuffled_barcodes20.txt')
+motiffile=file.path(srcdir, paste0('barcodes', i, '.txt'))
 motifinfo=read_tsv(motiffile, col_names=FALSE)
 bc_cols=c('readname', 'chrname', motifinfo$X1)
 
 ##read in data
 barcodefile=file.path(datadir, paste0('20190809_zymo_control_barcodes', i,'.txt'))
 bcinfo=read_tsv(barcodefile, col_names=bc_cols, na=c('NA', 'None'))    
-countsfile=file.path(projdir, 'kmer_control', '20190809_zymo_control_motif', paste0('20190809_zymo_control_motifcounts', i,'.txt'))
+countsfile=file.path(projdir, 'barcode_v2', '20190809_zymo_control', paste0('20190809_zymo_control_motifcounts', i,'.txt'))
 bccounts=read_tsv(countsfile, col_names=bc_cols, na=c('NA', 'None'))
 
 ##count NA and filter motif selections
 plasinfo=bcinfo %>%
     filter(grepl('plasmid', chrname, fixed=TRUE))
-nacount=colSums(is.na(plasinfo)/dim(plasinfo)[1])
-lowna=nacount[nacount<.1]
+
+nacount=colSums(bccounts==0)/dim(bccounts)[1]
+lowna=nacount[nacount<.05]
 keepmotifs=names(lowna)
 bccounts=bccounts %>%
     select(all_of(keepmotifs))
 bcinfo=bcinfo %>%
     select(all_of(keepmotifs))
-plasinfo=plasinfo %>%
-    select(all_of(keepmotifs)) %>%
-    filter(complete.cases(.))
-
 
 ##filter out non-bacterial genome reads and any with less than 3 motifs
 countsfilter=bccounts %>%
@@ -63,9 +63,8 @@ plasfilter=bccounts %>%
     filter(grepl('plasmid', chrname, fixed=TRUE)) %>%
     filter(across(c(-readname, -chrname), ~ .x>=2))
 plasfilt=plasinfo %>%
-    filter(readname %in% plasfilter$readname)
-
-
+    filter(readname %in% plasfilter$readname) %>%
+    filter(complete.cases(.))
 
 
 allfilt=bind_rows(bcfilt, plasfilt)
@@ -87,7 +86,7 @@ embedchr=embed %>%
 
 mycolors=c(brewer.pal(8, 'Set2'), '#000000')
 myshapes=c(3,18)
-plasfile=file.path(dbxdir, 'plasmid_shown_motif_control.pdf')
+plasfile=file.path(dbxdir, 'plasmid_shown_kmer_control.pdf')
 pdf(plasfile, h=9, w=13)
 plot=ggplot(embedchr, aes(x=x, y=y, colour=colour)) +
     geom_point(alpha=.2, size=.1) +
@@ -119,7 +118,7 @@ plasvote=plasfilt %>%
     collect() %>%
     ungroup()
 
-voteinfocsv=file.path(projdir, 'read_classification', 'voteinfo_distance_refbased_motif_control.csv')
+voteinfocsv=file.path(projdir, 'read_classification', 'voteinfo_distance_refbased_kmer_control.csv')
 write_csv(plasvote, voteinfocsv)
 plasvote=read_csv(voteinfocsv)
 
@@ -147,14 +146,14 @@ votecounts=voteclass %>%
     group_by(chrname) %>%
     mutate(frac=counts/sum(counts))
 
-plascountspdf=file.path(dbxdir, 'classify_plasmid_nearest_dist_refbased_motif_control.pdf')
+plascountspdf=file.path(dbxdir, 'classify_plasmid_nearest_dist_refbased_kmer_control.pdf')
 pdf(plascountspdf, w=15, h=7)
 plot=ggplot(votecounts, aes(x=shortclass, y=frac, colour=shortclass, fill=shortclass, alpha=.5)) +
     geom_bar(stat='identity') +
-    ylim(0,1) +
     facet_wrap(~chrname) +
     scale_colour_brewer(palette='Set2') +
     scale_fill_brewer(palette='Set2') +
+    ylim(0,1) +
     theme_bw()
 print(plot)
 dev.off()
