@@ -1,0 +1,9 @@
+BS.pilon.polished.v3.ST170922,
+Enterococcus_faecalis_complete_genome,
+Escherichia_coli_chromosome,GATC,CCWGG
+Escherichia_coli_plasmid,GATC,CCWGG
+Listeria_monocytogenes_complete_genome,
+Pseudomonas_aeruginosa_complete_genome,
+Salmonella_enterica_complete_genome,CAGAG
+Staphylococcus_aureus_chromosome,
+Staphylococcus_aureus_plasmid1,
