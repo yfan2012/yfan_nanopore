@@ -17,3 +17,15 @@ if [ $1 == dl_wgbs ] ; then
     done < $datadir/bisulfite/raw/wgbs_acc.txt
 fi
 
+if [ $1 == rename ] ; then
+
+    awk -F , '{print $1, $30}' $datadir/bisulfite/raw/wgbs_runinfo.csv > $datadir/bisulfite/raw/wgbs_names.txt
+
+    while read p ; do
+	acc=`echo $p | cut -d ' ' -f 1`
+	name=`echo $p | cut -d ' ' -f 2`
+
+	mv $datadir/bisulfite/raw/fastqs/${acc}_1.fastq $datadir/bisulfite/raw/fastqs/${name}_1.fastq
+	mv $datadir/bisulfite/raw/fastqs/${acc}_2.fastq $datadir/bisulfite/raw/fastqs/${name}_2.fastq
+    done < $datadir/bisulfite/raw/wgbs_names.txt
+fi
