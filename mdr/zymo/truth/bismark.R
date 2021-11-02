@@ -2,7 +2,8 @@ library(tidyverse)
 library(RColorBrewer)
 
 dbxdir='~/gdrive/mdr/zymo'
-datadir='/mithril/Data/Nanopore/projects/methbin/zymo/truth/bisulfite/bismark'
+projdir='/mithril/Data/Nanopore/projects/methbin/zymo/truth/bisulfite'
+datadir=file.path(projdir, 'bismark')
 labels=c('bsubtilis', 'ecoli', 'efaecalis', 'lmonocytogenes', 'nasa_Ecoli_K12', 'paeruginosa', 'saureus', 'senterica')
 cxcols=c('chr', 'pos', 'strand', 'meth', 'unmeth', 'context', 'seq')
 
@@ -30,3 +31,31 @@ for (i in labels) {
 dev.off()
 
     
+####report motifs
+barcodefile='~/Code/yfan_nanopore/mdr/rebase/barcodes50.txt'
+bc=read_tsv(barcodefile, col_names=c('motif'))
+bc_cols=c('chr', bc$motif)
+
+motifinfofile=file.path(projdir, 'motifcalls', '50_barcodes.csv')
+motifinfo=read_csv(motifinfofile, col_names=bc_cols, na=c("", "None"))
+
+summary=c()
+for (i in 1:dim(motifinfo)[1]) {
+    row=motifinfo[i,][-1]
+    row[is.na(row)]=0
+    a=row[as.vector(row>.8)]
+    if (length(a)>0) {
+        motifs=names(a)
+        str=''
+        for (j in 1:length(a)) {
+            str=paste0(str, '\t', motifs[j], ',', as.character(a[j]))
+        }
+        info=paste0(motifinfo[i,1],str)
+    }else{
+        info=paste0(motifinfo[i,1])
+    }
+    summary=c(summary, info)
+}
+
+summaryfile=file.path(projdir, 'motifcalls', 'meth_summary.txt')
+write(summary, summaryfile)
