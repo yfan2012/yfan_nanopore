@@ -45,4 +45,46 @@ if [ $1 == extractor ] ; then
 fi
 
     
-     
+if [ $1 == getchrlist ] ; then
+    ##get list of bacterial contigs from merged reference
+    ##just going to manually add the sample labels
+
+    grep '>' $ref \
+	| awk '{print substr($1,2)}' \
+	| awk ' { if (substr($1,1,1)!="t" ) print $0}' \
+	      > ./chrlist.txt
+fi
+    
+
+if [ $1 == test_bisulf ] ; then
+
+    while read p; do
+	label=`echo $p | cut -d ' ' -f 2`
+	chrom=`echo $p | cut -d ' ' -f 1`
+	python ~/Code/yfan_meth/utils/bismark_motif_finder.py \
+	       -c $datadir/bismark/$label/${label}_1_bismark_bt2_pe.CX_report.txt \
+	       -r $ref \
+	       -b ~/Code/yfan_nanopore/mdr/rebase/barcodes50.txt \
+	       -p .5 \
+	       -l 8 \
+	       -m 10 \
+	       -s $chrom
+    done <chrlist_test.txt
+fi
+
+if [ $1 == bisulf ] ; then
+    mkdir -p $datadir/motifcalls
+    touch $datadir/motifcalls/50_barcodes.csv
+    while read p; do
+        label=`echo $p | cut -d ' ' -f 2`
+        chrom=`echo $p | cut -d ' ' -f 1`
+        python ~/Code/yfan_meth/utils/bismark_motif_finder.py \
+               -c $datadir/bismark/$label/${label}_1_bismark_bt2_pe.CX_report.txt \
+               -r $ref \
+               -b ~/Code/yfan_nanopore/mdr/rebase/barcodes50.txt \
+               -p .5 \
+               -l 8 \
+               -m 10 \
+               -s $chrom >> $datadir/motifcalls/50_barcodes.csv
+    done <chrlist_withlabels.txt
+fi
