@@ -9,7 +9,7 @@ if [ $1 == test ] ; then
     mkdir -p $datadir
     mkdir -p $datadir/test
 
-    time ( python ~/Code/yfan_meth/utils/megalodon_agg.py \
+    time ( python ~/Code/yfan_meth/utils/megalodon_agg_experimental.py \
 	   -m $projdir/megalodon/$prefix/per_read_modified_base_calls.txt \
 	   -i $projdir/megalodon/$prefix/per_read_modified_base_calls.txt.small.idx \
 	   -r $ref \
