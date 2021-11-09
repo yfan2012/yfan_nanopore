@@ -185,15 +185,14 @@ embedchr=embed %>%
 mycolors=c(brewer.pal(8, 'Set2'), '#000000')
 myshapes=c(3,18)
 plasfile=file.path(dbxdir, 'plasmid_shown.pdf')
-pdf(plasfile, h=9, w=13)
+pdf(plasfile, h=9, w=19)
 plot=ggplot(embedchr, aes(x=x, y=y, colour=colour)) +
     geom_point(alpha=.2, size=.1) +
     scale_colour_manual(values=mycolors) +
     theme_bw()
 mainplot=plot +
     geom_point(data=embedplas, aes(x=x, y=y, shape=shape), inherit.aes=FALSE) +
-    scale_shape_manual(values=myshapes) +
-    theme(legend.position = 'none')
+    scale_shape_manual(values=myshapes)
 print(mainplot)
 sep=plot +
     facet_wrap(~label) +
@@ -201,6 +200,11 @@ sep=plot +
     scale_shape_manual(values=myshapes) +
     theme(legend.position = "none")
 print(sep)
+plot=ggplot(embedchr, aes(x=x, y=y, colour=colour)) +
+    geom_point(alpha=.2, size=.1) +
+    scale_colour_manual(values=mycolors) +
+    theme_bw()
+print(plot)
 dev.off()
 
 ##contig analysis
