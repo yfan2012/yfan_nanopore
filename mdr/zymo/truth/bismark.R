@@ -32,11 +32,12 @@ dev.off()
 
     
 ####report motifs
-barcodefile='~/Code/yfan_nanopore/mdr/rebase/barcodes50.txt'
+##barcodefile='~/Code/yfan_nanopore/mdr/rebase/barcodes50.txt'
+barcodefile='~/Code/yfan_nanopore/mdr/rebase/barcodes51.txt'
 bc=read_tsv(barcodefile, col_names=c('motif'))
 bc_cols=c('chr', bc$motif)
 
-motifinfofile=file.path(projdir, 'motifcalls', '50_barcodes.csv')
+motifinfofile=file.path(projdir, 'motifcalls', '51_barcodes.csv')
 motifinfo=read_csv(motifinfofile, col_names=bc_cols, na=c("", "None"))
 
 summary=c()
@@ -57,5 +58,6 @@ for (i in 1:dim(motifinfo)[1]) {
     summary=c(summary, info)
 }
 
-summaryfile=file.path(projdir, 'motifcalls', 'meth_summary.txt')
+##summaryfile=file.path(projdir, 'motifcalls', 'meth_summary.txt')
+summaryfile=file.path(projdir, 'motifcalls', 'meth_summary_51_barcodes.txt')
 write(summary, summaryfile)

@@ -88,3 +88,56 @@ if [ $1 == bisulf ] ; then
                -s $chrom >> $datadir/motifcalls/50_barcodes.csv
     done <chrlist_withlabels.txt
 fi
+
+
+if [ $1 == pseudo ] ; then
+    label=paeruginosa
+    chrom=Pseudomonas_aeruginosa_complete_genome
+    python ~/Code/yfan_meth/utils/bismark_motif_finder.py \
+           -c $datadir/bismark/$label/${label}_1_bismark_bt2_pe.CX_report.txt \
+           -r $ref \
+           -b ~/Code/yfan_nanopore/mdr/rebase/barcodes50.txt \
+           -p .5 \
+           -l 8 \
+           -m 10 \
+	   -o $datadir/motifcalls/$label.seqs.fasta \
+           -s $chrom >> $datadir/motifcalls/50_barcodes.csv
+fi
+
+
+if [ $1 == bisulf_pseudo ] ; then
+    ##rerun with pseudomonas motif
+    mkdir -p $datadir/motifcalls
+    touch $datadir/motifcalls/51_barcodes.csv
+    while read p; do
+        label=`echo $p | cut -d ' ' -f 2`
+        chrom=`echo $p | cut -d ' ' -f 1`
+        python ~/Code/yfan_meth/utils/bismark_motif_finder.py \
+               -c $datadir/bismark/$label/${label}_1_bismark_bt2_pe.CX_report.txt \
+               -r $ref \
+               -b ~/Code/yfan_nanopore/mdr/rebase/barcodes51.txt \
+               -p .5 \
+               -l 8 \
+               -m 10 \
+               -s $chrom >> $datadir/motifcalls/51_barcodes.csv
+    done <chrlist_withlabels.txt
+fi
+
+if [ $1 == countunk ] ; then
+    ##rerun with pseudomonas motif
+    mkdir -p $datadir/motifcalls
+    touch $datadir/motifcalls/51_barcodes.csv
+    while read p; do
+        label=`echo $p | cut -d ' ' -f 2`
+        chrom=`echo $p | cut -d ' ' -f 1`
+        python ~/Code/yfan_meth/utils/bismark_motif_finder.py \
+               -c $datadir/bismark/$label/${label}_1_bismark_bt2_pe.CX_report.txt \
+               -r $ref \
+               -b ~/Code/yfan_nanopore/mdr/rebase/barcodes51.txt \
+               -p .5 \
+               -l 8 \
+               -m 10 \
+	       -u \
+               -s $chrom >> $datadir/motifcalls/51_barcodes_unk.csv
+    done <chrlist_withlabels.txt
+fi
