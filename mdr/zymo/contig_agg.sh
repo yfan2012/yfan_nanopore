@@ -31,6 +31,23 @@ if [ $1 == agg ] ; then
 	   -v
 fi
 
+if [ $1 == mega_agg ] ; then
+    ssddir=~/data/mdr/zymo
+    megalodon \
+	$ssddir/raw/$prefix/$prefix/fast5 \
+	--overwrite \
+	--guppy-server-path "/usr/bin/guppy_basecall_server" \
+	--guppy-params "-d /home/yfan/software/rerio/basecall_models/ --num_callers 5 --ipc_threads 6" \
+	--guppy-config res_dna_r941_min_modbases-all-context_v001.cfg \
+	--reference $ref \
+	--outputs mods mod_mappings \
+	--output-directory $ssddir/megalodon/$prefix \
+	--write-mods-text \
+	--devices "cuda:0" \
+	--processes 36
+fi
+
+
 
 if [ $1 == findmotifs ] ; then
     mkdir -p $datadir/$prefix
