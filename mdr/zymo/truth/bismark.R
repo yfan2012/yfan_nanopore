@@ -1,5 +1,6 @@
 library(tidyverse)
 library(RColorBrewer)
+library(Biostrings)
 
 dbxdir='~/gdrive/mdr/zymo'
 projdir='/mithril/Data/Nanopore/projects/methbin/zymo/truth/bisulfite'
@@ -61,3 +62,6 @@ for (i in 1:dim(motifinfo)[1]) {
 ##summaryfile=file.path(projdir, 'motifcalls', 'meth_summary.txt')
 summaryfile=file.path(projdir, 'motifcalls', 'meth_summary_51_barcodes.txt')
 write(summary, summaryfile)
+
+
+

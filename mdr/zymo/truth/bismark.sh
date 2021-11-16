@@ -141,3 +141,13 @@ if [ $1 == countunk ] ; then
                -s $chrom >> $datadir/motifcalls/51_barcodes_unk.csv
     done <chrlist_withlabels.txt
 fi
+
+if [ $1 == account ] ; then 
+
+    python ~/Code/yfan_meth/utils/bismark_motif_confirm.py \
+	   -c $datadir/bismark \
+	   -r $ref \
+	   -s ~/Code/yfan_nanopore/mdr/zymo/truth/chrlist_withlabels.txt \
+	   -m $datadir/zymo_cmeth.csv \
+	   -o $datadir/zymo_methcounts.csv
+fi
