@@ -1,0 +1,8 @@
+016438	lmonocytogenes
+016439	bsubtilis
+016441	ecoli
+016442	saureus
+016443	paeruginosa
+016444	senterica
+016445	efaecalis
+016446	ecoli_ii
