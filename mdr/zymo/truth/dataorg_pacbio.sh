@@ -18,3 +18,24 @@ if [ $1 == rename ] ; then
     done < $datadir/pacbio/raw/pacbio_names.txt
 
 fi
+
+if [ $1 == get_pb_labels ] ; then
+    Rscript ~/Code/yfan_nanopore/mdr/zymo/truth/pacbio_labels.R
+fi
+
+
+if [ $1 == cp_modinfo ] ; then
+    mkdir -p $datadir/pacbio/modinfo
+    
+    while read p ; do
+	number=`echo $p | cut -d ' ' -f 1 `
+	label=`echo $p | cut -d ' ' -f 2 `
+
+	cp $datadir/pacbio/smrtanalysis/016/$number/data/modifications.csv.gz $datadir/pacbio/modinfo/$label.modifications.csv.gz
+	cp $datadir/pacbio/smrtanalysis/016/$number/data/motifs.gff.gz $datadir/pacbio/modinfo/$label.motifs.gff.gz
+	cp $datadir/pacbio/smrtanalysis/016/$number/data/motif_summary.csv $datadir/pacbio/modinfo/$label.motif_summary.csv
+    done < ~/Code/yfan_nanopore/mdr/zymo/truth/pblist_withlabels.txt
+fi
+
+	
+    
