@@ -66,3 +66,14 @@ if [ $1 == findmotifs ] ; then
 	done < ./truth/chrlist_withlabels.txt
 fi
     
+if [ $1 == extract_motifs ] ; then
+    time (python ~/Code/yfan_meth/utils/megalodon_extract_barcode_methprobs.py \
+	   -r $ref \
+	   -b ~/Code/yfan_nanopore/mdr/zymo/barcodes_zymo_curated.txt \
+	   -m $projdir/megalodon/$prefix/per_read_modified_base_calls.txt \
+	   -i $projdir/megalodon/$prefix/per_read_modified_base_calls.txt.idx \
+	   -o $datadir/$prefix/$prefix.curate_extract.csv \
+	   -t 12 )
+fi
+
+    
