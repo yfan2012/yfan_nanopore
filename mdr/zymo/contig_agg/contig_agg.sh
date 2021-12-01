@@ -65,8 +65,11 @@ if [ $1 == findmotifs ] ; then
 	       -s $chrom >> $datadir/$prefix/${prefix}_barcodes50.csv
 	done < ./truth/chrlist_withlabels.txt
 fi
-    
+
+
 if [ $1 == extract_motifs ] ; then
+    ##extract meth info at positions relelvant to the motifs in the barcode
+    
     time (python ~/Code/yfan_meth/utils/megalodon_extract_barcode_methprobs.py \
 	   -r $ref \
 	   -b ~/Code/yfan_nanopore/mdr/zymo/barcodes_zymo_curated.txt \
@@ -77,3 +80,12 @@ if [ $1 == extract_motifs ] ; then
 fi
 
     
+if [ $1 == filter_motifs ] ; then
+    time( python ~/Code/yfan_nanopore/mdr/zymo/contig_agg/filter_motif_calls.py \
+		 -i $datadir/$prefix/$prefix.curate_extract.csv \
+		 -o $datadir/$prefix/$prefix.curate_filter.csv \
+		 -m .8 \
+		 -u .8)
+fi
+
+	  
