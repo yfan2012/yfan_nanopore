@@ -18,3 +18,12 @@ if [ $1 == filter_meth ] ; then
 	   -o $datadir/clin_barocdes_methprobs.csv \
 	   -t 12
 fi
+
+if [ $1 == call_meth ] ; then
+    ##assign meth/unmeth based on given thresholds
+    python ~/Code/yfan_nanopore/mdr/zymo/contig_agg/filter_motif_calls.py \
+	   -i $datadir/clin_barocdes_methprobs.csv \
+	   -o $datadir/clin_barocdes_methcalls.csv \
+	   -m .8 \
+	   -u .8
+fi
