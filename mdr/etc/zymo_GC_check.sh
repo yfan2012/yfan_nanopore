@@ -3,7 +3,7 @@
 rawdir=/uru/Data/Nanopore/projects/read_class/zymo/raw
 ssddir=~/data/mdr/zymo
 prefix=20190809_zymo_control
-datadir=/mithril/Data/Nanopore/projects/methbin
+datadir=/mithril/Data/Nanopore/projects/methbin/etc
 
 ##ref from https://s3.amazonaws.com/zymo-files/BioPool/D6322.refseq.zip
 ref=/uru/Data/Nanopore/projects/read_class/zymo/ref/zymo_all.fa
@@ -35,4 +35,25 @@ if [ $1 == index ] ; then
 	    -o $ssddir/megalodon/CG_model/per_read_modified_base_calls.txt.idx
 fi
 
+
+if [ $1 == move_stuff ] ; then
+    cp -r $ssddir/megalodon/CG_model $datadir/
+fi
 	    
+if [ $1 == extract_motifs ] ; then
+    python ~/Code/yfan_meth/utils/megalodon_extract_barcode_methprobs.py \
+	   -r $ref \
+	   -b ~/Code/yfan_nanopore/mdr/zymo/barcodes_zymo_curated.txt \
+	   -m $datadir/CG_model/per_read_modified_base_calls.txt \
+	   -i $datadir/CG_model/per_read_modified_base_calls.txt.idx \
+	   -o $datadir/CG_model/curate_filter.csv \
+	   -t 12
+fi
+    
+if [ $1 == filter_motifs ] ; then
+    python ~/Code/yfan_nanopore/mdr/zymo/contig_agg/filter_motif_calls.py \
+	   -i $datadir/CG_model/curate_filter.csv \
+	   -o $datadir/CG_model/curate_calls.csv \
+	   -m .8 \
+	   -u .8
+fi
