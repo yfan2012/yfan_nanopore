@@ -104,6 +104,20 @@ if [ $1 == pseudo ] ; then
            -s $chrom >> $datadir/motifcalls/50_barcodes.csv
 fi
 
+if [ $1 == ecoli_investigation ] ; then
+    label=ecoli
+    chrom=Escherichia_coli_chromosome
+    python ~/Code/yfan_meth/utils/bismark_motif_finder.py \
+           -c $datadir/bismark/$label/${label}_1_bismark_bt2_pe.CX_report.txt \
+           -r $ref \
+           -b ~/Code/yfan_nanopore/mdr/rebase/barcodes50.txt \
+           -p .5 \
+           -l 8 \
+           -m 10 \
+	   -o $datadir/motifcalls/$label.seqs.fasta \
+           -s $chrom >> $datadir/motifcalls/50_barcodes.csv
+fi
+
 
 if [ $1 == bisulf_pseudo ] ; then
     ##rerun with pseudomonas motif
