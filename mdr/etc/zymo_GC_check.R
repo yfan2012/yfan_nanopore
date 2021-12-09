@@ -1,5 +1,6 @@
 library(tidyverse)
 library(multidplyr)
+library(Biostrings)
 
 cluster=new_cluster(12)
 cluster_library(cluster, 'tidyverse')
@@ -10,6 +11,7 @@ datadir=file.path(projdir, 'etc/CG_model')
 
 methcall_cols=c('chrom', 'pos', 'strand', 'prob', 'motif', 'base', 'meth')
 methcallsfile=file.path(datadir, 'curate_calls.csv')
+
 
 
 ##read motif info
@@ -60,7 +62,8 @@ methfreqs=methgroups %>%
     collect() %>%
     ungroup()
 cpgs=methfreqs %>%
-    filter(motif=='GCCGGC')
+    filter(motif=='GCCGGC') %>%
+    rename(chr=chrom)
 
 
 cgpdf=file.path(dbxdir, 'cg_model_megalodon.pdf')
@@ -75,19 +78,100 @@ dev.off()
 
 
 
+
+####bisulf stuff
+keyfile='~/Code/yfan_nanopore/mdr/zymo/truth/chrlist_withlabels.txt'
+keycols=c('chrom', 'label')
+key=read_table2(keyfile, col_names=keycols)
+
 labels=c('bsubtilis', 'ecoli', 'efaecalis', 'lmonocytogenes', 'paeruginosa', 'saureus', 'senterica')
 cxcols=c('chr', 'pos', 'strand', 'meth', 'unmeth', 'context', 'seq')
-
 allcx=NULL
 for (label in labels) {
     cxfile=file.path(projdir, 'zymo/truth/bisulfite/bismark', label, paste0(label, '_1_bismark_bt2_pe.CX_report.txt'))
+    chrlist=key$chrom[key$label==label]
     cx=read_tsv(cxfile, col_names=cxcols) %>%
+        rowwise() %>%
+        filter(chr %in% chrlist) %>%
         mutate(total=meth+unmeth)
     allcx=bind_rows(allcx, cx)
 }
 
-methcx=allcx %>%
-    rowwise() %>%
-    filter(!grepl('tig', chr, fixed=TRUE)) %>%    
-    group_by(chr, pos) %>%
-    top_n(1, total)
+methbisulf=allcx %>%
+    mutate(bisulf=meth/total) 
+
+
+
+
+####filter out appropriate 
+reffile='/uru/Data/Nanopore/projects/read_class/zymo/ref/zymo_all.fa'
+ref=readDNAStringSet(reffile, format='fasta')
+chrs=names(ref)[!grepl('tig', names(ref), fixed=TRUE)]
+methcompare=NULL
+for (i in chrs) {
+    print(i)
+    chromname=strsplit(i, split=' ', fixed=TRUE)[[1]][1]
+    starts=start(vmatchPattern('GCCGGC', ref[i])[[i]])
+    bisulfpos=c(starts+2, starts+3)
+    bisulf=methbisulf %>%
+        filter(chr==chromname) %>%
+        rowwise() %>%
+        filter(pos %in% bisulfpos) %>%
+        mutate(motif='GCCGGC')
+    mega=meth %>%
+        filter(chrom==chromname) %>%
+        filter(motif=='GCCGGC')
+    
+    ##assign each meth position a methfrac by megalodon, and a methfrac by bisulfite
+    for (start in starts) {
+        diffs=bisulf$pos-(start+2)<2
+        motif=bisulf[diffs,]
+
+        megadiffs=abs(mega$pos-start)<6
+        megamotif=mega[megadiffs,]
+
+        motifinfo=tibble(chr=chromname, pos=start, bisulf=mean(motif$bisulf), mega=max(megamotif$methfrac))
+        methcompare=bind_rows(methcompare, motifinfo)
+    }
+}
+
+    
+
+boxpdf=file.path(dbxdir, 'bisulf_boxes.pdf')
+pdf(boxpdf, h=9, w=13)
+box=ggplot(methcompare, aes(x=chr, y=bisulf, colour=chr, fill=chr, alpha=.2)) +
+    geom_boxplot() +
+    ggtitle('GCCGGC') +
+    theme_bw() +
+    theme(axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank())
+print(box)
+dev.off()
+
+
+boxpdf=file.path(dbxdir, 'mega_boxes.pdf')
+pdf(boxpdf, h=9, w=13)
+box=ggplot(methcompare, aes(x=chr, y=mega, colour=chr, fill=chr, alpha=.2)) +
+    geom_boxplot() +
+    ggtitle('GCCGGC') +
+    theme_bw() +
+    theme(axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank())
+print(box)
+dev.off()
+
+
+corpdf=file.path(dbxdir, 'bisulf_cor.pdf')
+pdf(corpdf, h=9, w=13)
+box=ggplot(methcompare, aes(x=bisulf, y=mega, colour=chr, alpha=.2)) +
+    geom_point() +
+    ggtitle('GCCGGC') +
+    theme_bw()
+print(box)
+dev.off()
+
+
+##sanity check
+allmethecoli=allmeth %>%
+    filter(chr=='Escherichia_coli_chromosome')
+ecolicg=meth %>%
+    filter(chrom=='Escherichia_coli_chromosome') %>%
+    filter(motif=='GCCGGC')
