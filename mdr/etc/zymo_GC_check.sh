@@ -3,7 +3,8 @@
 rawdir=/uru/Data/Nanopore/projects/read_class/zymo/raw
 ssddir=~/data/mdr/zymo
 prefix=20190809_zymo_control
-datadir=/mithril/Data/Nanopore/projects/methbin/etc
+projdir=/mithril/Data/Nanopore/projects/methbin
+datadir=$projdir/etc
 
 ##ref from https://s3.amazonaws.com/zymo-files/BioPool/D6322.refseq.zip
 ref=/uru/Data/Nanopore/projects/read_class/zymo/ref/zymo_all.fa
@@ -56,4 +57,21 @@ if [ $1 == filter_motifs ] ; then
 	   -o $datadir/CG_model/curate_calls.csv \
 	   -m .8 \
 	   -u .8
+fi
+
+
+if [ $1 == check_motifs ] ; then
+
+    while read p ;
+    do
+	label=`echo $p | cut -d ' ' -f 1` 
+	motifs=`echo $p | cut -d ' ' -f 2`
+	positions=`echo $p | cut -d ' ' -f 3`
+	echo $label
+	python ~/Code/yfan_meth/utils/bismark_motif_confirm.py \
+	       -c $projdir/zymo/truth/bisulfite/bismark/$label/${label}_1_bismark_bt2_pe.CX_report.txt \
+	       -r $ref \
+	       -m $motifs \
+	       -p $positions
+    done < bisulfinfo.txt
 fi

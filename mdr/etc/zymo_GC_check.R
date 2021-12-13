@@ -13,7 +13,6 @@ methcall_cols=c('chrom', 'pos', 'strand', 'prob', 'motif', 'base', 'meth')
 methcallsfile=file.path(datadir, 'curate_calls.csv')
 
 
-
 ##read motif info
 cmethfile=file.path(projdir, 'zymo/truth/bisulfite/zymo_cmeth.csv')
 cmeth=read_csv(cmethfile)
@@ -175,3 +174,4 @@ allmethecoli=allmeth %>%
 ecolicg=meth %>%
     filter(chrom=='Escherichia_coli_chromosome') %>%
     filter(motif=='GCCGGC')
+
