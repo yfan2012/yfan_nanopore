@@ -58,3 +58,28 @@ methchroms=methfreq %>%
 
 chrominfo=methchroms %>%
     spread(key=motif, value=freq)
+matchrominfo=as.matrix(chrominfo %>% select(-chrom))
+rownames(matchrominfo)=chrominfo$chrom
+
+chromdists=as_tibble(as.matrix(dist(matchrominfo))) %>%
+    mutate(chroms=chrominfo$chrom) %>%
+    gather(key=chroms2, value=dist, -chroms) %>%
+    mutate(rounded=round(dist, 2))
+
+chromdistspdf=file.path(dbxdir, 'clinical_contig_distances.pdf')
+pdf(chromdistspdf, h=55, w=55)
+plot=ggplot(chromdists, aes(x=chroms, y=chroms2)) +
+    geom_tile(aes(fill=dist)) +
+    geom_text(aes(label = rounded)) +
+    scale_fill_gradient(low = "white", high = "red") +
+    theme_bw() +
+    theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+print(plot)
+dev.off()
+
+chromclustspdf=file.path(dbxdir, 'clinical_contig_clusters.pdf')
+pdf(chromclustspdf, h=8, w=30)
+plot(hclust(dist(matchrominfo)))
+print(plot)
+dev.off()
+      

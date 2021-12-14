@@ -19,3 +19,10 @@ if [ $1 == filter_meth ] ; then
 	   -t 12
 fi
 
+if [ $1 == call_meth ] ; then
+    python ~/Code/yfan_nanopore/mdr/zymo/contig_agg/filter_motif_calls.py \
+	   -i $datadir/zymo_barocdes_methprobs.csv \
+	   -o $datadir/zymo_barocdes_methcalls.csv \
+	   -m .8 \
+	   -u .8
+fi
