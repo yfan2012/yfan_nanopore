@@ -144,8 +144,8 @@ if [ $1 == top40 ] ; then
 fi
 
 
+catdir=/atium/Data/ref/CATdb
 if [ $1 == cattigs ] ; then
-    catdir=/atium/Data/ref/CATdb
     mkdir -p $datadir/contig_id/CAT
 
     CAT contigs \
@@ -157,3 +157,13 @@ if [ $1 == cattigs ] ; then
 	--sensitive
     
 fi
+
+
+if [ $1 == nametigs ] ; then
+    CAT add_names \
+	-i $datadir/contig_id/CAT/$prefix.CAT.contig2classification.txt \
+	-t $catdir/tax \
+	-o $datadir/contig_id/CAT/$prefix.CAT.names.txt
+fi
+
+    

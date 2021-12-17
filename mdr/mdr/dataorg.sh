@@ -213,3 +213,9 @@ fi
 
 
     
+if [ $1 == hiC_copy ] ; then
+    mkdir -p $datadir/hiC/
+    mkdir -p $datadir/hiC/clusters
+
+    cp ~/gdrive/mdr/mdr/181127_stool_illumina_binning_rerun/proxiwrap_clusters/*fasta $datadir/hiC/clusters/
+fi
