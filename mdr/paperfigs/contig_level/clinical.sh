@@ -27,3 +27,25 @@ if [ $1 == call_meth ] ; then
 	   -m .8 \
 	   -u .8
 fi
+
+
+
+if [ $1 == combine_hiC ] ; then
+    ##combine individual hiC bin fastas into a single file
+    for i in $clindir/hiC/clusters/*.fasta ;
+    do
+	name=`basename $i .fasta`
+	sed "s/>/>$name./g" $i >> $clindir/hiC/$prefix.hiC.fasta
+    done
+fi
+
+
+if [ $1 == mummer_hiC ] ; then
+    ##mummer clin sample contigs with bins from phase folks
+    mkdir -p $datadir/clin_mummer
+    
+    nucmer -p $datadir/clin_mummer/asm_hiC $asm $clindir/hiC/$prefix.hiC.fasta
+    mummerplot --filter --fat --postscript -p $datadir/clin_mummer/asm_hiC $datadir/clin_mummer/asm_hiC.delta
+    mummerplot --filter --fat --png -p $datadir/clin_mummer/asm_hiC $datadir/clin_mummer/asm_hiC.delta
+    dnadiff -p $datadir/clin_mummer/asm_hiC $asm $clindir/hiC/$prefix.hiC.fasta
+fi
