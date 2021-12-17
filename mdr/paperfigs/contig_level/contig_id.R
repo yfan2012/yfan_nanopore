@@ -23,12 +23,18 @@ mum=read_tsv(mumfile, col_names=mumcols) %>%
     mutate(bin=strsplit(qname, '.', fixed=TRUE)[[1]][1]) %>%
     group_by(rname, bin) %>%
     summarise(total_rcov=sum(rcov)) %>%
-    filter(total_rcov>50)
+    filter(total_rcov>20)
 
 mumkey=mum %>%
     group_by(rname) %>%
+    filter(n()==1)
+
+mummultiple=mum %>%
+    group_by(rname) %>%
+    filter(n()>1) %>%
     summarise(all_bins=paste0(bin, collapse=','), all_rcov=paste0(total_rcov, collapse=','))
 
 mumkeyfile=file.path(datadir, 'tigs2bins.tsv')
 write_tsv(mumkey, mumkeyfile)
-
+multikeyfile=file.path(datadir, 'tigs2bins_multi.tsv')
+write_tsv(mummultiple, multikeyfile)
