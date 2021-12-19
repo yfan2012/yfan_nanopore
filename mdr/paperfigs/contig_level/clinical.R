@@ -49,9 +49,9 @@ methfreq=methgrouped %>%
     collect() %>%
     summarise(freq=mean(methfrac))
 
+##keep only chroms that have every motif represented
 nummotifs=length(table(methfreq$motif))
 keepchroms=names(table(methfreq$chrom)[table(methfreq$chrom)==nummotifs])
-
 methchroms=methfreq %>%
     rowwise() %>%
     filter(chrom %in% keepchroms)
@@ -82,4 +82,18 @@ pdf(chromclustspdf, h=8, w=30)
 plot(hclust(dist(matchrominfo)))
 print(plot)
 dev.off()
-      
+
+
+
+####add in bin info from mummer
+chrombinsfile=file.path(datadir, 'tigs2bins.tsv')
+chrombins=read_tsv(chrombinsfile)
+for (i in keepchroms) {
+    if (!(i %in% chrombins$rname)) {
+        info=tibble(rname=i, bin='unknown', total_rcov=NA)
+        chrombins=bind_rows(chrombins, info)
+    }
+}
+methbins=methchroms %>%
+    rowwise() %>%
+    mutate(bin=chrombins$bin[chrombins$rname==chrom])
