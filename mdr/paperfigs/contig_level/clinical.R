@@ -1,5 +1,8 @@
 library(tidyverse)
 library(multidplyr)
+library(RColorBrewer)
+library(ggdendro)
+library(dendextend)
 
 cluster=new_cluster(12)
 cluster_library(cluster, 'tidyverse')
@@ -49,18 +52,20 @@ methfreq=methgrouped %>%
     collect() %>%
     summarise(freq=mean(methfrac))
 
-##keep only chroms that have every motif represented
+##keep only contigs that have every motif represented
 nummotifs=length(table(methfreq$motif))
 keepchroms=names(table(methfreq$chrom)[table(methfreq$chrom)==nummotifs])
 methchroms=methfreq %>%
     rowwise() %>%
     filter(chrom %in% keepchroms)
 
+##make matrix of meth info by contig
 chrominfo=methchroms %>%
     spread(key=motif, value=freq)
 matchrominfo=as.matrix(chrominfo %>% select(-chrom))
 rownames(matchrominfo)=chrominfo$chrom
 
+##make dstance matrix
 chromdists=as_tibble(as.matrix(dist(matchrominfo))) %>%
     mutate(chroms=chrominfo$chrom) %>%
     gather(key=chroms2, value=dist, -chroms) %>%
@@ -85,6 +90,7 @@ dev.off()
 
 
 
+
 ####add in bin info from mummer
 chrombinsfile=file.path(datadir, 'tigs2bins.tsv')
 chrombins=read_tsv(chrombinsfile)
@@ -97,3 +103,30 @@ for (i in keepchroms) {
 methbins=methchroms %>%
     rowwise() %>%
     mutate(bin=chrombins$bin[chrombins$rname==chrom])
+
+binnames=c()
+for (i in rownames(matchrominfo)) {
+    bin=chrombins$bin[chrombins$rname==i]
+    binnames=c(binnames, bin)
+}
+mycolors=c(colorRampPalette(brewer.pal(8, 'Set2'))(15), '#000000')
+colorkey=tibble(contig=rownames(table(binnames)), color=mycolors)
+bincolors=c()
+for (i in binnames) {
+    color=colorkey$color[colorkey$contig==i]
+    bincolors=c(bincolors, color)
+}
+    
+##try dendrogram starting at 5.4 from tutorial below
+##http://www.sthda.com/english/wiki/beautiful-dendrogram-visualizations-in-r-5-must-known-methods-unsupervised-machine-learning#ggplot2-integration
+dend=matchrominfo %>%
+    scale %>% 
+    dist %>%
+    hclust %>%
+    as.dendrogram %>%
+    set("labels_col", bincolors)
+
+chrombinspdf=file.path(dbxdir, 'clinical_contig_clusters_bin_colored.pdf')
+pdf(chrombinspdf, h=8, w=30)
+plot(dend)
+dev.off()
