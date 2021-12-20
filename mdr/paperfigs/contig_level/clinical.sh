@@ -49,3 +49,4 @@ if [ $1 == mummer_hiC ] ; then
     mummerplot --filter --fat --png -p $datadir/clin_mummer/asm_hiC $datadir/clin_mummer/asm_hiC.delta
     dnadiff -p $datadir/clin_mummer/asm_hiC $asm $clindir/hiC/$prefix.hiC.fasta
 fi
+

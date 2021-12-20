@@ -130,3 +130,41 @@ chrombinspdf=file.path(dbxdir, 'clinical_contig_clusters_bin_colored.pdf')
 pdf(chrombinspdf, h=8, w=30)
 plot(dend)
 dev.off()
+
+binnedinfo=matchrominfo[binnames!='unknown',]
+binneddend=binnedinfo %>%
+    scale %>% 
+    dist %>%
+    hclust %>%
+    as.dendrogram %>%
+    set("labels_col", bincolors[bincolors!='#000000'])
+
+chrombinspdf=file.path(dbxdir, 'clinical_contig_clusters_bin_colored_binned.pdf')
+pdf(chrombinspdf, h=8, w=30)
+plot(binneddend)
+dev.off()
+
+
+
+
+
+####look at organism classifications
+CATfile=file.path(projdir, 'mdr/contig_id/CAT/200708_mdr_stool16native.CAT.names_official.txt')
+phyloranks=c('superkingdom', 'phylum', 'class', 'order', 'family', 'genus', 'species')
+CATcols=c('tig', 'classification', 'reason', 'lineage', 'lineage_scores', phyloranks)
+CAT=read_tsv(CATfile)
+names(CAT)=CATcols
+
+catsum=c()
+for (i in rev(phyloranks)) {
+    level=CAT %>%
+        filter(!!as.name(i)!='no support') %>%
+        rowwise() %>%
+        filter(!tig %in% catsum$tig) %>%
+        mutate(orfs=strsplit(reason, ' ', fixed=TRUE)[[1]][3]) %>%
+        mutate(level=i) %>%
+        mutate(ident=strsplit(!!as.name(i), ':', fixed=TRUE)[[1]][1]) %>%
+        select(tig, orfs, level, ident)
+    catsum=bind_rows(catsum, level)
+}
+

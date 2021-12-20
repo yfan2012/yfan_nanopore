@@ -158,7 +158,6 @@ if [ $1 == cattigs ] ; then
     
 fi
 
-
 if [ $1 == nametigs ] ; then
     CAT add_names \
 	-i $datadir/contig_id/CAT/$prefix.CAT.contig2classification.txt \
@@ -166,4 +165,16 @@ if [ $1 == nametigs ] ; then
 	-o $datadir/contig_id/CAT/$prefix.CAT.names.txt
 fi
 
+if [ $1 == summarise ] ; then
+    CAT add_names \
+	-i $datadir/contig_id/CAT/$prefix.CAT.contig2classification.txt \
+	-t $catdir/tax \
+	-o $datadir/contig_id/CAT/$prefix.CAT.names_official.txt \
+	--only_official
+    CAT summarise \
+	-c $datadir/medaka/consensus.fasta \
+	-i $datadir/contig_id/CAT/$prefix.CAT.names_official.txt \
+	-o $datadir/contig_id/CAT/$prefix.CAT.summary.txt
+fi
     
+	
