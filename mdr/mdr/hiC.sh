@@ -19,6 +19,23 @@ if [ $1 == BAT ] ; then
 	--sensitive
 fi
 
+if [ $1 == BAT_single ] ; then
+    ##downstream naming doesn't tolerate two possible classifications
+    ##force single classification using the f parameter
+    mkdir -p $datadir/bin_id
+    mkdir -p $datadir/bin_id/BAT_single
+    
+    CAT bins \
+	-b $datadir/clusters \
+	-d $catdir/db \
+	-t $catdir/tax \
+	-o $datadir/bin_id/BAT_single/$prefix.BAT \
+	-s fasta \
+	-f .5 \
+	--force \
+	--sensitive
+fi
+
 
 if [ $1 == namebins ] ; then
     CAT add_names \
@@ -26,3 +43,16 @@ if [ $1 == namebins ] ; then
         -t $catdir/tax \
         -o $datadir/bin_id/BAT/$prefix.BAT.names.txt
 fi
+
+
+if [ $1 == summarise ] ; then
+    CAT add_names \
+	-i $datadir/bin_id/BAT_single/$prefix.BAT.bin2classification.txt \
+	-t $catdir/tax \
+	-o $datadir/bin_id/BAT_single/$prefix.BAT.names_official.txt \
+	--only_official
+    CAT summarise \
+	-i $datadir/bin_id/BAT_single/$prefix.BAT.names_official.txt \
+	-o $datadir/bin_id/BAT_single/$prefix.BAT.summary.txt
+fi
+    
