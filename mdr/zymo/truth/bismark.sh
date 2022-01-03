@@ -157,11 +157,15 @@ if [ $1 == countunk ] ; then
 fi
 
 if [ $1 == account ] ; then 
-
-    python ~/Code/yfan_meth/utils/bismark_motif_confirm.py \
-	   -c $datadir/bismark \
-	   -r $ref \
-	   -s ~/Code/yfan_nanopore/mdr/zymo/truth/chrlist_withlabels.txt \
-	   -m $datadir/zymo_cmeth.csv \
-	   -o $datadir/zymo_methcounts.csv
+    while read p; do
+	label=`echo $p | awk '{print $1}'`
+	motifs=`echo $p | awk '{print $2}'`
+	methpos=`echo $p | awk '{print $3}'`
+	
+	python ~/Code/yfan_meth/utils/bismark_motif_confirm.py \
+	       -c $datadir/bismark/$label/${label}_1_bismark_bt2_pe.CX_report.txt \
+	       -r $ref \
+	       -m $motifs \
+	       -p $methpos
+    done <bismark_account.txt
 fi

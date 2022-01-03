@@ -45,6 +45,7 @@ cluster_copy(cluster, 'findMethFreq')
 
 methgrouped=meth %>%
     filter(sum(methnum+umethnum)>5) %>%
+    ##filter(sum(methnum+umethnum)>1) %>%
     group_by(chrom, motif) %>%
     partition(cluster)
 methfreq=methgrouped %>%
@@ -109,7 +110,8 @@ for (i in rownames(matchrominfo)) {
     bin=chrombins$bin[chrombins$rname==i]
     binnames=c(binnames, bin)
 }
-mycolors=c(colorRampPalette(brewer.pal(8, 'Set2'))(15), '#000000')
+numcolors=length(names(table(binnames)))-1
+mycolors=c(colorRampPalette(brewer.pal(8, 'Set2'))(numcolors), '#000000')
 colorkey=tibble(contig=rownames(table(binnames)), color=mycolors)
 bincolors=c()
 for (i in binnames) {
@@ -200,3 +202,55 @@ for (i in which(chrombins$bin!='unknown')) {
 }
 tiginfocsv=file.path(dbxdir, 'tigbins_species.csv')
 write_csv(tiginfo, tiginfocsv)
+
+
+
+
+
+
+
+
+####attach classification info to the dendrogram
+labelfull=NULL
+for (i in label_order) {
+    info=tiginfo[tiginfo$tig==i,]
+    if (dim(info)[1]>0) {
+        labelfull=c(labelfull, paste0(info$tig, ', ', info$tigleaf, ': ', info$bin, ', ',  info$binleaf, ' (', info$lca, ')'))
+    } else {
+        ##if the contig wasn't assigned a taxononomy, but was assigned a bin
+        bin=chrombins$bin[chrombins$rname==i]
+        infobin=BAT[BAT$tig==paste0(bin, '.fasta'),][-(1:5)] %>% slice(1) %>% unlist(., use.names=FALSE)
+        binindex=sum(!infobin=='no support')
+        ##seems that one of the bins (bin_31) isn't even classified at the superkingdom level
+        if (binindex>0) {
+            binleaf=strsplit(infobin[binindex], ':', fixed=TRUE)[[1]][1]
+        }else{
+            binleaf='Organism'
+        }
+        labelfull=c(labelfull, paste0(i, ', not assigned: ', bin, ', ', binleaf, ' (NA)'))
+        
+    }
+}
+
+labels(binneddend)=labelfull
+
+chrombinspdf=file.path(dbxdir, 'clinical_contig_clusters_bin_colored_binned_labelfull.pdf')
+pdf(chrombinspdf, h=11, w=30)
+par(mar = c(26, 4, 4, 2) + 0.1)
+plot(binneddend)
+dev.off()
+
+
+##chrombinsvertpdf=file.path(dbxdir, 'clinical_contig_clusters_bin_colored_binned_labelfull_vert_test.pdf')
+chrombinsvertpdf=file.path(dbxdir, 'clinical_contig_clusters_bin_colored_binned_labelfull_vert.pdf')
+##pdf(chrombinsvertpdf, h=40, w=11)
+pdf(chrombinsvertpdf, h=30, w=11)
+par(mar = c(5, 4, 2, 40) + 0.1)
+plot(binneddend, horiz=TRUE)
+dev.off()
+
+
+##check odd contigs
+binnedkey=chrombins %>%
+    rowwise () %>%
+    filter(rname %in% label_order)

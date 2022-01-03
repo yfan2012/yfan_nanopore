@@ -1,0 +1,5 @@
+bsubtilis	CCWGG	2
+ecoli		CCWGG,KCCGGM	2,3
+paeruginosa	CMTCGAKG	4
+saureus		GATC	4
+senterica	CCWGG	2

@@ -38,3 +38,6 @@ mumkeyfile=file.path(datadir, 'tigs2bins.tsv')
 write_tsv(mumkey, mumkeyfile)
 multikeyfile=file.path(datadir, 'tigs2bins_multi.tsv')
 write_tsv(mummultiple, multikeyfile)
+
+
+
