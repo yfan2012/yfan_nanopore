@@ -240,7 +240,6 @@ par(mar = c(26, 4, 4, 2) + 0.1)
 plot(binneddend)
 dev.off()
 
-
 ##chrombinsvertpdf=file.path(dbxdir, 'clinical_contig_clusters_bin_colored_binned_labelfull_vert_test.pdf')
 chrombinsvertpdf=file.path(dbxdir, 'clinical_contig_clusters_bin_colored_binned_labelfull_vert.pdf')
 ##pdf(chrombinsvertpdf, h=40, w=11)
@@ -250,7 +249,119 @@ plot(binneddend, horiz=TRUE)
 dev.off()
 
 
-##check odd contigs
-binnedkey=chrombins %>%
-    rowwise () %>%
+
+##check out weird contigs
+treechrombins=chrombins %>%
     filter(rname %in% label_order)
+
+
+
+
+
+
+
+####coverage hist analysis
+covfile=file.path(projdir, 'mdr', 'align', paste0(prefix, 'polished.sorted.cov'))
+cov_cols=c('tig', 'pos', 'cov')
+cov=read_tsv(covfile, col_names=cov_cols) %>%
+    group_by(tig) %>%
+    mutate(covfrac=cov/max(cov))
+cov_labeled=cov %>%
+    filter(tig %in% label_order[1:20])
+
+##get coverage spectrum
+covfreq=cov %>%
+    group_by(tig, cov) %>%
+    summarise(freq=n()) %>%
+    mutate(normfreq=freq/max(freq)) %>%
+    mutate(normcov=cov/max(cov))
+covfreq_labeled=covfreq %>%
+    filter(tig %in% label_order)
+
+findpeaks <- function(test) {
+    ##normalized coverage frequency tibble
+    ##return height and time (highest point of bimodality, and time spent in bimodality)
+    
+    steps=rev(seq(.01,1,.01))
+    covrange=diff(range(test$cov))
+    
+    height=0
+    time=0
+    spread=0
+    for (i in steps) {
+        over=which(test$normfreq>=i)
+        if (length(over)>1) {
+            peaks=1+sum(diff(over)>1)
+            if (peaks>1) {
+                time=time+.01
+                starts=c(over[1], over[which(diff(over)>1)]+1)
+                ends=c(over[which(diff(over)>1)+1], over[length(over)])
+                mids=starts+(ends-starts)/2
+                ispread=max(diff(mids))/covrange
+                if (spread<ispread && ispread>.05) {
+                    spread=ispread
+                    if (height<i){
+                        height=i
+                    }
+                }
+                
+            }
+        }
+    }
+    return(tibble(tig=test$tig[1], h=height, t=time, s=spread))
+}
+
+covpeaks=covfreq %>%
+    do(findpeaks(.)) %>%
+    filter(tig %in% label_order) %>%
+    mutate(composite=sum(h*t*s)) %>%
+    arrange(-composite)
+
+
+##obvs just do q-q plot??
+qqmse <- function(test){
+    ##poisson coverage 
+    mean=sum(test$cov*test$freq)/sum(test$freq)
+    std=sqrt(mean)
+    
+    ordered_freq=sort(test$freq)
+    ptile=test %>%
+        rowwise() %>%
+        mutate(percentile=sum(test$freq[test$cov<=cov])/sum(test$freq)) %>%
+        mutate(theoretical=pnorm(cov, mean, std)) %>%
+        mutate(res=(percentile=theoretical)^2)
+
+    mse=sqrt(sum(ptile$res))
+    return(tibble(tig=test$tig[1], mse=mse))
+}
+
+covqq=covfreq %>%
+    do(qqmse(.)) %>%
+    filter(tig %in% label_order) %>%
+    arrange(-mse)
+##doesn't look as compeling as my weird thing looking for bimodality 
+##tails are messing with me?
+
+
+##plot hists
+plotcov_head=covfreq %>%
+    filter(tig %in% covpeaks_labeled$tig[1:20])
+plotcov_tail=covfreq %>%
+    filter(tig %in% tail(covpeaks_labeled$tig, 20))
+
+histfile=file.path(dbxdir, 'clinical_contig_coverage_hists.pdf')
+pdf(histfile, h=13, w=20)
+headplot=ggplot(plotcov_head, aes(x=normcov, y=normfreq)) +
+    geom_bar(stat='identity') +
+    facet_wrap(~tig) +
+    theme_bw()
+print(headplot)
+tailplot=ggplot(plotcov_tail, aes(x=normcov, y=normfreq)) +
+    geom_bar(stat='identity') +
+    facet_wrap(~tig) +
+    theme_bw()
+print(tailplot)
+dev.off()
+
+
+

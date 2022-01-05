@@ -178,3 +178,20 @@ if [ $1 == summarise ] ; then
 fi
     
 	
+if [ $1 == align_polished ] ; then
+    mkdir -p $datadir/align
+
+    minimap2 -t 36 -ax map-ont $asmpolished $fq \
+	| samtools view -@ 36 -b \
+	| samtools sort -@ 36 -o $datadir/align/${prefix}_asmpolished.sorted.bam
+    samtools index $datadir/align/${prefix}_asmpolished.sorted.bam
+fi
+
+
+if [ $1 == coverage_polished ] ; then
+    bedtools genomecov -d \
+	     -ibam $datadir/align/${prefix}_asmpolished.sorted.bam \
+	     > $datadir/align/${prefix}_asmpolished.sorted.cov
+fi
+
+    
