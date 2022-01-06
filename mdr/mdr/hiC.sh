@@ -56,3 +56,19 @@ if [ $1 == summarise ] ; then
 	-o $datadir/bin_id/BAT_single/$prefix.BAT.summary.txt
 fi
     
+
+if [ $1 == abricate ] ; then
+    mkdir -p $projdir/mdr/amr
+
+    binfile=$datadir/$prefix.hiC.fasta
+
+    for i in ecoh card ncbi resfinder plasmidfinder vfdb ecoli_vf megares argannot ;
+    do
+	abricate \
+	    --threads 36 \
+	    --db $i \
+	    $binfile > $projdir/mdr/amr/$prefix.hiC.$i.tsv
+    done
+fi
+    
+    
