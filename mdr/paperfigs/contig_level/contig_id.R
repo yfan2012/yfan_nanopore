@@ -21,7 +21,7 @@ mumcols=c('rstart', 'rend', 'qstart', 'qend', 'ralen', 'qalen','ident', 'rlen', 
 mum=read_tsv(mumfile, col_names=mumcols) %>%
     rowwise() %>%
     mutate(bin=strsplit(qname, '.', fixed=TRUE)[[1]][1]) %>%
-    group_by(rname, bin) %>%
+    group_by(rname, bin, rlen) %>%
     summarise(total_rcov=sum(rcov)) %>%
     filter(total_rcov>20)
 
