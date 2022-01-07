@@ -342,7 +342,6 @@ covqq=covfreq %>%
 ##doesn't look as compeling as my weird thing looking for bimodality 
 ##tails are messing with me?
 
-
 ##plot hists
 plotcov_head=covfreq %>%
     filter(tig %in% covpeaks_labeled$tig[1:20])
@@ -361,6 +360,64 @@ tailplot=ggplot(plotcov_tail, aes(x=normcov, y=normfreq)) +
     facet_wrap(~tig) +
     theme_bw()
 print(tailplot)
+dev.off()
+
+
+
+
+
+####plot clusters
+clusters=cutree(binneddend, h=4)
+clustinfo=tibble(tig=sapply(strsplit(names(clusters), ',', fixed=TRUE), '[[', 1),
+                 cluster=paste0('cluster_',as.character(clusters))) %>%
+    rowwise() %>%
+    mutate(bin=chrombins$bin[chrombins$rname==tig]) %>%
+    mutate(tiglen=chrombins$rlen[chrombins$rname==tig]) %>%
+    rowwise() %>%
+    mutate(binnum=as.numeric(strsplit(bin, '_', fixed=TRUE)[[1]][2])) %>%
+    mutate(tigname=paste0(chartr('0123456789', 'abcdefghij', binnum), tig))
+
+clustercolors=mycolors[1:15]
+names(clustercolors)=names(table(clustinfo$bin))
+
+plots=NULL
+num=1
+for (i in names(table(clustinfo$cluster))) {
+    plotclustinfo=clustinfo %>%
+        filter(cluster==i)
+    plot=ggplot(plotclustinfo, aes(y=tig, x=tiglen, colour=bin, fill=bin)) +
+        geom_bar(stat='identity', position='dodge', aes(alpha=.5)) +
+        xlim(0, max(clustinfo$tiglen)) +
+        ggtitle(i) +
+        scale_fill_manual(values=clustercolors) +
+        scale_color_manual(values=clustercolors) +
+        scale_alpha(guide = 'none') +
+        theme_bw()
+    plots[[num]]=plot
+    num=num+1
+}
+
+library(cowplot)    
+clustplotfile=file.path(dbxdir, 'clinical_clusters.pdf')
+pdf(clustplotfile, h=9, w=25)
+##print(plot_grid(plotlist=plots, ncol=2))
+plot=ggplot(clustinfo, aes(x=tigname, y=tiglen, colour=bin, fill=bin)) +
+    geom_bar(stat='identity', position='dodge', alpha=.8, width=.85) +
+    scale_fill_manual(values=clustercolors) +
+    scale_color_manual(values=clustercolors) +
+    facet_grid(~cluster, scales="free", space='free', switch='x') +
+    scale_alpha(guide = 'none') +
+    theme_bw() +
+    theme(axis.title.x=element_blank(),
+          axis.text.x=element_blank(),
+          axis.ticks.x=element_blank(),
+          panel.spacing=unit(1.5, 'lines'),
+          panel.border=element_blank(),
+          panel.grid.major=element_blank(),
+          panel.grid.minor=element_blank(),
+          strip.background=element_blank(),
+          strip.placement='inside')
+print(plot)
 dev.off()
 
 
