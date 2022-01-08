@@ -3,6 +3,7 @@ library(multidplyr)
 library(RColorBrewer)
 library(ggdendro)
 library(dendextend)
+source('~/Code/yfan_nanopore/mdr/paperfigs/contig_level/clinical_functions.R')
 
 cluster=new_cluster(12)
 cluster_library(cluster, 'tidyverse')
