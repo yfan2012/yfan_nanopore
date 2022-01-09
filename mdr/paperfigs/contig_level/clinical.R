@@ -353,25 +353,3 @@ plot=ggplot(clustinfo, aes(x=tigname, y=tiglen, colour=bin, fill=bin)) +
 print(plot)
 dev.off()
 
-
-
-
-
-
-
-####plasmids
-binplasfile=file.path(projdir, 'mdr/amr/200708_mdr_stool16native.hiC.plasmidfinder.tsv')
-tigplasfile=file.path(projdir, 'mdr/amr/200708_mdr_stool16native.plasmidfinder.tsv')
-plas_cols=c('file', 'seq', 'start', 'end', 'strand', 'gene', 'coverage', 'covmap', 'gaps', 'covfrac', 'ident', 'db', 'acc', 'prod', 'res')
-binplas=read_tsv(binplasfile, col_names=plas_cols, skip=1) %>%
-    select(-file, -coverage, -covmap, -covmap, -db, -prod, -res) %>%
-    filter(ident>=95)
-tigplas=read_tsv(tigplasfile, col_names=plas_cols, skip=1) %>%
-    select(-file, -coverage, -covmap, -covmap, -db, -prod, -res) %>%
-    filter(ident>=95) %>%
-    rowwise() %>%
-    filter(gene %in% binplas$gene) %>%
-    mutate(bin=binplas$seq[binplas$gene==gene])
-
-
-
