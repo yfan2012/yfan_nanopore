@@ -229,6 +229,14 @@ par(mar = c(5, 4, 2, 40) + 0.1)
 plot(binneddend, horiz=TRUE)
 dev.off()
 
+##large version
+chrombinsvertlargepdf=file.path(dbxdir, 'clinical_contig_clusters_bin_colored_binned_labelfull_vert_large.pdf')
+##pdf(chrombinsvertpdf, h=40, w=11)
+pdf(chrombinsvertlargepdf, h=30, w=21)
+par(mar = c(5, 4, 2, 40) + 0.1)
+plot(binneddend, horiz=TRUE)
+dev.off()
+
 
 
 ##check out weird contigs

@@ -15,7 +15,7 @@ datadir=file.path(projdir, 'paperfigs/contig_level')
 dbxdir='~/gdrive/mdr/paperfigs/contig_level'
 
 
-####plasmids - figure out which contigs need including
+####plasmids - figure out which contigs need to be included
 binplasfile=file.path(projdir, 'mdr/amr/200708_mdr_stool16native.hiC.plasmidfinder.tsv')
 tigplasfile=file.path(projdir, 'mdr/amr/200708_mdr_stool16native.plasmidfinder.tsv')
 plas_cols=c('file', 'seq', 'start', 'end', 'strand', 'gene', 'coverage', 'covmap', 'gaps', 'covfrac', 'ident', 'db', 'acc', 'prod', 'res')
@@ -24,19 +24,17 @@ binplas=read_tsv(binplasfile, col_names=plas_cols, skip=1) %>%
     filter(ident>=95)
 tigplas=read_tsv(tigplasfile, col_names=plas_cols, skip=1) %>%
     select(-file, -coverage, -covmap, -covmap, -db, -prod, -res) %>%
-    filter(ident>=95) %>%
-    rowwise() %>%
-    filter(gene %in% binplas$gene) %>%
-    mutate(bin=binplas$seq[binplas$gene==gene])
+    filter(ident>=95) ##%>%
+    ##rowwise() %>%
+    ##filter(gene %in% binplas$gene) %>%
+    ##mutate(bin=binplas$seq[binplas$gene==gene])
 plastigs=names(table(tigplas$seq))
+missingplas=binplas$gene[!binplas$gene %in% tigplas$gene]
 
 
 
 
-
-
-
-####read meth data and impute
+####read meth data
 methfile=file.path(datadir, 'clin_barocdes_methcalls.csv')
 methcols=c('chrom', 'pos', 'strand', 'prob', 'motif', 'base', 'meth')
 meth=read_csv(methfile, col_names=methcols) %>%
@@ -45,18 +43,41 @@ meth=read_csv(methfile, col_names=methcols) %>%
     mutate(methfrac=methnum/(methnum+umethnum))
 
 
+
+
+####try no restricitons on just the dropped plasmid sequences
 cluster_copy(cluster, 'findMethFreq')
 methgrouped=meth %>%
     filter(sum(methnum+umethnum)>5) %>%
-    ##filter(sum(methnum+umethnum)>1) %>%
     group_by(chrom, motif) %>%
     partition(cluster)
-methfreq=methgrouped %>%
+methloci=methgrouped %>%
     do(findMethFreq(.))  %>%
-    collect() %>%
+    collect()
+methfreq=methloci %>%
     summarise(freq=mean(methfrac))
 
+plasgrouped=meth %>%
+    filter(chrom %in% plastigs) %>%
+    group_by(chrom, motif) %>%
+    partition(cluster)
+plasloci=plasgrouped %>%
+    do(findMethFreq(.))  %>%
+    collect()
+plasfreq=plasloci %>%
+    summarise(freq=mean(methfrac))
+
+
 allmotifs=names(table(methfreq$motif))
+
+##check how incomplete some of the plasmid contigs are
+##looks like most important plasmids need to have 
+tigcomplete=methfreq %>%
+    summarise(count=n())
+
+plastiginfo=tigplas %>%
+    rowwise() %>%
+    mutate(count=tigcomplete$count[tigcomplete$chrom==seq])
 
 
 imputezero <- function(test, mindata) {
@@ -73,7 +94,7 @@ imputezero <- function(test, mindata) {
 }
 
 methchroms=methfreq %>%
-    do(imputezero(., 7))
+    do(imputezero(., 9))
 
 nummotifs=length(allmotifs)
 keepchroms=names(table(methchroms$chrom)[table(methchroms$chrom)==nummotifs])
