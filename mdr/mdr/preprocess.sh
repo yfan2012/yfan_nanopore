@@ -204,7 +204,9 @@ if [ $1 == perf_aligns_only ] ; then
 
     ##filters for read ids with mapq60
     samtools view $datadir/align/${prefix}_asmpolished.sorted.bam \
-	| awk '$5==60 {print $1}' > $datadir/align/${prefix}_mapq60_readids.txt
+	| awk '$5==60 {print $1}'\
+	| sort \
+	| uniq -u > $datadir/align/${prefix}_mapq60_readids.txt
 
     ##list of mapq60 and unqiue
     sort $datadir/align/${prefix}_unique_readids.txt $datadir/align/${prefix}_mapq60_readids.txt \
@@ -213,12 +215,10 @@ if [ $1 == perf_aligns_only ] ; then
 fi
 
 
-if [ $1 == perf_fq ] ; then
-    seqtk subseq $fq $datadir/align/${prefix}_perf_readids.txt > $datadir/fastqs/200708_mdr_stool16native.perf.fq
-    gzip $datadir/fastqs/200708_mdr_stool16native.perf.fq
-fi
-
 if [ $1 == align_perf ] ; then
+    seqtk subseq $fq $datadir/align/${prefix}_perf_readids.txt > $datadir/fastqs/200708_mdr_stool16native.perf.fq
+    pigz -p 12 $datadir/fastqs/200708_mdr_stool16native.perf.fq
+
     mkdir -p $datadir/align
 
     minimap2 -t 36 -ax map-ont $asmpolished $datadir/fastqs/$prefix.perf.fq.gz \
@@ -237,3 +237,16 @@ if [ $1 == coverage_perf ] ; then
 	     > $datadir/align/${prefix}_asmpolished.perf.sorted.cov
 fi
 
+if [ $1 == coverage_primary ] ; then
+    samtools view -F 256 -b $datadir/align/${prefix}_asmpolished.sorted.bam \
+	| samtools sort -@ 36 -o $datadir/align/${prefix}_asmpolished.primary.sorted.bam
+    samtools index $datadir/align/${prefix}_asmpolished.primary.sorted.bam
+
+    bedtools genomecov -d \
+	     -ibam $datadir/align/${prefix}_asmpolished.primary.sorted.bam \
+	     > $datadir/align/${prefix}_asmpolished.primary.sorted.cov
+fi
+
+
+    
+	
