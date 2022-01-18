@@ -18,8 +18,6 @@ datadir=file.path(projdir, 'paperfigs/contig_level')
 dbxdir='~/gdrive/mdr/paperfigs/contig_level'
 
 
-####get list of plasmid tigs
-
 
 
 
@@ -31,20 +29,32 @@ cov=read_tsv(covfile, col_names=cov_cols) %>%
     group_by(tig) %>%
     mutate(covfrac=cov/max(cov))
 
+
 ##get coverage spectrum
 covfreq=cov %>%
     group_by(tig, cov) %>%
     summarise(freq=n()) %>%
     mutate(normfreq=freq/max(freq)) %>%
     mutate(normcov=cov/max(cov))
-
+    
 covpeaks=covfreq %>%
     do(findpeaks(.)) %>%
     mutate(composite=sum(h*t*s)) %>%
-    arrange(-composite)
+    arrange(-composite) %>%
+    ungroup() %>%
+    mutate(rank=dense_rank(desc(composite)))
 
-##plot hists
 
+
+####get list of plasmid tigs
+tigplasfile=file.path(projdir, 'mdr/amr/200708_mdr_stool16native.plasmidfinder.tsv')
+plas_cols=c('file', 'seq', 'start', 'end', 'strand', 'gene', 'coverage', 'covmap', 'gaps', 'covfrac', 'ident', 'db',
+            'acc', 'prod', 'res')
+tigplas=read_tsv(tigplasfile, col_names=plas_cols, skip=1) %>%
+    select(-file, -start, -end, -strand, -gaps, -coverage, -covmap, -covfrac, -db, -prod, -res, -acc) %>%
+    rowwise() %>%
+    mutate(rank=covpeaks$rank[covpeaks$tig==seq]) %>%
+    arrange(rank)
 
 
 

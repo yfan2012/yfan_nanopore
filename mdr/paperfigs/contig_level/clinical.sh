@@ -21,9 +21,32 @@ fi
 
 if [ $1 == call_meth ] ; then
     ##assign meth/unmeth based on given thresholds
-    python ~/Code/yfan_nanopore/mdr/zymo/contig_agg/filter_motif_calls.py \
+    python3 ~/Code/yfan_nanopore/mdr/zymo/contig_agg/filter_motif_calls.py \
 	   -i $datadir/clin_barocdes_methprobs.csv \
 	   -o $datadir/clin_barocdes_methcalls.csv \
+	   -m .8 \
+	   -u .8
+fi
+
+if [ $1 == meth_perf ] ; then
+    ##aggregate meth calls from the alignment filtered reads
+    python3 ~/Code/yfan_meth/utils/megalodon_mod_basecalls_idx.py \
+	   -i $clindir/megalodon/${prefix}_perf/per_read_modified_base_calls.txt \
+	   -o $clindir/megalodon/${prefix}_perf/per_read_modified_base_calls.txt.idx
+
+    ##filter out barcode motif related positions in per read meth calls
+    python3 ~/Code/yfan_meth/utils/megalodon_extract_barcode_methprobs.py \
+	   -r $asm \
+	   -b $barcodes \
+	   -m $clindir/megalodon/${prefix}_perf/per_read_modified_base_calls.txt \
+	   -i $clindir/megalodon/${prefix}_perf/per_read_modified_base_calls.txt.idx \
+	   -o $datadir/clin_barocdes_methprobs.perf.csv \
+	   -t 12
+
+    ##assign meth/unmeth based on given thresholds
+    python3 ~/Code/yfan_nanopore/mdr/zymo/contig_agg/filter_motif_calls.py \
+	   -i $datadir/clin_barocdes_methprobs.perf.csv \
+	   -o $datadir/clin_barocdes_methcalls.perf.csv \
 	   -m .8 \
 	   -u .8
 fi
