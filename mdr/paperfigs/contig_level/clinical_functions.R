@@ -35,7 +35,6 @@ findpeaks <- function(test) {
         if (length(over)>1) {
             peaks=1+sum(diff(over)>1)
             if (peaks>1) {
-                print(i)
                 time=time+.01
                 starts=c(over[1], over[which(diff(over)>1)]+1)
                 ends=c(over[which(diff(over)>1)+1], over[length(over)])

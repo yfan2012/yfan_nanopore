@@ -8,9 +8,6 @@ source('~/Code/yfan_nanopore/mdr/paperfigs/contig_level/clinical_functions.R')
 ##use coverage to filter out list of potentially misassembled contigs
 ##don't want to lose too many plasmid contigs, so take that into consideration 
 
-cluster=new_cluster(12)
-cluster_library(cluster, 'tidyverse')
-
 projdir='/mithril/Data/Nanopore/projects/methbin'
 prefix='200708_mdr_stool16native_asm'
 datadir=file.path(projdir, 'paperfigs/contig_level')
@@ -23,11 +20,15 @@ dbxdir='~/gdrive/mdr/paperfigs/contig_level'
 
 
 ####coverage hist analysis
-covfile=file.path(projdir, 'mdr', 'align', paste0(prefix, 'polished.sorted.cov'))
+covfile=file.path(projdir, 'mdr', 'align', paste0(prefix, 'polished.primary.sorted.cov'))
 cov_cols=c('tig', 'pos', 'cov')
 cov=read_tsv(covfile, col_names=cov_cols) %>%
     group_by(tig) %>%
     mutate(covfrac=cov/max(cov))
+
+tiglens=cov %>%
+    group_by(tig) %>%
+    summarise(len=max(pos))
 
 
 ##get coverage spectrum
@@ -41,8 +42,11 @@ covpeaks=covfreq %>%
     do(findpeaks(.)) %>%
     mutate(composite=sum(h*t*s)) %>%
     arrange(-composite) %>%
+    mutate(len=tiglens$len[tiglens$tig==tig]) %>%
     ungroup() %>%
     mutate(rank=dense_rank(desc(composite)))
+
+
 
 
 
@@ -54,9 +58,22 @@ tigplas=read_tsv(tigplasfile, col_names=plas_cols, skip=1) %>%
     select(-file, -start, -end, -strand, -gaps, -coverage, -covmap, -covfrac, -db, -prod, -res, -acc) %>%
     rowwise() %>%
     mutate(rank=covpeaks$rank[covpeaks$tig==seq]) %>%
+    mutate(len=covpeaks$len[covpeaks$tig==seq]) %>%
     arrange(rank)
 
 
+
+
+####try using mean deviation from average
+covdev=cov %>%
+    group_by(tig) %>%
+    mutate(avgcov=mean(cov)) %>%
+    mutate(dev=abs(cov-avgcov)/avgcov) %>%
+    summarise(avgdev=mean(dev)) %>%
+    arrange(-avgdev) %>%
+    mutate(rank=dense_rank(desc(avgdev))) %>%
+    rowwise() %>%
+    mutate(len=covpeaks$len[covpeaks$tig==tig])
 
 
 
