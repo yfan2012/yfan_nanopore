@@ -91,9 +91,7 @@ if [ $1 == megalodon_perf ] ; then
 	--processes 36
     rm $ssddir/megalodon/${i}_perf/per_read_modified_base_calls.db
     
-fi
 
-if [ $1 == move_perf ] ; then
     mkdir -p $datadir/megalodon/${i}_perf
     mv $ssddir/megalodon/${i}_perf/* $datadir/megalodon/${i}_perf/
 fi

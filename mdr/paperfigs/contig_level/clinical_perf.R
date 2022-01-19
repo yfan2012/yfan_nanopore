@@ -114,7 +114,19 @@ tiginfocsv=file.path(dbxdir, 'tigbins_species.csv')
 tiginfo=read_csv(tiginfocsv)
 
 
+
+
+
+
+
+
 ####attach classification info to the dendrogram
+phyloranks=c('superkingdom', 'phylum', 'class', 'order', 'family', 'genus', 'species')
+CATcols=c('tig', 'classification', 'reason', 'lineage', 'lineage_scores', phyloranks)
+BATfile=file.path(projdir, 'mdr/hiC/bin_id/BAT_single/200708_mdr_stool16native.BAT.names_official.txt')
+BAT=read_tsv(BATfile)
+names(BAT)=CATcols
+
 labelfull=NULL
 for (i in label_order) {
     info=tiginfo[tiginfo$tig==i,]
@@ -146,7 +158,7 @@ dev.off()
 
 
 ####plot clusters
-clusters=cutree(binneddend, h=4)
+clusters=cutree(binneddend, h=5.2)
 clustinfo=tibble(tig=sapply(strsplit(names(clusters), ',', fixed=TRUE), '[[', 1),
                  cluster=paste0('cluster_',as.character(clusters))) %>%
     rowwise() %>%
@@ -159,27 +171,9 @@ clustinfo=tibble(tig=sapply(strsplit(names(clusters), ',', fixed=TRUE), '[[', 1)
 clustercolors=mycolors[1:15]
 names(clustercolors)=names(table(clustinfo$bin))
 
-plots=NULL
-num=1
-for (i in names(table(clustinfo$cluster))) {
-    plotclustinfo=clustinfo %>%
-        filter(cluster==i)
-    plot=ggplot(plotclustinfo, aes(y=tig, x=tiglen, colour=bin, fill=bin)) +
-        geom_bar(stat='identity', position='dodge', aes(alpha=.5)) +
-        xlim(0, max(clustinfo$tiglen)) +
-        ggtitle(i) +
-        scale_fill_manual(values=clustercolors) +
-        scale_color_manual(values=clustercolors) +
-        scale_alpha(guide = 'none') +
-        theme_bw()
-    plots[[num]]=plot
-    num=num+1
-}
 
-library(cowplot)    
 clustplotfile=file.path(dbxdir, 'clinical_clusters_perf.pdf')
 pdf(clustplotfile, h=9, w=25)
-##print(plot_grid(plotlist=plots, ncol=2))
 plot=ggplot(clustinfo, aes(x=tigname, y=tiglen, colour=bin, fill=bin)) +
     geom_bar(stat='identity', position='dodge', alpha=.8, width=.85) +
     scale_fill_manual(values=clustercolors) +
