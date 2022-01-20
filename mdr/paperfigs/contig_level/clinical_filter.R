@@ -19,49 +19,6 @@ dbxdir='~/gdrive/mdr/paperfigs/contig_level'
 
 
 
-####coverage hist analysis
-covfile=file.path(projdir, 'mdr', 'align', paste0(prefix, 'polished.primary.sorted.cov'))
-cov_cols=c('tig', 'pos', 'cov')
-cov=read_tsv(covfile, col_names=cov_cols) %>%
-    group_by(tig) %>%
-    mutate(covfrac=cov/max(cov))
-
-tiglens=cov %>%
-    group_by(tig) %>%
-    summarise(len=max(pos))
-
-
-##get coverage spectrum
-covfreq=cov %>%
-    group_by(tig, cov) %>%
-    summarise(freq=n()) %>%
-    mutate(normfreq=freq/max(freq)) %>%
-    mutate(normcov=cov/max(cov))
-    
-covpeaks=covfreq %>%
-    do(findpeaks(.)) %>%
-    mutate(composite=sum(h*t*s)) %>%
-    arrange(-composite) %>%
-    mutate(len=tiglens$len[tiglens$tig==tig]) %>%
-    ungroup() %>%
-    mutate(rank=dense_rank(desc(composite)))
-
-
-
-
-
-####get list of plasmid tigs
-tigplasfile=file.path(projdir, 'mdr/amr/200708_mdr_stool16native.plasmidfinder.tsv')
-plas_cols=c('file', 'seq', 'start', 'end', 'strand', 'gene', 'coverage', 'covmap', 'gaps', 'covfrac', 'ident', 'db',
-            'acc', 'prod', 'res')
-tigplas=read_tsv(tigplasfile, col_names=plas_cols, skip=1) %>%
-    select(-file, -start, -end, -strand, -gaps, -coverage, -covmap, -covfrac, -db, -prod, -res, -acc) %>%
-    rowwise() %>%
-    mutate(rank=covpeaks$rank[covpeaks$tig==seq]) %>%
-    mutate(len=covpeaks$len[covpeaks$tig==seq]) %>%
-    arrange(rank)
-
-
 
 
 ####try using mean deviation from average
@@ -74,8 +31,6 @@ covdev=cov %>%
     mutate(rank=dense_rank(desc(avgdev))) %>%
     rowwise() %>%
     mutate(len=covpeaks$len[covpeaks$tig==tig])
-
-
 
 
 
