@@ -72,7 +72,7 @@ qqmse <- function(test){
 }
 
 
-clustertigs <- function(methfreq, treefile, clusterfile) {
+clustertigs <- function(methfreq, treefile, clusterfile, cutheight) {
     
     ##keep only contigs that have every motif represented
     nummotifs=length(table(methfreq$motif))
@@ -97,10 +97,10 @@ clustertigs <- function(methfreq, treefile, clusterfile) {
     chrombinsfile='/mithril/Data/Nanopore/projects/methbin/paperfigs/contig_level/tigs2bins.tsv'
     chrombins=read_tsv(chrombinsfile)
     for (i in keepchroms) {
-    if (!(i %in% chrombins$rname)) {
-        info=tibble(rname=i, bin='unknown', total_rcov=NA)
-        chrombins=bind_rows(chrombins, info)
-    }
+        if (!(i %in% chrombins$rname)) {
+            info=tibble(rname=i, bin='unknown', total_rcov=NA)
+            chrombins=bind_rows(chrombins, info)
+        }
     }
     methbins=methchroms %>%
         rowwise() %>%
@@ -190,7 +190,7 @@ clustertigs <- function(methfreq, treefile, clusterfile) {
     dev.off()
     
     ##plot clusters
-    clusters=cutree(binneddend, h=5.2)
+    clusters=cutree(binneddend, h=cutheight)
     clustinfo=tibble(tig=sapply(strsplit(names(clusters), ',', fixed=TRUE), '[[', 1),
                      cluster=paste0('cluster_',as.character(clusters))) %>%
         rowwise() %>%
@@ -200,7 +200,7 @@ clustertigs <- function(methfreq, treefile, clusterfile) {
         mutate(binnum=as.numeric(strsplit(bin, '_', fixed=TRUE)[[1]][2])) %>%
         mutate(tigname=paste0(chartr('0123456789', 'abcdefghij', binnum), tig))
     
-    clustercolors=mycolors[1:15]
+    clustercolors=mycolors[1:numcolors]
     names(clustercolors)=names(table(clustinfo$bin))
     
 
@@ -223,4 +223,44 @@ clustertigs <- function(methfreq, treefile, clusterfile) {
               strip.placement='inside')
     print(plot)
     dev.off()
+
+    print(paste0('number of bins: ', as.character(length(table(clustinfo$bin)))))
+    print(paste0('number of tigs: ', as.character(length(keepchroms))))
+}
+
+
+heatcheck <- function(freqs, heatfile) {
+    ##check out clustering heatmap to see which motifs to include?
+    completefreqs=freqs[complete.cases(freqs),] %>%
+        ungroup()
+
+    freqsdf=data.frame(completefreqs %>% select(-chrom))
+    rownames(freqsdf)=completefreqs$chrom
+
+    plotfreqs=scale(freqsdf)
+    
+    
+    pdf(heatfile, h=20, w=11)
+    heatmap(plotfreqs, scale = "none")
+    dev.off()
+}
+
+
+plascheck <- function(freqs, tigname) {
+    
+    completefreqs=freqs[complete.cases(freqs),]
+    completechroms=data.frame(completefreqs %>%
+        select(-chrom))
+    rownames(completechroms)=completefreqs$chrom
+        
+    chromdists=as_tibble(as.matrix(dist(completechroms))) %>%
+        mutate(chroms=completefreqs$chrom) %>%
+        gather(key=chroms2, value=dist, -chroms) %>%
+        mutate(rounded=round(dist, 2))
+    
+    tiginfo=chromdists %>%
+        filter(chroms==tigname) %>%
+        arrange(dist)
+
+    return(tiginfo)
 }
