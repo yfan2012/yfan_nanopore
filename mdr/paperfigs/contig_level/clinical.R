@@ -139,56 +139,9 @@ dev.off()
 
 
 
-####look at organism classifications
-CATfile=file.path(projdir, 'mdr/contig_id/CAT/200708_mdr_stool16native.CAT.names_official.txt')
-phyloranks=c('superkingdom', 'phylum', 'class', 'order', 'family', 'genus', 'species')
-CATcols=c('tig', 'classification', 'reason', 'lineage', 'lineage_scores', phyloranks)
-CAT=read_tsv(CATfile)
-names(CAT)=CATcols
-
-BATfile=file.path(projdir, 'mdr/hiC/bin_id/BAT_single/200708_mdr_stool16native.BAT.names_official.txt')
-BAT=read_tsv(BATfile)
-names(BAT)=CATcols
-
-tiginfo=NULL
-for (i in which(chrombins$bin!='unknown')) {
-    bin=chrombins[i,]$bin
-    tig=chrombins[i,]$rname
-    
-    infobin=BAT[BAT$tig==paste0(bin, '.fasta'),][-(1:5)] %>% slice(1) %>% unlist(., use.names=FALSE)
-    infotig=CAT[CAT$tig==tig,][-(1:5)] %>% slice(1) %>% unlist(., use.names=FALSE)
-    allinfo=tibble(bin=infobin, tig=infotig) %>%
-        rowwise() %>%
-        mutate(bin=strsplit(bin, ':', fixed=TRUE)[[1]][1]) %>%
-        mutate(tig=strsplit(tig, ':', fixed=TRUE)[[1]][1])
-    allinfo[is.na(allinfo)]='not applicable'
-    
-    binindex=sum(!allinfo$bin=='no support')
-    tigindex=sum(!allinfo$tig=='no support')
-    
-    binleaf=allinfo$bin[binindex]
-    tigleaf=allinfo$tig[tigindex]
-
-    supported=min(binindex, tigindex)
-    lcamatches=which(allinfo$bin[1:supported]==allinfo$tig[1:supported])
-
-    if (length(lcamatches)!=0) {
-        lcaindex=max(lcamatches)
-        lca=phyloranks[lcaindex]
-    } else {
-        lca='none'
-    }
-    
-    tiginfo=bind_rows(tiginfo, tibble(tig=tig, bin=bin, tigleaf=tigleaf, binleaf=binleaf, lca=lca))
-}
+####species info
 tiginfocsv=file.path(dbxdir, 'tigbins_species.csv')
-write_csv(tiginfo, tiginfocsv)
-
-
-
-
-
-
+tiginfo=read_csv(tiginfocsv)
 
 
 ####attach classification info to the dendrogram
@@ -196,7 +149,7 @@ labelfull=NULL
 for (i in label_order) {
     info=tiginfo[tiginfo$tig==i,]
     if (dim(info)[1]>0) {
-        labelfull=c(labelfull, paste0(info$tig, ', ', info$tigleaf, ': ', info$bin, ', ',  info$binleaf, ' (', info$lca, ')'))
+        labelfull=c(labelfull, paste0(info$tig, ', ', info$tigleaf, ': ', info$bin, ', ',  info$binleaf, ' (', info$lcalevel, ')'))
     } else {
         ##if the contig wasn't assigned a taxononomy, but was assigned a bin
         bin=chrombins$bin[chrombins$rname==i]
