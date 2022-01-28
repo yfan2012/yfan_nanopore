@@ -36,7 +36,6 @@ methfreq=methgrouped %>%
     summarise(freq=mean(methfrac))
 
 
-
 ##try to rescue some contigs by eliminating non-useful motifs
 ##plot motif frequencies
 motifdistpdf=file.path(dbxdir, 'meth_dists_per_motif_bc2.pdf')
@@ -79,8 +78,6 @@ heatcheck(freqs, heatfile)
 
 
 
-
-
 ####coverage hist analysis
 covfile=file.path(projdir, 'mdr', 'align', paste0('200708_mdr_stool16native_asmpolished.perf.sorted.cov'))
 cov_cols=c('tig', 'pos', 'cov')
@@ -106,6 +103,10 @@ covpeaks=covfreq %>%
     mutate(len=tiglens$len[tiglens$tig==tig]) %>%
     ungroup() %>%
     mutate(rank=dense_rank(desc(composite)))
+
+
+
+
 
 
 
@@ -170,11 +171,34 @@ for (i in 1:dim(plasnear)[1]) {
 }
 
 
-##mess around
-nearestknown=plasnearbins %>%
+
+####classification methods
+##nearest only
+nearest=plasnearbins %>%
     filter(bin!='unknown') %>%
     group_by(chroms) %>%
     filter(row_number()==1) %>%
     mutate(mumbin=paste(unique(tigplas$mumbin[tigplas$tig==chroms], collapse='|')))
+
+##nearest known
+nearestknown=plasnearbins %>%
+    group_by(chroms) %>%
+    do(plas_nearest_known(.,3)) %>%
+    mutate(mumbin=paste(unique(tigplas$mumbin[tigplas$tig==chroms]), collapse='|')) %>%
+    mutate(genebin=paste(unique(tigplas$genebin[tigplas$tig==chroms]), collapse='|')) %>%
+    filter(nummotifs>=10) %>%
+    mutate_if(is.character, str_replace_all, pattern='nothing1', replacement='none') %>%
+    mutate_if(is.character, str_replace_all, pattern='nothing2', replacement='none') %>%
+    mutate_if(is.character, str_replace_all, pattern='nothing3', replacement='none')
+
+##add in taxonomy info
+tiginfocsv=file.path(dbxdir, 'tigbins_species.csv')
+tiginfo=read_csv(tiginfocsv)
+
+plasneartax=plasnearbins %>%
+    group_by(chroms, chroms2) %>%
+    do(taxonomy_pairs(.))
+
+
 
 

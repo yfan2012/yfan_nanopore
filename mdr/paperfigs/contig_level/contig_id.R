@@ -44,7 +44,6 @@ BATfile=file.path(projdir, 'mdr/hiC/bin_id/BAT_single/200708_mdr_stool16native.B
 BAT=read_tsv(BATfile)
 names(BAT)=CATcols
 
-
 tiginfo=NULL
 for (i in CAT$tig[CAT$tig %in% mumkey$rname]) {
     tig=i

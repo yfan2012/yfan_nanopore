@@ -247,20 +247,142 @@ heatcheck <- function(freqs, heatfile) {
 
 
 plascheck <- function(freqs, tigname) {
-    
-    completefreqs=freqs[complete.cases(freqs),]
-    completechroms=data.frame(completefreqs %>%
-        select(-chrom))
-    rownames(completechroms)=completefreqs$chrom
-        
-    chromdists=as_tibble(as.matrix(dist(completechroms))) %>%
-        mutate(chroms=completefreqs$chrom) %>%
-        gather(key=chroms2, value=dist, -chroms) %>%
-        mutate(rounded=round(dist, 2))
-    
-    tiginfo=chromdists %>%
-        filter(chroms==tigname) %>%
-        arrange(dist)
+    fullinfo=freqs %>%
+        filter(chrom==tigname)
 
-    return(tiginfo)
+    if (dim(fullinfo)[1]>0) {
+        cols=colnames(fullinfo)[!is.na(fullinfo)]
+        info=fullinfo %>%
+            select(all_of(cols))
+        
+        freqs=freqs %>%
+            select(all_of(cols))
+        completefreqs=freqs[complete.cases(freqs),]
+        
+        completechroms=data.frame(completefreqs %>%
+                                  select(-chrom))
+        rownames(completechroms)=completefreqs$chrom
+        
+        chromdists=as_tibble(as.matrix(dist(completechroms))) %>%
+            mutate(chroms=completefreqs$chrom) %>%
+            gather(key=chroms2, value=dist, -chroms) %>%
+            mutate(rounded=round(dist, 2))
+        
+        tiginfo=chromdists %>%
+            filter(chroms==tigname) %>%
+            arrange(dist) %>%
+            mutate(nummoitfs=length(cols)-1)
+        
+        return(tiginfo[2:dim(tiginfo)[1],])
+    }
+}
+
+plas_nearest_known <- function(test, numreturn) {
+    ##takes output of plascheck grouped by chroms
+    ##takes how many possible tigs u want returned
+
+    nearest_known_tig=test$bin[which(test$bin!='unknown')[1]]
+
+    ##get info on bins
+    bincounts=c()
+    for (i in unique(test$bin)) {
+        bincounts=c(bincounts,table(test$bin)[i])
+    }
+
+    tignames=paste0('tig', as.character(seq(1, numreturn, 1)))
+    countnames=paste0('count', as.character(seq(1, numreturn, 1)))
+    colnames=c(rbind(tignames, countnames))
+
+    
+    if (length(bincounts)<numreturn) {
+        for (i in 1:(numreturn-length(bincounts))) {
+            term=paste0('nothing', as.character(i))
+            bincounts[term]=term
+        }
+
+    }
+    countsinfo=c(rbind(names(bincounts)[1:numreturn], bincounts[1:numreturn]))
+    names(countsinfo)=colnames
+
+    
+    ##try to figure out more elegant syntax when you're less unhinged than u r rn
+    bindata=NULL
+    bindata=bind_rows(bindata, countsinfo)
+    bindata$nummotifs=test$nummoitfs[1]
+    bindata$chroms=test$chroms[1]
+    bindata=bindata %>%
+        select(nummotifs, everything()) %>%
+        select(chroms, everything())
+    
+    return(bindata)
+}
+
+
+CATfile=file.path(projdir, 'mdr/contig_id/CAT/200708_mdr_stool16native.CAT.names_official.txt')
+phyloranks=c('superkingdom', 'phylum', 'class', 'order', 'family', 'genus', 'species')
+CATcols=c('tig', 'classification', 'reason', 'lineage', 'lineage_scores', phyloranks)
+CAT=read_tsv(CATfile)
+names(CAT)=CATcols
+
+BATfile=file.path(projdir, 'mdr/hiC/bin_id/BAT_single/200708_mdr_stool16native.BAT.names_official.txt')
+BAT=read_tsv(BATfile)
+names(BAT)=CATcols
+
+taxonomy_pairs <- function(test) {
+    ##given a plasnearbin pair, add
+    bin=test$bin
+    tig=test$chroms2
+
+    print(c(test$chroms, tig))
+    
+    ##in case there's no bin
+    infotig=tibble(tig=CAT[CAT$tig==tig,][-(1:5)] %>% slice(1) %>% unlist(., use.names=FALSE)) %>%
+        rowwise() %>%
+        mutate(tig=strsplit(tig, ':', fixed=TRUE)[[1]][1])
+    infotig[is.na(infotig)]='not applicable'
+    tigindex=sum(!infotig$tig=='no support')
+    if (tigindex>0) {
+        tigleaf=infotig$tig[tigindex]
+    }else{
+        tigleaf='not assigned'
+    }
+
+    
+    if (bin !='unknown') {
+        infobin=tibble(bin=BAT[BAT$tig==paste0(bin, '.fasta'),][-(1:5)] %>% slice(1) %>% unlist(., use.names=FALSE)) %>%
+            rowwise() %>%
+            mutate(bin=strsplit(bin, ':', fixed=TRUE)[[1]][1])
+            
+        allinfo=tibble(bin=infobin$bin, tig=infotig$tig)
+        allinfo[is.na(allinfo)]='not applicable'
+        
+        binindex=sum(!allinfo$bin=='no support')
+        binleaf=allinfo$bin[binindex]
+        supported=min(binindex, tigindex)        
+        lcamatches=which(allinfo$bin[1:supported]==allinfo$tig[1:supported])
+
+        if (length(lcamatches)!=0) {
+            lcaindex=max(lcamatches)
+            lcalevel=phyloranks[lcaindex]
+            lca=allinfo$tig[lcaindex]
+        } else {
+            lcalevel='none'
+            lca='none'
+        }
+        
+        fullinfo=test %>%
+            mutate(tigleaf=tigleaf) %>%
+            mutate(binleaf=binleaf) %>%
+            mutate(lca=lca) %>%
+            mutate(lcalevel=lcalevel)
+        
+    } else {
+        fullinfo=test %>%
+            mutate(tigleaf=tigleaf) %>%
+            mutate(binleaf='unknown') %>%
+            mutate(lca='unknown') %>%
+            mutate(lcalevel='unknown')
+    }
+
+    return(fullinfo)
 }
