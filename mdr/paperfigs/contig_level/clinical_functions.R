@@ -317,7 +317,7 @@ plas_nearest_known <- function(test, numreturn) {
     return(bindata)
 }
 
-
+projdir='/mithril/Data/Nanopore/projects/methbin'
 CATfile=file.path(projdir, 'mdr/contig_id/CAT/200708_mdr_stool16native.CAT.names_official.txt')
 phyloranks=c('superkingdom', 'phylum', 'class', 'order', 'family', 'genus', 'species')
 CATcols=c('tig', 'classification', 'reason', 'lineage', 'lineage_scores', phyloranks)

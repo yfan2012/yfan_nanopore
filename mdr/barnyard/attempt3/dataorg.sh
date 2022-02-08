@@ -13,7 +13,7 @@ if [ $1 == dlref ] ; then
 fi
 
 if [ $1 == catref ] ; then
-    cat $datadir/ref/ecoli.fa.gz $datadir/ref/pRW62.fa.gz $datadir/ref/staph.fa.gz > $datadir/ref/allrefs.fa.gz
+    cat $datadir/ref/dhq5a.fa.gz $datadir/ref/pRW62.fa.gz $datadir/ref/staph.fa.gz > $datadir/ref/allrefs.fa.gz
     gunzip $datadir/ref/allrefs.fa.gz
 fi
 
