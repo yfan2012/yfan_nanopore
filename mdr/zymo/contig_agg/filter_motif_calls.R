@@ -30,8 +30,14 @@ filter=read_csv(filterfile, col_names=filter_cols) %>%
     mutate(methfrac=methnum/(methnum+umethnum))
 
 
+##get idea of which tigs have which mtoifs represented
+motifcounts=filter %>%
+    group_by(chrom, motif) %>%
+    summarise(num=n())
+
+
 ####isolate bases that are supposed to be methylated
-##don't bother with the small staph plasmids
+##don't bother with the small staph plasmids since they only ahave a couple of motif calls total
 basemeth=NULL
 chrs=names(table(filter$chrom))
 usechrs=chrs[1:(length(chrs)-2)]
@@ -45,6 +51,7 @@ for (i in usechrs) {
         qmotif=methinfo$motif[j]
         motifpos=methinfo$pos[j]
         motiflen=nchar(qmotif)
+
         
         speciesmotif=speciesmeth %>%
             filter(motif==qmotif)
@@ -203,3 +210,33 @@ print(plot)
 dev.off()
 
 
+
+##try for cmeth
+cmethlist=c('GATC', 'CMTCGAKG', 'CCWGG', 'GCCGGC')
+cagg=basemeth %>%
+    group_by(chrom, motif) %>%
+    summarise(meanmeth=mean(methfrac))
+cabb=cagg %>%
+    rowwise() %>%
+    filter(motif %in% cmethlist) %>%
+    spread(key=motif, value=meanmeth) %>%
+    filter(chrom != 'Staphylococcus_aureus_plasmid1')
+matcabb=as.matrix(cabb %>% select(-chrom))
+rownames(matcabb)=cabb$chrom
+cabbdists=as.matrix(dist(matcabb))
+
+cabbdistsdf=as_tibble(cabbdists) %>%
+    mutate(chroms=rownames(cabbdists)) %>%
+    gather(key=chroms2, value=dist, -chroms) %>%
+    mutate(rounded=round(dist,2))
+
+cdistplotspdf=file.path(dbxdir, paste0('filter_motif_heatmaps_cmeth.pdf'))
+pdf(cdistplotspdf, h=9, w=9)
+plot=ggplot(cabbdistsdf, aes(x=chroms, y=chroms2)) +
+    geom_tile(aes(fill = dist)) +
+    geom_text(aes(label = rounded)) +
+    scale_fill_gradient(low = "white", high = "red") +
+    theme_bw() +
+    theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+print(plot)
+dev.off()
