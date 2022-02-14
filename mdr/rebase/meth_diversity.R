@@ -20,7 +20,9 @@ rebase=read_csv(rebasefile) %>%
 rebasefiltcsv=file.path(datadir, 'refs', 'rebase_filtered.csv')
 write_csv(rebase, rebasefiltcsv)
 
-    
+common=sort(table(rebase$Specificity), decreasing=TRUE)
+
+
 motifcounts=rebase %>%
     group_by(Specificity) %>%
     summarise(count=n(), type=Type[1]) %>%
