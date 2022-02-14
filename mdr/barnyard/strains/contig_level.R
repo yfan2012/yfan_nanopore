@@ -5,7 +5,6 @@ library(ggdendro)
 library(dendextend)
 source('~/Code/yfan_nanopore/mdr/paperfigs/contig_level/clinical_functions.R')
 
-clear
 cluster=new_cluster(12)
 cluster_library(cluster, 'tidyverse')
 
@@ -27,6 +26,7 @@ ecolimeth=read_csv(ecolimethfile, col_names=methcols) %>%
     group_by(chrom, pos, strand, motif) %>%
     summarise(methnum=sum(meth=='m'), umethnum=sum(meth=='u')) %>%
     mutate(methfrac=methnum/(methnum+umethnum))
+
 
 cluster_copy(cluster, 'findMethFreq')
 getFreqdf <- function(meth) {
@@ -66,6 +66,8 @@ getFreqMatrix <- function(freq) {
 }
 
 freqmat=getFreqMatrix(freq)
+freqmat=rbind(freqmat, (freqmat['staph_PRW62',]+freqmat['ecoli_PRW62',])/2)
+rownames(freqmat)[5]='both_PRW62'
 splasmat=getFreqMatrix(splasfreq)
 eplasmat=getFreqMatrix(eplasfreq)
 
@@ -95,3 +97,131 @@ dev.off()
 
 
 
+
+samps=c('both_plas', 'staph_plas', 'ecoli_plas')
+covcols=c('chrom', 'pos', 'cov')
+cov=NULL
+for (i in samps) {
+    covfile=file.path(datadir, 'align', paste0(i, '.genomecov'))
+    sampcov=read_tsv(covfile, covcols) %>%
+        group_by(chrom) %>%
+        summarise(meancov=mean(cov)) %>%
+        mutate(samp=i)
+    cov=bind_rows(cov, sampcov)
+}
+runs=c('220131_mdr_barnyard_st3294', '220131_mdr_barnyard_st3689')
+runcov=NULL
+for (i in runs) {
+    covfile=file.path(datadir, 'align', paste0(i, '.genomecov'))
+    sampcov=read_tsv(covfile, covcols) %>%
+        group_by(chrom) %>%
+        summarise(meancov=mean(cov)) %>%
+        mutate(samp=i)
+    runcov=bind_rows(runcov, sampcov)
+}
+
+
+splasmethfile=file.path(datadir, 'contig_level', 'staph_plas.barocdes_methcalls.csv')
+eplasmethfile=file.path(datadir, 'contig_level', 'ecoli_plas.barocdes_methcalls.csv')
+aplasmethfile=file.path(datadir, 'contig_level', 'both_plas.barocdes_methcalls.csv')
+splasmeth=read_csv(splasmethfile, col_names=methcols) %>%
+    group_by(chrom, pos, strand, motif) %>%
+    summarise(methnum=sum(meth=='m'), umethnum=sum(meth=='u')) %>%
+    mutate(methfrac=methnum/(methnum+umethnum))
+eplasmeth=read_csv(eplasmethfile, col_names=methcols) %>%
+    group_by(chrom, pos, strand, motif) %>%
+    summarise(methnum=sum(meth=='m'), umethnum=sum(meth=='u')) %>%
+    mutate(methfrac=methnum/(methnum+umethnum))
+aplasmeth=read_csv(aplasmethfile, col_names=methcols) %>%
+    group_by(chrom, pos, strand, motif) %>%
+    summarise(methnum=sum(meth=='m'), umethnum=sum(meth=='u')) %>%
+    mutate(methfrac=methnum/(methnum+umethnum))
+
+
+splasfreq=getFreqdf(splasmeth)
+eplasfreq=getFreqdf(eplasmeth)
+aplasfreq=getFreqdf(aplasmeth)
+
+##get rid of gcgc because it's sort of redundant with rgcgcy
+sfreq=splasfreq %>%
+    filter(motif %in% keepchroms) %>%
+    filter(motif!='GCGC') %>%
+    mutate(samp='s')
+efreq=eplasfreq %>%
+    filter(motif %in% keepchroms) %>%
+    filter(motif!='GCGC') %>%
+    mutate(samp='e')
+afreq=aplasfreq %>%
+    filter(motif %in% keepchroms) %>%
+    filter(motif!='GCGC') %>%
+    mutate(samp='a')
+
+sfreqmat=getFreqMatrix(sfreq)
+rownames(sfreqmat)=c('chr_ecoli', 'chr_staph', 'plas_staph')
+efreqmat=getFreqMatrix(efreq)
+rownames(efreqmat)=c('chr_ecoli', 'chr_staph', 'plas_ecoli')
+afreqmat=getFreqMatrix(afreq)
+rownames(afreqmat)=c('chr_ecoli', 'chr_staph', 'plas_both')
+
+sdists=getDists(sfreqmat)
+edists=getDists(efreqmat)
+adists=getDists(afreqmat)
+
+combine_freqmat=rbind(sfreqmat, efreqmat[3,], afreqmat[3,])
+rownames(combine_freqmat)=c('ecoli_chr', 'staph_chr', 'staph_plas', 'ecoli_plas', 'all_plas')
+
+cdists=getDists(combine_freqmat)
+
+sepdistpdf=file.path(dbxdir, 'barnyard_strain_distances_sep.pdf')
+pdf(sepdistpdf, h=6, w=6)
+splot=ggplot(sdists, aes(x=chroms, y=chroms2)) +
+    geom_tile(aes(fill=dist)) +
+    geom_text(aes(label = rounded)) +
+    scale_fill_gradient(low = "white", high = "red") +
+    theme_bw() +
+    theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+print(splot)
+eplot=ggplot(edists, aes(x=chroms, y=chroms2)) +
+    geom_tile(aes(fill=dist)) +
+    geom_text(aes(label = rounded)) +
+    scale_fill_gradient(low = "white", high = "red") +
+    theme_bw() +
+    theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+print(eplot)
+aplot=ggplot(adists, aes(x=chroms, y=chroms2)) +
+    geom_tile(aes(fill=dist)) +
+    geom_text(aes(label = rounded)) +
+    scale_fill_gradient(low = "white", high = "red") +
+    theme_bw() +
+    theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+print(aplot)
+cplot=ggplot(cdists, aes(x=chroms, y=chroms2)) +
+    geom_tile(aes(fill=dist)) +
+    geom_text(aes(label = rounded)) +
+    scale_fill_gradient(low = "white", high = "red") +
+    theme_bw() +
+    theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+print(cplot)
+dev.off()
+
+
+
+
+
+
+
+
+
+
+freq=bind_rows(staphfreq %>% mutate(samp='staph'), ecolifreq %>% mutate(samp='ecoli'))
+keepchroms=names(table(freq$motif))[table(freq$motif)==4]
+
+freq=freq %>%
+    filter(motif %in% keepchroms) %>%
+    filter(motif!='GCGC')
+
+
+splasfreq=freq %>%
+    filter(!(chrom=='PRW62' & samp=='ecoli'))
+eplasfreq=freq %>%
+    filter(!(chrom=='PRW62' & samp=='staph'))

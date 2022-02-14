@@ -63,6 +63,16 @@ if [ $1 == alignbam ] ; then
 fi
 
 
+if [ $1 == coverage ] ; then
+    for i in $samps ;
+    do
+	samp=$prefix$i
+	bedtools genomecov -d -ibam $datadir/align/$samp.sorted.bam \
+		 > $datadir/align/$samp.genomecov
+    done
+fi
+
+
 barcodes=~/Code/yfan_nanopore/mdr/paperfigs/contig_level/clin_barcodes2.txt
 if [ $1 == test ] ; then
     for i in $samps ;
