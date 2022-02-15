@@ -314,3 +314,6 @@ plot=ggplot(clustinfo, aes(x=tigname, y=tiglen, colour=bin, fill=bin)) +
 print(plot)
 dev.off()
 
+
+
+
