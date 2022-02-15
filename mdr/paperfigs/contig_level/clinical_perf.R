@@ -202,3 +202,21 @@ plasneartax=plasnearbins %>%
 
 
 
+
+
+
+####rand distance
+##plain dendrogram labels to make this easier
+plaindend=binnedinfo %>%
+    scale %>% 
+    dist %>%
+    hclust %>%
+    as.dendrogram
+##truth
+truthbins=tibble(tig=labels(plaindend)) %>%
+    rowwise() %>%
+    filter(tig %in% tiginfo$tig) %>%
+    mutate(bin=tiginfo$bin[which(tiginfo$tig==tig)])
+
+
+clusts=cutree(plaindend, h=5)
