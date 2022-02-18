@@ -205,18 +205,137 @@ plasneartax=plasnearbins %>%
 
 
 
-####rand distance
-##plain dendrogram labels to make this easier
-plaindend=binnedinfo %>%
+####rand distance and contamination analysis
+##from clustertigs function, but stops at the plain dend
+methfreq=testmethfreq
+nummotifs=length(table(methfreq$motif))
+keepchroms=names(table(methfreq$chrom)[table(methfreq$chrom)==nummotifs])
+methchroms=methfreq %>%
+    rowwise() %>%
+    filter(chrom %in% keepchroms)
+chrominfo=methchroms %>%
+    spread(key=motif, value=freq)
+matchrominfo=as.matrix(chrominfo %>% select(-chrom))
+rownames(matchrominfo)=chrominfo$chrom
+plaindend=matchrominfo %>%
     scale %>% 
     dist %>%
     hclust %>%
     as.dendrogram
+
 ##truth
 truthbins=tibble(tig=labels(plaindend)) %>%
     rowwise() %>%
     filter(tig %in% tiginfo$tig) %>%
-    mutate(bin=tiginfo$bin[which(tiginfo$tig==tig)])
+    mutate(bin=tiginfo$bin[which(tiginfo$tig==tig)]) %>%
+    mutate(tiglen=chrombins$rlen[chrombins$rname==tig])
 
 
-clusts=cutree(plaindend, h=5)
+maxheight=attributes(plaindend)$height
+rands=NULL
+contams=NULL
+
+
+for (height in seq(0, maxheight, .01)){
+    clusts=cutree(plaindend, h=height)
+    truthbins=truthbins %>%
+        rowwise() %>%
+        mutate(clustbin=clusts[tig])
+    numclusts=length(table(truthbins$clustbin))
+    
+    ##rand index stuff
+    ri=rand.index(as.numeric(as.factor(truthbins$bin)), truthbins$clustbin)
+    ari=adjustedRandIndex(truthbins$bin, truthbins$clustbin)
+    heightrand=tibble(height=height,
+                      numclusts=numclusts,
+                      ri=ri,
+                      ari=ari)
+    rands=bind_rows(rands, heightrand)
+
+    ##contam - what percentage of contigs is not in the right cluster?
+    ##assign bins to clusters by majority
+    majclusts=truthbins %>%
+        group_by(bin, clustbin) %>%
+        summarise(seq=sum(tiglen)) %>%
+        filter(seq==max(seq))
+    ##for each contig, see if its part of the 'right' cluster
+    contam=truthbins %>%
+        rowwise() %>%
+        mutate(inmajority=clustbin==majclusts$clustbin[majclusts$bin==bin])
+    majority=sum(contam$tiglen[contam$inmajority])/sum(contam$tiglen)
+    nummajority=sum(contam$inmajority)/dim(contam)[1]
+    
+    ##purity - what percentage of a meth cluster is not the majority bin of that cluster?
+    ##assign clusters to bins according to majority composition
+    pureclusts=truthbins %>%
+        group_by(clustbin, bin) %>%
+        summarise(seq=sum(tiglen)) %>%
+        ungroup() %>%
+        group_by(clustbin) %>%
+        filter(seq==max(seq))
+    ##for each contig, see if it's part of the 'right' cluster
+    purity=truthbins %>%
+        rowwise() %>%
+        mutate(purity=bin==pureclusts$bin[pureclusts$clustbin==clustbin])
+    pure=sum(purity$tiglen[purity$purity])/sum(purity$tiglen)
+    numpure=sum(purity$purity)/dim(purity)[1]
+
+    heightcontam=tibble(height=height,
+                      numclusts=numclusts,
+                      majority=majority,
+                      revmajority=1-majority,
+                      nummajority=nummajority,
+                      revnummajority=1-nummajority,
+                      pure=pure,
+                      numpure=numpure)
+    contams=bind_rows(contams, heightcontam)
+}
+    
+rands=rands %>%
+    select(-height) %>%
+    unique() %>%
+    arrange(numclusts)
+
+ucontams=contams %>%
+    select(-height) %>%
+    unique() %>%
+    arrange(numclusts)
+percent=ucontams %>%
+    select(-c(nummajority, numpure, revmajority, revnummajority)) %>%
+    gather('key', 'value', -numclusts)
+num=ucontams %>%
+    select(-c(majority, pure, revmajority, revnummajority)) %>%
+    gather('key', 'value', -numclusts)
+
+
+metricpdf=file.path(dbxdir, 'clinical_contig_clusters_metrics_perf.pdf')
+pdf(metricpdf, h=8, w=11)
+percentplot=ggplot(percent, aes(x=numclusts, y=value, colour=key)) +
+    geom_line() +
+    ggtitle('Percent sequence') +
+    theme_bw()
+rocplot=ggplot(ucontams, aes(x=revmajority, y=pure)) +
+    geom_step() +
+    ggtitle('Percent seqeunce') +
+    theme_bw()
+numplot=ggplot(num, aes(x=numclusts, y=value, colour=key)) +
+    geom_line() +
+    ggtitle('Percent contigs') +
+    theme_bw()
+rocnumplot=ggplot(ucontams, aes(x=revnummajority, y=numpure)) +
+    geom_step() +
+    ggtitle('Percent contigs') +
+    theme_bw()
+plot(percentplot)
+plot(rocplot)
+plot(numplot)
+plot(rocnumplot)
+dev.off()
+
+ratings=contams %>%
+    mutate(seqrate=majority*pure) %>%
+    mutate(tigrate=nummajority*numpure) %>%
+    unique() %>%
+    select(-c(height))
+
+##check randomization under the same structure
