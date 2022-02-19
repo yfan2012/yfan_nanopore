@@ -386,3 +386,54 @@ taxonomy_pairs <- function(test) {
 
     return(fullinfo)
 }
+
+
+get_tree_roc <- function(dend, truthbins) {
+    roc=NULL
+    maxheight=attributes(dend)$height
+    heights=seq(0, maxheight, .01)
+    for (height in heights) {
+        clusts=cutree(dend, h=height)
+        numclusts=length(table(clusts))
+        
+        binlabs=truthbins %>%
+            rowwise() %>%
+            mutate(clustbin=clusts[tig])
+        
+        bin2clust=binlabs %>%
+            group_by(bin, clustbin) %>%
+            summarise(seq=sum(tiglen)) %>%
+            ungroup() %>%
+            group_by(bin) %>%
+            filter(seq==max(seq))
+        togetherness=binlabs %>%
+            rowwise() %>%
+            mutate(together=clustbin==bin2clust$clustbin[bin2clust$bin==bin])
+        seqtogether=sum(togetherness$tiglen[togetherness$together])/sum(togetherness$tiglen)
+        numtogether=sum(togetherness$together)/dim(togetherness)[1]
+        
+        clust2bin=binlabs %>%
+            group_by(clustbin, bin) %>%
+            summarise(seq=sum(tiglen)) %>%
+            ungroup() %>%
+            group_by(clustbin) %>%
+            filter(seq==max(seq))
+        purity=binlabs %>%
+            rowwise() %>%
+            mutate(pure=bin==clust2bin$bin[clust2bin$clustbin==clustbin])
+        seqpure=sum(purity$tiglen[purity$pure])/sum(purity$tiglen)
+        numpure=sum(purity$pure)/dim(purity)[1]
+        
+        heightinfo=tibble(height=height,
+                          numclusts=numclusts,
+                          seqtogether=seqtogether,
+                          numtogether=numtogether,
+                          seqpure=seqpure,
+                          numpure=numpure)
+        roc=bind_rows(roc, heightinfo)
+    }
+    rocunique=roc %>%
+        group_by(numclusts) %>%
+        filter(n()==1)
+    return(rocunique)
+}
