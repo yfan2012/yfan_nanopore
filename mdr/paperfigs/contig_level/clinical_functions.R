@@ -394,11 +394,11 @@ get_tree_roc <- function(dend, truthbins) {
     heights=seq(0, maxheight, .01)
     for (height in heights) {
         clusts=cutree(dend, h=height)
-        numclusts=length(table(clusts))
         
         binlabs=truthbins %>%
             rowwise() %>%
             mutate(clustbin=clusts[tig])
+        numclusts=length(table(binlabs$clustbin))
         
         bin2clust=binlabs %>%
             group_by(bin, clustbin) %>%
@@ -426,14 +426,14 @@ get_tree_roc <- function(dend, truthbins) {
         
         heightinfo=tibble(height=height,
                           numclusts=numclusts,
-                          seqtogether=seqtogether,
-                          numtogether=numtogether,
+                          seqtogether=1-seqtogether,
+                          numtogether=1-numtogether,
                           seqpure=seqpure,
                           numpure=numpure)
         roc=bind_rows(roc, heightinfo)
     }
     rocunique=roc %>%
         group_by(numclusts) %>%
-        filter(n()==1)
+        filter(row_number()==1)
     return(rocunique)
 }

@@ -114,7 +114,6 @@ covpeaks=covfreq %>%
 ##make plasmid info
 chrombinsfile=file.path(datadir, 'tigs2bins.tsv')
 chrombins=read_tsv(chrombinsfile)
-
 tigplasfile=file.path(projdir, 'mdr/amr/200708_mdr_stool16native.plasmidfinder.tsv')
 plas_cols=c('file', 'seq', 'start', 'end', 'strand', 'gene', 'coverage', 'covmap', 'gaps', 'covfrac', 'ident', 'db', 'acc', 'prod', 'res')
 tigplas=read_tsv(tigplasfile, col_names=plas_cols, skip=1) %>%
@@ -230,11 +229,11 @@ truthbins=tibble(tig=labels(plaindend)) %>%
     mutate(bin=tiginfo$bin[which(tiginfo$tig==tig)]) %>%
     mutate(tiglen=chrombins$rlen[chrombins$rname==tig])
 
-
+library(fossil)
+library(mclust)
 maxheight=attributes(plaindend)$height
 rands=NULL
 contams=NULL
-
 
 for (height in seq(0, maxheight, .01)){
     clusts=cutree(plaindend, h=height)
@@ -317,6 +316,9 @@ percentplot=ggplot(percent, aes(x=numclusts, y=value, colour=key)) +
 rocplot=ggplot(ucontams, aes(x=revmajority, y=pure)) +
     geom_step() +
     ggtitle('Percent seqeunce') +
+    xlim(0,1) +
+    ylim(0,1) +
+    geom_abline(a=0, b=1) +
     theme_bw()
 numplot=ggplot(num, aes(x=numclusts, y=value, colour=key)) +
     geom_line() +
@@ -325,6 +327,9 @@ numplot=ggplot(num, aes(x=numclusts, y=value, colour=key)) +
 rocnumplot=ggplot(ucontams, aes(x=revnummajority, y=numpure)) +
     geom_step() +
     ggtitle('Percent contigs') +
+    xlim(0,1) +
+    ylim(0,1) +
+    geom_abline(a=0, b=1) +
     theme_bw()
 plot(percentplot)
 plot(rocplot)
@@ -338,4 +343,96 @@ ratings=contams %>%
     unique() %>%
     select(-c(height))
 
-##check randomization under the same structure
+##check randomization under the same structure - randomize labels on the existing tree structure
+truthbins=tibble(tig=labels(plaindend)) %>%
+    rowwise() %>%
+    filter(tig %in% tiginfo$tig) %>%
+    mutate(bin=tiginfo$bin[which(tiginfo$tig==tig)]) %>%
+    mutate(tiglen=chrombins$rlen[chrombins$rname==tig])
+allroc=NULL
+for (i in 1:50) {
+    randchrominfo=as.matrix(chrominfo %>% select(-chrom))
+    rownames(randchrominfo)=sample(chrominfo$chrom)
+    randodend=randchrominfo %>%
+        scale %>% 
+        dist %>%
+        hclust %>%
+        as.dendrogram
+    randroc=get_tree_roc(randodend, truthbins) %>%
+        mutate(samp=i)
+    allroc=bind_rows(allroc, randroc)
+}
+
+numtips=length(chrominfo$chrom)
+allrands=NULL
+for (i in 1:50) {
+    randchrominfo=matrix(sample(matchrominfo), nrow=dim(matchrominfo)[1], ncol=dim(matchrominfo)[2])
+    rownames(randchrominfo)=chrominfo$chrom
+    colnames(randchrominfo)=colnames(matchrominfo)
+    randodend=randchrominfo %>%
+        scale %>% 
+        dist %>%
+        hclust %>%
+        as.dendrogram
+    randroc=get_tree_roc(randodend, truthbins) %>%
+        mutate(samp=i)
+    allrands=bind_rows(allrands, randroc)
+}
+
+realroc=get_tree_roc(plaindend, truthbins) %>%
+    mutate(samp=0)
+
+plotallroc=bind_rows(realroc, allroc) %>%
+    mutate(label=case_when(samp==0 ~ 'real', TRUE ~ 'rando')) %>%
+    mutate(seqtogether=1-seqtogether) %>%
+    mutate(numtogether=1-numtogether)
+plotallrands=bind_rows(realroc, allrands) %>%
+    mutate(label=case_when(samp==0 ~ 'real', TRUE ~ 'rando')) %>%
+    mutate(seqtogether=1-seqtogether) %>%
+    mutate(numtogether=1-numtogether)
+
+
+##randopdf=file.path(dbxdir, 'clinical_contig_clusters_metrics_perf_rando.pdf')
+randopdf=file.path(dbxdir, 'clinical_contig_clusters_metrics_perf_rando_points.pdf')
+pdf(randopdf, h=8, w=11)
+plot1=ggplot(plotallroc %>% filter(label=='real'), aes(x=seqtogether, y=seqpure, colour=label, alpha=.02))+
+##plot1=ggplot(plotallroc, aes(x=seqtogether, y=seqpure, colour=label, alpha=.02))+
+    geom_step() +
+    geom_point(plotallroc %>% filter(label=='rando'), mapping=aes(x=seqtogether, y=seqpure, colour=label, alpha=.02)) +
+    ggtitle('Percent Sequence: random labels, same tree structure') +
+    scale_colour_brewer(palette='Set2') +
+    xlim(0,1) +
+    ylim(0,1) +
+    theme_bw()
+print(plot1)
+plot2=ggplot(plotallrands %>% filter(label=='real'), aes(x=seqtogether, y=seqpure, colour=label, alpha=.02))+
+##plot2=ggplot(plotallrands, aes(x=seqtogether, y=seqpure, colour=label, alpha=.02))+
+    geom_step() +
+    geom_point(plotallrands %>% filter(label=='rando'), mapping=aes(x=seqtogether, y=seqpure, colour=label, alpha=.02)) +
+    ggtitle('Percent Sequence: random structure') +
+    scale_colour_brewer(palette='Set2') +
+    xlim(0,1) +
+    ylim(0,1) +
+    theme_bw()
+print(plot2)
+plot3=ggplot(plotallroc %>% filter(label=='real'), aes(x=numtogether, y=numpure, colour=label, alpha=.02))+
+##plot3=ggplot(plotallroc, aes(x=numtogether, y=numpure, colour=label, alpha=.02))+
+    geom_step() +
+    geom_point(plotallroc %>% filter(label=='rando'), mapping=aes(x=numtogether, y=numpure, colour=label, alpha=.02)) +
+    ggtitle('Percent Contigs: random labels, same tree structure') +
+    scale_colour_brewer(palette='Set2') +
+    xlim(0,1) +
+    ylim(0,1) +
+    theme_bw()
+print(plot3)
+plot4=ggplot(plotallrands %>% filter(label=='real'), aes(x=numtogether, y=numpure, colour=label, alpha=.02))+
+##plot4=ggplot(plotallrands, aes(x=numtogether, y=numpure, colour=label, alpha=.02))+
+    geom_step() +
+    geom_point(plotallrands %>% filter(label=='rando'), mapping=aes(x=numtogether, y=numpure, colour=label, alpha=.02)) +
+    ggtitle('Percent Contigs: random sturcture') +
+    scale_colour_brewer(palette='Set2') +
+    xlim(0,1) +
+    ylim(0,1) +
+    theme_bw()
+print(plot4)
+dev.off()
