@@ -225,9 +225,9 @@ plaindend=matchrominfo %>%
 ##truth
 truthbins=tibble(tig=labels(plaindend)) %>%
     rowwise() %>%
-    filter(tig %in% tiginfo$tig) %>%
-    mutate(bin=tiginfo$bin[which(tiginfo$tig==tig)]) %>%
-    mutate(tiglen=chrombins$rlen[chrombins$rname==tig])
+    mutate(bin=chrombins$bin[which(chrombins$rname==tig)]) %>%
+    mutate(tiglen=chrombins$rlen[chrombins$rname==tig]) %>%
+    filter(bin!='unknown')
 
 library(fossil)
 library(mclust)
@@ -251,7 +251,7 @@ for (height in seq(0, maxheight, .01)){
                       ari=ari)
     rands=bind_rows(rands, heightrand)
 
-    ##contam - what percentage of contigs is not in the right cluster?
+    ##togetherness - what percentage of contigs is not in the right cluster?
     ##assign bins to clusters by majority
     majclusts=truthbins %>%
         group_by(bin, clustbin) %>%

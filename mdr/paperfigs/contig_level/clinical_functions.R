@@ -8,14 +8,42 @@ findMethFreq <- function(x) {
     for (i in x$pos) {
         diffs=abs(x$pos-i)
         motifgroup=x[diffs<=motiflen,] %>%
-            arrange(-methfrac) %>%
             mutate(totcalls=methnum+umethnum) %>%
+            group_by(motif) %>%
+            arrange(-methfrac) %>%
             arrange(-totcalls)
         motifpos=bind_rows(motifpos, motifgroup[1,])
     }
 
-    motifpos=unique(motifpos) %>%
-        select(-totcalls)
+    motifpos=unique(motifpos)
+    return(motifpos)
+}
+
+findMethFreqtest <- function(x) {
+    ##collapses called meth into methfreq.
+    ##x is meth df above, grouped by chrom and motif
+
+    motiflen=nchar(x$motif[1])
+    
+    motifpos=NULL
+    for (i in x$pos) {
+        diffs=abs(x$pos-i)
+        motifgroup=x[diffs<=motiflen,] %>%
+            mutate(totcalls=methnum+umethnum) %>%
+            group_by(motif) %>%
+            summarise(chrom=chrom,
+                      pos=pos,
+                      strand=strand,
+                      motif=motif,
+                      methnum=sum(methnum),
+                      umethnum=sum(umethnum),
+                      totcalls=sum(totcalls)) %>%
+            mutate(methfrac=methnum/totcalls)
+
+        motifpos=bind_rows(motifpos, motifgroup[1,])
+    }
+
+    motifpos=unique(motifpos)
     return(motifpos)
 }
 
@@ -124,17 +152,6 @@ clustertigs <- function(methfreq, treefile, clusterfile, cutheight) {
 
     ##try dendrogram starting at 5.4 from tutorial below
     ##http://www.sthda.com/english/wiki/beautiful-dendrogram-visualizations-in-r-5-must-known-methods-unsupervised-machine-learning#ggplot2-integration
-    dend=matchrominfo %>%
-        scale %>% 
-        dist %>%
-        hclust %>%
-        as.dendrogram
-    label_order=labels(dend)
-    label_colors=bincolorinfo[label_order,]
-    dend=dend %>%
-        set('labels_col', label_colors)
-    
-    
     binnedinfo=matchrominfo[binnames!='unknown',]
     binneddend=binnedinfo %>%
         scale %>% 

@@ -38,7 +38,7 @@ getFreqdf <- function(meth) {
     methfreq=methgrouped %>%
         do(findMethFreq(.))  %>%
         collect() %>%
-        summarise(freq=mean(methfrac))
+        summarise(freq=mean(methfrac), numloci=n())
 }
 staphfreq=getFreqdf(staphmeth)
 ecolifreq=getFreqdf(ecolimeth)
@@ -142,18 +142,22 @@ splasfreq=getFreqdf(splasmeth)
 eplasfreq=getFreqdf(eplasmeth)
 aplasfreq=getFreqdf(aplasmeth)
 
+
 ##get rid of gcgc because it's sort of redundant with rgcgcy
 sfreq=splasfreq %>%
     filter(motif %in% keepchroms) %>%
     filter(motif!='GCGC') %>%
+    select(-numloci) %>%
     mutate(samp='s')
 efreq=eplasfreq %>%
     filter(motif %in% keepchroms) %>%
     filter(motif!='GCGC') %>%
+    select(-numloci) %>%
     mutate(samp='e')
 afreq=aplasfreq %>%
     filter(motif %in% keepchroms) %>%
     filter(motif!='GCGC') %>%
+    select(-numloci) %>%
     mutate(samp='a')
 
 sfreqmat=getFreqMatrix(sfreq)
@@ -169,8 +173,22 @@ adists=getDists(afreqmat)
 
 combine_freqmat=rbind(sfreqmat, efreqmat[3,], afreqmat[3,])
 rownames(combine_freqmat)=c('ecoli_chr', 'staph_chr', 'staph_plas', 'ecoli_plas', 'all_plas')
-
 cdists=getDists(combine_freqmat)
+
+fewloci=unique(splasfreq$motif[splasfreq$numloci<10]) ##same for all samps
+tfreqmat=combine_freqmat[,-which(colnames(combine_freqmat) %in% fewloci)]
+tdists=getDists(tfreqmat)
+
+abbrevpdf=file.path(dbxdir, 'barnyard_strain_fewermotifs.pdf')
+pdf(abbrevpdf, h=6, w=6)
+aplot=ggplot(tdists, aes(x=chroms, y=chroms2)) +
+    geom_tile(aes(fill=dist)) +
+    geom_text(aes(label=rounded)) +
+    scale_fill_gradient(low='white', high='red') +
+    theme_bw() +
+    theme(axis.text.x=element_text(angle=90, vjust=.5, hjust=1))
+print(aplot)
+dev.off()
 
 sepdistpdf=file.path(dbxdir, 'barnyard_strain_distances_sep.pdf')
 pdf(sepdistpdf, h=6, w=6)
@@ -210,18 +228,31 @@ dev.off()
 
 
 
+####figure out if there's a good coverage based way to exclude some motifs
+readcov=NULL
+for (i in samps) {
+    covfile=file.path(datadir, 'align', paste0(i, '.genomecov'))
+    sampcov=read_tsv(covfile, covcols) %>%
+        mutate(samp=i)
+    readcov=bind_rows(readcov, sampcov)
+}
 
+smethcov=full_join(splasmeth, readcov %>% filter(samp=='staph_plas')) %>%
+    na.omit %>%
+    mutate(methcov=(methnum+umethnum)/cov) %>%
+    mutate(methtot=methnum/cov)
+emethcov=full_join(eplasmeth, readcov %>% filter(samp=='ecoli_plas')) %>%
+    na.omit %>%
+    mutate(methcov=(methnum+umethnum)/cov) %>%
+    mutate(methtot=methnum/cov)
+amethcov=full_join(aplasmeth, readcov %>% filter(samp=='both_plas')) %>%
+    na.omit %>%
+    mutate(methcov=(methnum+umethnum)/cov) %>%
+    mutate(methtot=methnum/cov)
 
+methcov=bind_rows(smethcov, emethcov, amethcov)
 
-freq=bind_rows(staphfreq %>% mutate(samp='staph'), ecolifreq %>% mutate(samp='ecoli'))
-keepchroms=names(table(freq$motif))[table(freq$motif)==4]
-
-freq=freq %>%
-    filter(motif %in% keepchroms) %>%
-    filter(motif!='GCGC')
-
-
-splasfreq=freq %>%
-    filter(!(chrom=='PRW62' & samp=='ecoli'))
-eplasfreq=freq %>%
-    filter(!(chrom=='PRW62' & samp=='staph'))
+methcovpdf=file.path(dbxdir, 'barnyard_strain_methcov.pdf')
+pdf(methcovpdf, w=11, h=8)
+plot=ggplot(methcov, aes(x=methcov, colour=samp)
+    
