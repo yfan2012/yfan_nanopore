@@ -47,6 +47,42 @@ findMethFreqtest <- function(x) {
     return(motifpos)
 }
 
+findMethFreqcov <- function(x, cov) {
+    ##collapses called meth into methfreq.
+    ##x is meth df above, grouped by chrom and motif
+    ##would be better to add in cov column to x beforehand
+    
+    motiflen=nchar(x$motif[1])
+    
+    motifpos=NULL
+    for (i in x$pos) {
+        diffs=abs(x$pos-i)
+        motifgroup=x[diffs<=motiflen,] %>%
+            mutate(totcalls=methnum+umethnum) %>%
+            group_by(motif) %>%
+            summarise(chrom=chrom,
+                      pos=pos,
+                      strand=strand,
+                      motif=motif,
+                      methnum=sum(methnum),
+                      umethnum=sum(umethnum),
+                      totcalls=sum(totcalls)) %>%
+            mutate(methfrac=methnum/totcalls)
+
+        covinfo=cov %>%
+            filter(chrom==motifgroup$chrom[1]) %>%
+            filter(pos %in% motifgroup$pos)
+
+        meancov=mean(covinfo$cov)
+        motifgroup$meancov=meancov
+            
+        motifpos=bind_rows(motifpos, motifgroup[1,])
+    }
+
+    motifpos=unique(motifpos)
+    return(motifpos)
+}
+
 
 
 findpeaks <- function(test) {
