@@ -5,14 +5,14 @@ library(ggdendro)
 library(dendextend)
 source('~/Code/yfan_nanopore/mdr/paperfigs/contig_level/clinical_functions.R')
 
-cluster=new_cluster(12)
+cluster=new_cluster(16)
 cluster_library(cluster, 'tidyverse')
 
 projdir='/mithril/Data/Nanopore/projects/methbin'
 prefix='200708_mdr_stool16native_perf'
 datadir=file.path(projdir, 'paperfigs/contig_level')
 
-dbxdir='~/gdrive/mdr/paperfigs/contig_level'
+dbxdir='~/gdrive/mdr/paperfigs/contig_level_cov'
 
 
 ####methylation distance
@@ -24,16 +24,30 @@ meth=read_csv(methfile, col_names=methcols) %>%
     summarise(methnum=sum(meth=='m'), umethnum=sum(meth=='u')) %>%
     mutate(methfrac=methnum/(methnum+umethnum))
 
+##coverage
+covcols=c('chrom', 'pos', 'cov')
+covfile=file.path(projdir, 'mdr/align/200708_mdr_stool16native_asmpolished.perf.sorted.cov')
+cov=read_tsv(covfile, covcols)
+
+methcov=inner_join(meth, cov, by=c('chrom', 'pos'))
+
+
+
 cluster_copy(cluster, 'findMethFreq')
 
-methgrouped=meth %>%
+methgrouped=methcov %>%
     filter(sum(methnum+umethnum)>5) %>%
     group_by(chrom, motif) %>%
     partition(cluster)
-methfreq=methgrouped %>%
+methloci=methgrouped %>%
     do(findMethFreq(.))  %>%
-    collect() %>%
-    summarise(freq=mean(methfrac))
+    collect()
+methfreq=methloci %>%
+    ungroup() %>%
+    mutate(methfrac=methnum/cov) %>%
+    group_by(motif, chrom) %>%
+    summarise(freq=mean(methfrac), numloci=n())
+
 
 
 ##try to rescue some contigs by eliminating non-useful motifs
@@ -61,6 +75,7 @@ clustertigs(submethfreq, treefile, clusterfile, 4)
 
 exvec=c('ATGCAT', 'GTCGAC', 'GANTC', 'GTWWAC', 'AAGCTT', 'CTCGAG', 'CTGCAG', 'CCGCGG')
 testmethfreq=methfreq %>%
+    select(-numloci) %>%
     ##exlude based on discrim power from distributions above
     rowwise() %>%
     filter(!motif %in% exvec)
@@ -147,6 +162,7 @@ for (i in tigplas$gene) {
     }
 }
 
+
 ##get contigs nearest to plasmids
 plasnear=NULL
 for (i in tigplas$tig) {
@@ -179,7 +195,6 @@ nearest=plasnearbins %>%
     filter(row_number()==1) %>%
     mutate(mumbin=paste(unique(tigplas$mumbin[tigplas$tig==chroms], collapse='|')))
 
-
 ##nearest known
 nearestknown=plasnearbins %>%
     group_by(chroms) %>%
@@ -192,18 +207,18 @@ nearestknown=plasnearbins %>%
     mutate_if(is.character, str_replace_all, pattern='nothing3', replacement='none')
 
 ##add in taxonomy info
-tiginfocsv=file.path(dbxdir, 'tigbins_species.csv')
+tiginfocsv=file.path('~/gdrive/mdr/paperfigs/contig_level/tigbins_species.csv')
 tiginfo=read_csv(tiginfocsv)
 
 plasneartax=plasnearbins %>%
     group_by(chroms, chroms2) %>%
     do(taxonomy_pairs(.))
 
-
 nearestcsv=file.path(dbxdir, 'nearestplas_cov.csv')
 write_csv(nearest, nearestcsv)
 nearestknowncsv=file.path(dbxdir, 'nearestknown_cov.csv')
 write_csv(nearestknown, nearestknowncsv)
+
 
 
 
@@ -228,18 +243,18 @@ plaindend=matchrominfo %>%
 
 ##truth
 truthbins=tibble(tig=labels(plaindend)) %>%
-    rowwise() %>%
     filter(tig %in% tiginfo$tig) %>%
+    rowwise() %>%
     mutate(bin=chrombins$bin[which(chrombins$rname==tig)]) %>%
     mutate(tiglen=chrombins$rlen[chrombins$rname==tig]) %>%
     filter(bin!='unknown')
-
 
 library(fossil)
 library(mclust)
 maxheight=attributes(plaindend)$height
 rands=NULL
 contams=NULL
+
 for (height in seq(0, maxheight, .01)){
     clusts=cutree(plaindend, h=height)
     truthbins=truthbins %>%
@@ -294,7 +309,8 @@ for (height in seq(0, maxheight, .01)){
                       numpure=numpure)
     contams=bind_rows(contams, heightcontam)
 }
-    
+
+
 rands=rands %>%
     select(-height) %>%
     unique() %>%
@@ -349,6 +365,12 @@ ratings=contams %>%
     select(-c(height))
 
 ##check randomization under the same structure - randomize labels on the existing tree structure
+truthbins=tibble(tig=labels(plaindend)) %>%
+    rowwise() %>%
+    filter(tig %in% tiginfo$tig) %>%
+    mutate(bin=tiginfo$bin[which(tiginfo$tig==tig)]) %>%
+    mutate(tiglen=chrombins$rlen[chrombins$rname==tig])
+
 allroc=NULL
 for (i in 1:50) {
     randchrominfo=as.matrix(chrominfo %>% select(-chrom))
@@ -391,10 +413,11 @@ plotallrands=bind_rows(realroc, allrands) %>%
     mutate(seqtogether=1-seqtogether) %>%
     mutate(numtogether=1-numtogether)
 
-plotallroccsv=file.path(dbxdir, 'plotallroc.csv')
+plotallroccsv=file.path(dbxdir, 'plotallroc_cov.csv')
 write_csv(plotallroc, plotallroccsv)
-plotallrandscsv=file.path(dbxdir, 'plotallrands.csv')
+plotallrandscsv=file.path(dbxdir, 'plotallrands_cov.csv')
 write_csv(plotallrands, plotallrandscsv)
+
 
 ##randopdf=file.path(dbxdir, 'clinical_contig_clusters_metrics_perf_rando.pdf')
 randopdf=file.path(dbxdir, 'clinical_contig_clusters_metrics_perf_rando_points.pdf')
@@ -439,4 +462,61 @@ plot4=ggplot(plotallrands %>% filter(label=='real'), aes(x=numtogether, y=numpur
     ylim(0,1) +
     theme_bw()
 print(plot4)
+dev.off()
+
+
+
+
+####investigate why cov gets more wrong
+set1=c('contig_16', 'contig_1253', 'contig_386')
+set2=c('contig_433', 'contig_16', 'contig_774')
+set3=c('contig_503', 'contig_161', 'contig_137')
+
+setloci=methloci %>%
+    filter(chrom %in% set1)
+covfreq=setloci %>%
+    ungroup() %>%
+    mutate(methfrac=methnum/cov) %>%
+    group_by(motif, chrom) %>%
+    summarise(freq=mean(methfrac), numloci=n()) %>%
+    select(-numloci) %>%
+    ##exlude based on discrim power from distributions above
+    rowwise() %>%
+    filter(!motif %in% exvec)
+covmat=covfreq %>%
+    spread(key=motif, value=freq)
+
+maxfreq=setloci %>%
+    ungroup() %>%
+    group_by(motif, chrom) %>%
+    summarise(freq=mean(methfrac), numloci=n()) %>%
+    select(-numloci) %>%
+    rowwise() %>%
+    filter(!motif %in% exvec)
+maxmat=maxfreq %>%
+    spread(key=motif, value=freq)
+
+squashmotifs=c('KCCGGM', 'GGCC', 'GCGC')
+squashloci=setloci %>%
+    filter(motif %in% squashmotifs) %>%
+    mutate(methcov=methnum/cov) %>%
+    mutate(umethcov=umethnum/cov)
+
+squashpdf=file.path(dbxdir, 'clinical_contig_squash.pdf')
+pdf(squashpdf, h=8, w=17)
+for (i in squashmotifs) {
+    squashmotif=squashloci %>%
+        filter(motif==i)
+    numpoints=min(table(squashmotif$chrom))
+    plotsquash=squashmotif %>%
+        group_by(chrom) %>%
+        filter(row_number()<=numpoints)
+    plot=ggplot(plotsquash, aes(x=umethcov, y=methcov, colour=chrom, alpha=.05)) +
+        geom_point() +
+        facet_wrap(~chrom) +
+        ggtitle(i) +
+        scale_colour_brewer(palette='Set2') +
+        theme_bw()
+    print(plot)
+}
 dev.off()

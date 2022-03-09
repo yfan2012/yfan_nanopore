@@ -202,3 +202,22 @@ dev.off()
 
 
 
+####unmeth check
+chrmeth=splasmeth %>%
+    filter(chrom!='PRW62') %>%
+    mutate(org=case_when(chrom=='CP017100.1' ~ 'ecoli',
+                         TRUE ~ 'staph'))
+methscatterpdf=file.path(dbxdir, 'barnyard_meth_scatter.pdf')
+pdf(methscatterpdf, h=8, w=15)
+for (i in c('CCWGG', 'GATC')) {
+    plotchr=chrmeth %>%
+        filter(motif==i)
+    plot=ggplot(plotchr, aes(x=umethnum, y=methnum, colour=org, alpha=.05)) +
+        geom_point() +
+        facet_wrap(~org) +
+        ggtitle(i) +
+        scale_colour_brewer(palette='Set2') +
+        theme_bw()
+    print(plot)
+}
+dev.off()
