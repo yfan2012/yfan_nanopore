@@ -16,24 +16,7 @@ dbxdir='~/gdrive/mdr/paperfigs/contig_level'
 
 
 ####methylation distance
-##methfile=file.path(datadir, 'clin_barocdes_methcalls.perf.csv')
-methfile=file.path(datadir, 'clin_barocdes_methcalls.perf2.csv')
-methcols=c('chrom', 'pos', 'strand', 'prob', 'motif', 'base', 'meth')
-meth=read_csv(methfile, col_names=methcols) %>%
-    group_by(chrom, pos, strand, motif) %>%
-    summarise(methnum=sum(meth=='m'), umethnum=sum(meth=='u')) %>%
-    mutate(methfrac=methnum/(methnum+umethnum))
-
-cluster_copy(cluster, 'findMethFreq')
-
-methgrouped=meth %>%
-    filter(sum(methnum+umethnum)>5) %>%
-    group_by(chrom, motif) %>%
-    partition(cluster)
-methfreq=methgrouped %>%
-    do(findMethFreq(.))  %>%
-    collect() %>%
-    summarise(freq=mean(methfrac))
+methfreq=readRDS(file.path(datadir, 'clin_methfreq.rds'))
 
 
 ##try to rescue some contigs by eliminating non-useful motifs
