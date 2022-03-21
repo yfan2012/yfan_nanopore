@@ -63,8 +63,6 @@ chrombins=read_tsv(chrombinsfile)
 nummotifs=length(table(methfreq$motif))
 keepchroms=names(table(methfreq$chrom)[table(methfreq$chrom)==nummotifs])
 
-
-
 roc=NULL
 for (i in seq(0, 100, 10)) {
     if (i==0) {
@@ -129,26 +127,68 @@ print(tigplot)
 dev.off()
 
 
-methchroms=methfreq %>%
-    filter(chrom %in% keepchroms)
-chrominfo=methchroms %>%
-    spread(key=motif, value=freq)
-matchrominfo=as.matrix(chrominfo %>% select(-chrom))
-rownames(matchrominfo)=chrominfo$chrom
-plaindend=matchrominfo %>%
-    scale %>% 
-    dist %>%
-    hclust %>%
-    as.dendrogram
 
-methfile=file.path(datadir, 'clin_barocdes_methcalls.perf2.csv')
-methcols=c('chrom', 'pos', 'strand', 'prob', 'motif', 'base', 'meth')
-meth=read_csv(methfile, col_names=methcols) %>%
-    group_by(chrom, pos, strand, motif) %>%
-    summarise(methnum=sum(meth=='m'), umethnum=sum(meth=='u')) %>%
-    mutate(methfrac=methnum/(methnum+umethnum))
 
-treefile=file.path(dbxdir, 'clinical_contig_plaindend.pdf')
-clusterfile=file.path(dbxdir, 'clinical_clusters_plaindend.pdf')
-clustertigs(methfreq, treefile, clusterfile, 4)
+####try length exclusion
+lenroc=NULL
+for (i in seq(0,50,5)) {
+    methchroms=methfreq %>%
+        rowwise() %>%
+        filter(chrom %in% keepchroms)
 
+    chrombinsord=chrombins %>%
+        arrange(rlen) %>%
+        filter(rname %in% methchroms$chrom)
+
+    methchroms=methchroms %>%
+        filter(chrom %in% chrombinsord$rname[-(1:i)])
+    
+    chrominfo=methchroms %>%
+        spread(key=motif, value=freq)
+
+    matchrominfo=as.matrix(chrominfo %>% select(-chrom))
+    rownames(matchrominfo)=chrominfo$chrom
+    plaindend=matchrominfo %>%
+        scale %>% 
+        dist %>%
+        hclust %>%
+        as.dendrogram
+    
+    truthbins=tibble(tig=labels(plaindend)) %>%
+        rowwise() %>%
+        filter(tig %in% tiginfo$tig) %>%
+        mutate(bin=chrombins$bin[which(chrombins$rname==tig)]) %>%
+        mutate(tiglen=chrombins$rlen[chrombins$rname==tig]) %>%
+        filter(bin!='unknown')
+    
+    elimroc=get_tree_roc(plaindend, truthbins) %>%
+        mutate(samp=i)
+
+    lenroc=bind_rows(lenroc, elimroc)
+}
+
+lenplot=lenroc %>%
+    filter(samp<=20) %>%
+    mutate(samp=as.character(samp)) %>%
+    mutate(seqtogether=1-seqtogether) %>%
+    mutate(numtogether=1-numtogether)
+
+covrocpdf=file.path(dbxdir, 'clinical_contig_roc_lenexclude.pdf')
+pdf(covrocpdf, h=8, w=11)
+seqplot=ggplot(lenplot, aes(x=seqtogether, y=seqpure, colour=samp)) +
+    geom_step() +
+    xlim(0,1) +
+    ylim(0,1) +
+    ggtitle('Based on amount of sequence') +
+    scale_colour_brewer(palette='Set2') +
+    theme_bw()
+print(seqplot)
+tigplot=ggplot(lenplot, aes(x=numtogether, y=numpure, colour=samp)) +
+    geom_step() +
+    xlim(0,1) +
+    ylim(0,1) +
+    ggtitle('Based on number of contigs') +
+    scale_colour_brewer(palette='Set2') +
+    theme_bw()
+print(tigplot)
+dev.off()
