@@ -19,6 +19,29 @@ findMethFreq <- function(x) {
     return(motifpos)
 }
 
+
+methFreqByPos <- function(x, methpos) {
+    motiflen=nchar(x$motif[1])
+    ediff=seq(0, motiflen-1, 1)
+
+    motifpos=NULL
+    for (ind in 1:length(x$pos)) {
+        i=x$pos[ind]
+        diffs=abs(x$pos-i)
+        if (sum(diffs[ind:(ind+motiflen-1)]==ediff, na.rm=T)==motiflen) {
+            motifgroup=x[diffs<=motiflen,] %>%
+                mutate(totcalls=methnum+umethnum)
+            if (dim(motifgroup)[1]==motiflen) {
+                methsite=motifgroup[methpos,]
+                methsite$label=paste0(methsite$motif, as.character(methpos))
+                motifpos=bind_rows(motifpos, methsite)
+            }
+        }
+    }
+    return(motifpos)
+}
+
+        
 findMethFreqtest <- function(x) {
     ##collapses called meth into methfreq.
     ##x is meth df above, grouped by chrom and motif

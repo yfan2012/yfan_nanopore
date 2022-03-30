@@ -1,0 +1,261 @@
+library(tidyverse)
+library(multidplyr)
+library(pheatmap)
+source('~/Code/yfan_nanopore/mdr/paperfigs/contig_level/clinical_functions.R')
+
+cluster=new_cluster(12)
+cluster_library(cluster, 'tidyverse')
+cluster_copy(cluster, 'findMethFreq')
+
+projdir='/mithril/Data/Nanopore/projects/methbin/zymo'
+prefix='20190809_zymo_control'
+datadir=file.path(projdir, 'contig_agg', prefix)
+filterfile=file.path(datadir, paste0(prefix,'.curate_filter.csv'))
+
+dbxdir='~/gdrive/mdr/paperfigs/figs'
+
+##read motif info
+cmethfile=file.path(projdir, 'truth/bisulfite/zymo_cmeth.csv')
+cmeth=read_csv(cmethfile)
+amethfile=file.path(projdir, 'truth/pacbio/zymo_ameth.csv')
+ameth=read_csv(amethfile)
+methinfo=bind_rows(cmeth,ameth) %>%
+    group_by(motif, pos) %>%
+    summarise(num=n())
+    
+nametochrfile='~/Code/yfan_nanopore/mdr/zymo/truth/chrlist_withlabels.txt'
+chrlabels=read_table2(nametochrfile, col_names=c('chr', 'label'))
+
+
+
+##read filtered megalodon output
+filter_cols=c('chrom', 'pos', 'strand', 'prob', 'motif', 'base', 'meth')
+filter=read_csv(filterfile, col_names=filter_cols) %>%
+    filter(!grepl('tig0', chrom, fixed=TRUE)) %>%
+    group_by(chrom, pos, strand, motif) %>%
+    summarise(methnum=sum(meth=='m'), umethnum=sum(meth=='u')) %>%
+    mutate(methfrac=methnum/(methnum+umethnum))
+
+
+##get idea of which tigs have which mtoifs represented
+motifcounts=filter %>%
+    group_by(chrom, motif) %>%
+    summarise(num=n())
+
+
+####isolate bases that are supposed to be methylated
+##don't bother with the small staph plasmids since they only ahave a couple of motif calls total
+aggregate_meth  <- function(speciesmeth, methinfo){
+    basemeth=NULL
+    for (j in 1:dim(methinfo)[1]) {
+        qmotif=methinfo$motif[j]
+        print(qmotif)
+        motifpos=methinfo$pos[j]
+        motiflen=nchar(qmotif)
+        
+        speciesmotif=speciesmeth %>%
+            filter(motif==qmotif)
+        
+        if (dim(speciesmotif)[1]>0) {
+            speciesfreq=methFreqByPos(speciesmotif, motifpos) %>%
+                mutate(label=paste0(motif, as.character(motifpos)))
+            basemeth=bind_rows(basemeth, speciesfreq)
+        }
+    }
+    return(basemeth)
+}
+
+cluster_copy(cluster, 'aggregate_meth')
+cluster_copy(cluster, 'methinfo')
+cluster_copy(cluster, 'methFreqByPos')
+
+chrs=names(table(filter$chrom))
+usechrs=chrs[1:(length(chrs)-2)]
+
+speciesmeth=filter %>%
+    filter(chrom %in% usechrs) %>%
+    group_by(chrom) %>%
+    partition(cluster)
+basemeth=speciesmeth %>%
+    do(aggregate_meth(., methinfo)) %>%
+    collect() %>%
+    ungroup()
+
+
+
+##calculate dists and plot
+##methagg=basemeth2 %>%
+methagg=basemeth %>%
+    group_by(chrom, label) %>%
+    summarise(meanmeth=mean(methfrac))
+
+abbmotif=methagg %>%
+    rowwise() %>%
+    filter(label %in% c('GATC2', 'CAGAG4', 'GATC4', 'CCWGG2', 'CTKVAG5')) %>%
+    spread(key=label, value=meanmeth)
+matabbmotif=as.matrix(abbmotif %>% select(-chrom))
+rownames(matabbmotif)=abbmotif$chrom
+abbdists=as.matrix(dist(matabbmotif))
+
+abbdistsdf=as_tibble(abbdists) %>%
+    mutate(chroms=rownames(abbdists)) %>%
+    gather(key=chroms2, value=dist, -chroms) %>%
+    mutate(rounded=round(dist,2))
+
+clustfeats=as.data.frame(abbmotif[,2:6])
+rownames(clustfeats)=abbmotif$chrom
+chrorder=labels(as.dendrogram(hclust(dist(clustfeats), 'average')))
+chrlabs=tibble(newlab=paste0(c('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i'), chrorder),
+               oldlab=chrorder)
+
+abbdistsdf=abbdistsdf %>%
+    rowwise() %>%
+    mutate(chroms=chrlabs$newlab[chrlabs$oldlab==chroms]) %>%
+    mutate(chroms2=chrlabs$newlab[chrlabs$oldlab==chroms2])
+
+
+##merged motifs
+motifmethagg=basemeth %>%
+    group_by(chrom, motif) %>%
+    summarise(meanmeth=mean(methfrac))
+cleanmotif=motifmethagg %>%
+    rowwise() %>%
+    filter(motif %in% c('GATC', 'CAGAG', 'CCWGG')) %>%
+    spread(key=motif, value=meanmeth)
+matcleanmotif=as.matrix(cleanmotif %>% select(-chrom))
+rownames(matcleanmotif)=cleanmotif$chrom
+cleandists=as.matrix(dist(matcleanmotif))
+
+cleandistsdf=as_tibble(cleandists) %>%
+    mutate(chroms=rownames(cleandists)) %>%
+    gather(key=chroms2, value=dist, -chroms) %>%
+    mutate(rounded=round(dist,2))
+
+chrlabs=tibble(newlab=paste0(c('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i'), chrorder),
+               oldlab=chrorder)
+
+cleandistsdf=cleandistsdf %>%
+    rowwise() %>%
+    mutate(chroms=chrlabs$newlab[chrlabs$oldlab==chroms]) %>%
+    mutate(chroms2=chrlabs$newlab[chrlabs$oldlab==chroms2])
+    
+##exclude useless
+conmotif=methagg %>%
+    rowwise() %>%
+    filter(label %in% c('GATC2', 'CAGAG4', 'GATC4', 'CCWGG2')) %>%
+    spread(key=label, value=meanmeth)
+matconmotif=as.matrix(conmotif %>% select(-chrom))
+rownames(matconmotif)=conmotif$chrom
+condists=as.matrix(dist(matconmotif))
+
+condistsdf=as_tibble(condists) %>%
+    mutate(chroms=rownames(condists)) %>%
+    gather(key=chroms2, value=dist, -chroms) %>%
+    mutate(rounded=round(dist,2))
+
+condistsdf=condistsdf %>%
+    rowwise() %>%
+    mutate(chroms=chrlabs$newlab[chrlabs$oldlab==chroms]) %>%
+    mutate(chroms2=chrlabs$newlab[chrlabs$oldlab==chroms2])
+    
+
+##plot
+distplotspdf=file.path(dbxdir, paste0('zymo_heatmap.pdf'))
+pdf(distplotspdf, h=9, w=9)
+plot=ggplot(abbdistsdf, aes(x=chroms, y=chroms2)) +
+    geom_tile(aes(fill = dist)) +
+    geom_text(aes(label = rounded)) +
+    scale_fill_gradient(low = "#FC8D62", high = "white") +
+    theme_bw() +
+    theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+print(plot)
+hmpalette=colorRampPalette(c('white', '#FC8D62'))(256)
+hm=pheatmap(matabbmotif, color=hmpalette, scale='none', display_numbers=T)
+print(hm)
+plot=ggplot(cleandistsdf, aes(x=chroms, y=chroms2)) +
+    geom_tile(aes(fill = dist)) +
+    geom_text(aes(label = rounded)) +
+    ggtitle('Merged motifs: GATC, CAGAG, CCWGG') +
+    scale_fill_gradient(low = "#FC8D62", high = "white") +
+    theme_bw() +
+    theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+print(plot)
+plot=ggplot(condistsdf, aes(x=chroms, y=chroms2)) +
+    geom_tile(aes(fill = dist)) +
+    geom_text(aes(label = rounded)) +
+    ggtitle('Unmerged motifs: G6mATC, GAT5mC, CAGAG, CCWGG') +
+    scale_fill_gradient(low = "#FC8D62", high = "white") +
+    theme_bw() +
+    theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+print(plot)
+dev.off()
+
+
+
+##for cmeth
+cmethlist=c('GATC4', 'CMTCGAKG4', 'CCWGG2', 'GCCGGC3')
+cagg=basemeth %>%
+    group_by(chrom, label) %>%
+    summarise(meanmeth=mean(methfrac))
+cabb=cagg %>%
+    rowwise() %>%
+    filter(label %in% cmethlist) %>%
+    spread(key=label, value=meanmeth) %>%
+    filter(chrom != 'Staphylococcus_aureus_plasmid1')
+matcabb=as.matrix(cabb %>% select(-chrom))
+rownames(matcabb)=cabb$chrom
+cabbdists=as.matrix(dist(matcabb))
+
+cabbdistsdf=as_tibble(cabbdists) %>%
+    mutate(chroms=rownames(cabbdists)) %>%
+    gather(key=chroms2, value=dist, -chroms) %>%
+    mutate(rounded=round(dist,2))
+
+
+cabbdistsdf=cabbdistsdf %>%
+    rowwise() %>%
+    mutate(chroms=chrlabs$newlab[chrlabs$oldlab==chroms]) %>%
+    mutate(chroms2=chrlabs$newlab[chrlabs$oldlab==chroms2])
+
+cdistplotspdf=file.path(dbxdir, paste0('zymo_heatmap_cmeth.pdf'))
+pdf(cdistplotspdf, h=9, w=9)
+plot=ggplot(cabbdistsdf, aes(x=chroms, y=chroms2)) +
+    geom_tile(aes(fill = dist)) +
+    geom_text(aes(label = rounded)) +
+    ggtitle('Barcode: C motifs only') +
+    scale_fill_gradient(low = "#FC8D62", high = "white") +
+    theme_bw() +
+    theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+print(plot)
+dev.off()
+
+
+
+
+##full monty
+fullmethagg=basemeth %>%
+    group_by(chrom, label) %>%
+    summarise(meanmeth=mean(methfrac)) %>%
+    filter(chrom != 'Staphylococcus_aureus_plasmid1')
+full=fullmethagg %>%
+    spread(key=label, value=meanmeth)
+matfull=as.matrix(full %>% select(-chrom))
+rownames(matfull)=full$chrom
+fulldists=as.matrix(dist(matfull))
+
+fulldistsdf=as_tibble(fulldists) %>%
+    mutate(chroms=rownames(fulldists)) %>%
+    gather(key=chroms2, value=dist, -chroms) %>%
+    mutate(rounded=round(dist,2))
+
+fdistplotspdf=file.path(dbxdir, 'zymo_heatmap_full.pdf')
+pdf(fdistplotspdf, h=9, w=9)
+plot=ggplot(fulldistsdf, aes(x=chroms, y=chroms2)) +
+    geom_tile(aes(fill = dist)) +
+    geom_text(aes(label = rounded)) +
+    ggtitle('Barcode: All motifs') +
+    scale_fill_gradient(low = "#FC8D62", high = "white") +
+    theme_bw() +
+    theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+print(plot)
+dev.off()
