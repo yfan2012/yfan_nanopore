@@ -70,7 +70,7 @@ fi
 if [ $1 == extract_motifs ] ; then
     ##extract meth info at positions relelvant to the motifs in the barcode
     
-    time (python ~/Code/yfan_meth/utils/megalodon_extract_barcode_methprobs.py \
+    time (python3 ~/Code/yfan_meth/utils/megalodon_extract_barcode_methprobs.py \
 	   -r $ref \
 	   -b ~/Code/yfan_nanopore/mdr/zymo/barcodes_zymo_curated.txt \
 	   -m $projdir/megalodon/$prefix/per_read_modified_base_calls.txt \
