@@ -22,6 +22,8 @@ write_csv(rebase, rebasefiltcsv)
 
 common=sort(table(rebase$Specificity), decreasing=TRUE)
 
+freq=sort(table(rebase$Specificity), decreasing=T)
+
 
 motifcounts=rebase %>%
     group_by(Specificity) %>%

@@ -27,12 +27,21 @@ taxinfo=read_csv(taxfile)
 ####get tree from methylation distance
 exvec=c('ATGCAT', 'GTCGAC', 'GANTC', 'GTWWAC', 'AAGCTT', 'CTCGAG', 'CTGCAG', 'CCGCGG', 'GCCGGC', 'TCCGGA')
 methfreq=readRDS(file.path(datadir, 'clin_methfreq.rds'))
+fullfreqs=methfreq %>%
+    rowwise() %>%
+    spread(key=motif, value=freq)
+fullnacount=colSums(is.na(fullfreqs))/dim(fullfreqs)[1]
+fullcounts=tibble(motifs=names(fullnacount), frac=1-fullnacount)
+
+fullcountcsv=file.path(dbxdir, 'clin_motifcounts.csv')
+write_csv(fullcounts, fullcountcsv)
+
+
 freqs=methfreq %>%
     rowwise() %>%
     filter(!motif %in% exvec) %>%
     spread(key=motif, value=freq)
 nacount=colSums(is.na(freqs))/dim(freqs)[1]
-
 
 nummotifs=length(table(methfreq$motif))
 keepchroms=names(table(methfreq$chrom)[table(methfreq$chrom)==nummotifs])
