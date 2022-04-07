@@ -7,6 +7,7 @@ datadir=$projdir/paperfigs/contig_level
 
 barcodes=~/Code/yfan_nanopore/mdr/paperfigs/contig_level/clin_barcodes.txt
 barcodes2=~/Code/yfan_nanopore/mdr/paperfigs/contig_level/clin_barcodes2.txt
+barcodes3=~/Code/yfan_nanopore/mdr/paperfigs/contig_level/clin_barcodes3.txt
 asm=$clindir/medaka/consensus.fasta
 
 if [ $1 == filter_meth ] ; then
@@ -76,7 +77,26 @@ if [ $1 == meth_perf_filter2 ] ; then
 	   -u .8
 fi
 
+if [ $1 == meth_perf3 ] ; then
+    ##filter out barcode motif related positions in per read meth calls
+    python3 ~/Code/yfan_meth/utils/megalodon_extract_barcode_methprobs.py \
+	   -r $asm \
+	   -b $barcodes3 \
+	   -m $clindir/megalodon/${prefix}_perf/per_read_modified_base_calls.txt \
+	   -i $clindir/megalodon/${prefix}_perf/per_read_modified_base_calls.txt.idx \
+	   -o $datadir/clin_barocdes_methprobs.perf3.csv \
+	   -t 12
 
+fi
+
+if [ $1 == meth_perf_filter3 ] ; then
+    ##assign meth/unmeth based on given thresholds
+    python3 ~/Code/yfan_nanopore/mdr/zymo/contig_agg/filter_motif_calls.py \
+	   -i $datadir/clin_barocdes_methprobs.perf3.csv \
+	   -o $datadir/clin_barocdes_methcalls.perf3.csv \
+	   -m .8 \
+	   -u .8
+fi
 
 if [ $1 == combine_hiC ] ; then
     ##combine individual hiC bin fastas into a single file

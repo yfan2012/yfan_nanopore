@@ -25,7 +25,7 @@ taxfile=file.path('~/gdrive/mdr/paperfigs/contig_level/tigbins_species.csv')
 taxinfo=read_csv(taxfile)
 
 ####get tree from methylation distance
-exvec=c('ATGCAT', 'GTCGAC', 'GANTC', 'GTWWAC', 'AAGCTT', 'CTCGAG', 'CTGCAG', 'CCGCGG')
+exvec=c('ATGCAT', 'GTCGAC', 'GANTC', 'GTWWAC', 'AAGCTT', 'CTCGAG', 'CTGCAG', 'CCGCGG', 'GCCGGC', 'TCCGGA')
 methfreq=readRDS(file.path(datadir, 'clin_methfreq.rds'))
 freqs=methfreq %>%
     rowwise() %>%
@@ -44,16 +44,16 @@ chrominfo=methchroms %>%
     filter(chrom %in% chrombins$rname)
 matchrominfo=as.matrix(chrominfo %>% select(-chrom))
 rownames(matchrominfo)=chrominfo$chrom
-plaindend=matchrominfo %>%
+dend=matchrominfo %>%
     scale %>% 
     dist %>%
     hclust %>%
     as.dendrogram
 dendfile=file.path(dbxdir, 'plaindend.tree')
-write.tree(plaindend %>% as.phylo, dendfile)
+write.tree(dend %>% as.phylo, dendfile)
 
 
-labelinfo=tibble(label=labels(plaindend)) %>%
+labelinfo=tibble(label=labels(dend)) %>%
     filter(label %in% chrombins$rname) %>%
     rowwise() %>%
     mutate(bins=chrombins$bin[chrombins$rname==label])
@@ -75,7 +75,7 @@ labelinfo=labelinfo %>%
     mutate(color=mycolors$color[mycolors$bin==bins]) %>%
     mutate(tax=taxinfo$tigleaf[taxinfo$tig==label])
 
-plaindend=plaindend %>%
+plaindend=dend %>%
     set('leaves_pch', 15) %>%
     set('leaves_cex', 2) %>%
     set('leaves_col', labelinfo$color) %>%
@@ -92,5 +92,21 @@ plot(plaindend, horiz=TRUE)
 dev.off()
 
 
+##show plasmid labels
+plasnearbinscsv=file.path(dbxdir, 'plasmid_nearest.csv')
+plasnear=read_csv(plasnearbinscsv)
+labelinfo=labelinfo %>%
+    mutate(type=case_when(label %in% unique(plasnear$chroms) ~ label,
+                          TRUE ~ ''))
 
+dendlabeled=dend %>%
+    set('leaves_pch', 15) %>%
+    set('leaves_cex', 2) %>%
+    set('leaves_col', labelinfo$color) %>%
+    set('labels', labelinfo$type)
 
+labtreepdf=file.path(dbxdir, 'tree_labeled.pdf')
+pdf(labtreepdf, h=35, w=8)
+par(mar = c(3, 4, 2, 15) + 0.1)
+plot(dendlabeled, horiz=TRUE)
+dev.off()

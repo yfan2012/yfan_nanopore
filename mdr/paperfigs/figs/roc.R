@@ -17,6 +17,7 @@ dbxdir='~/gdrive/mdr/paperfigs/figs'
 
 ####methylation distance
 methfreq=readRDS(file.path(datadir, 'clin_methfreq.rds'))
+##methfreq=readRDS(file.path(datadir, 'clin_methfreq3.rds'))
 exvec=c('ATGCAT', 'GTCGAC', 'GANTC', 'GTWWAC', 'AAGCTT', 'CTCGAG', 'CTGCAG', 'CCGCGG')
 methfreq=methfreq %>%
     rowwise() %>%
@@ -224,4 +225,4 @@ dev.off()
 
 
 
-####coverage exclusion
+

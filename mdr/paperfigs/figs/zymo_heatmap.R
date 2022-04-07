@@ -169,9 +169,6 @@ plot=ggplot(abbdistsdf, aes(x=chroms, y=chroms2)) +
     theme_bw() +
     theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
 print(plot)
-hmpalette=colorRampPalette(c('white', '#FC8D62'))(256)
-hm=pheatmap(matabbmotif, color=hmpalette, scale='none', display_numbers=T)
-print(hm)
 plot=ggplot(cleandistsdf, aes(x=chroms, y=chroms2)) +
     geom_tile(aes(fill = dist)) +
     geom_text(aes(label = rounded)) +
@@ -190,10 +187,16 @@ plot=ggplot(condistsdf, aes(x=chroms, y=chroms2)) +
 print(plot)
 dev.off()
 
+hmpdf=file.path(dbxdir, paste0('zymo_heatmap_cluster.pdf'))
+pdf(hmpdf, h=9, w=7)
+hmpalette=colorRampPalette(c('white', '#FC8D62'))(256)
+hm=pheatmap(matabbmotif, color=hmpalette, scale='none', display_numbers=T)
+print(hm)
+dev.off()
 
 
 ##for cmeth
-cmethlist=c('GATC4', 'CMTCGAKG4', 'CCWGG2', 'GCCGGC3')
+cmethlist=c('GATC4', 'CMTCGAKG4', 'CCWGG2', 'GCCGGC3', 'TCCGGA3')
 cagg=basemeth %>%
     group_by(chrom, label) %>%
     summarise(meanmeth=mean(methfrac))
