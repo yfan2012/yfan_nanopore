@@ -1,5 +1,5 @@
 # yfan_nanopore
-mdr - methylation binning of metagenomic contigs
+mdr - methylation binning of metagenomic contigs  
 sindbis - direct RNA-seq analysis of SINV and aB treated infections (now moved to maggie's repo for the paper)  
 nina - analysis of new prolificans fungal genomes  
 moth - help tatiana assemble the moth genome using an AWS cluster  
