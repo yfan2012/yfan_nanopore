@@ -77,13 +77,17 @@ fi
 if [ $1 == unmappedfqhic ] ; then
     for i in phase shotgun ;
     do
+	awk '{print $1"/1"}' $datadir/dataclean/nonhuman_readnames_${i}.txt \
+	    > $datadir/dataclean/nonhuman_readnames_${i}_1.txt
 	fq1=$datadir/illumina/raw/${hic}_${i}_1.fastq.gz
-	seqtk subseq $fq1 $datadir/dataclean/nonhuman_readnames_$i.txt \
+	seqtk subseq $fq1 $datadir/dataclean/nonhuman_readnames_${i}_1.txt \
 	      > $datadir/dataclean/${hic}_nohuman/${hic}_${i}_1_nohuman.fq
 	gzip $datadir/dataclean/${hic}_nohuman/${hic}_${i}_1_nohuman.fq
 
+	awk '{print $1"/2"}' $datadir/dataclean/nonhuman_readnames_${i}.txt \
+	    > $datadir/dataclean/nonhuman_readnames_${i}_2.txt
 	fq2=$datadir/illumina/raw/${hic}_${i}_2.fastq.gz
-	seqtk subseq $fq2 $datadir/dataclean/nonhuman_readnames_$i.txt \
+	seqtk subseq $fq2 $datadir/dataclean/nonhuman_readnames_${i}_2.txt \
 	      > $datadir/dataclean/${hic}_nohuman/${hic}_${i}_2_nohuman.fq
 	gzip $datadir/dataclean/${hic}_nohuman/${hic}_${i}_2_nohuman.fq
 
