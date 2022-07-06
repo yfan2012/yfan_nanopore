@@ -42,6 +42,8 @@ motifcounts=filter %>%
     group_by(chrom, motif) %>%
     summarise(num=n())
 
+motifcountscsv=file.path(dbxdir, 'zymo_motifcounts.csv')
+write_csv(motifcounts, motifcountscsv)
 
 ####isolate bases that are supposed to be methylated
 ##don't bother with the small staph plasmids since they only ahave a couple of motif calls total

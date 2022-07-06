@@ -66,6 +66,18 @@ for (i in samps) {
     readcov=bind_rows(readcov, sampcov)
 }
 
+runs=c('220131_mdr_barnyard_st3294', '220131_mdr_barnyard_st3689')
+runcov=NULL
+for (i in runs) {
+    covfile=file.path(datadir, 'align', paste0(i, '.genomecov'))
+    sampcov=read_tsv(covfile, covcols) %>%
+        group_by(chrom) %>%
+        summarise(meancov=mean(cov)) %>%
+        mutate(samp=i)
+    runcov=bind_rows(runcov, sampcov)
+}
+runcovcsv='~/gdrive/mdr/paperfigs/figs/barnyard_runcov.csv'
+write_csv(runcov, runcovcsv)
 
 methcols=c('chrom', 'pos', 'strand', 'prob', 'motif', 'base', 'meth')
 splasmethfile=file.path(datadir, 'contig_level', 'staph_plas.barocdes_methcalls.csv')
