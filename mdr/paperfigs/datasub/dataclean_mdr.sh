@@ -69,6 +69,8 @@ if [ $1 == unmappedhic ] ; then
     do
 	samtools view -f 4 $datadir/dataclean/${hic}_${i}.sorted.bam \
 	    | awk '{print $1}' \
+	    | sort \
+	    | uniq \
 		  > $datadir/dataclean/nonhuman_readnames_$i.txt
     done
 fi
@@ -77,6 +79,7 @@ fi
 if [ $1 == unmappedfqhic ] ; then
     for i in phase shotgun ;
     do
+	{
 	awk '{print $1"/1"}' $datadir/dataclean/nonhuman_readnames_${i}.txt \
 	    > $datadir/dataclean/nonhuman_readnames_${i}_1.txt
 	fq1=$datadir/illumina/raw/${hic}_${i}_1.fastq.gz
@@ -89,7 +92,7 @@ if [ $1 == unmappedfqhic ] ; then
 	fq2=$datadir/illumina/raw/${hic}_${i}_2.fastq.gz
 	seqtk subseq $fq2 $datadir/dataclean/nonhuman_readnames_${i}_2.txt \
 	      > $datadir/dataclean/${hic}_nohuman/${hic}_${i}_2_nohuman.fq
-	gzip $datadir/dataclean/${hic}_nohuman/${hic}_${i}_2_nohuman.fq
-
+	gzip $datadir/dataclean/${hic}_nohuman/${hic}_${i}_2_nohuman.fq 
+	} & 
     done
 fi
