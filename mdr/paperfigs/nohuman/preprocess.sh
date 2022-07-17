@@ -173,3 +173,14 @@ if [ $1 == methcalls ] ; then
 	   -m .8 \
 	   -u .8
 fi
+
+
+if [ $1 == mummer_hiC ] ; then
+    ##mummer clin sample contigs with bins from phase folks
+    mkdir -p $datadir/clin_mummer
+    
+    nucmer -p $datadir/clin_mummer/asm_hiC $asmpolished $projdir/mdr/hiC/200708_mdr_stool16native.hiC.fasta
+    mummerplot --filter --fat --postscript -p $datadir/clin_mummer/asm_hiC $datadir/clin_mummer/asm_hiC.delta
+    mummerplot --filter --fat --png -p $datadir/clin_mummer/asm_hiC $datadir/clin_mummer/asm_hiC.delta
+    dnadiff -p $datadir/clin_mummer/asm_hiC $asmpolished $projdir/mdr/hiC/200708_mdr_stool16native.hiC.fasta
+fi
