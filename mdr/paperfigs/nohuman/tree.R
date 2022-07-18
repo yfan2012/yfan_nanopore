@@ -8,6 +8,7 @@ library(mclust)
 library(ggtree)
 library(treeio)
 library(ape)
+library(cluster)
 source('~/Code/yfan_nanopore/mdr/paperfigs/contig_level/clinical_functions.R')
 
 
@@ -20,7 +21,7 @@ dbxdir='~/gdrive/mdr/paperfigs/figs_nohuman'
 chrombinsfile=file.path(datadir, 'tigs2bins.tsv')
 chrombins=read_tsv(chrombinsfile)
 
-invec=c('CAGAG','CCWGG', 'CMTCGAKG','CTCCAG', 'CTKVAG', 'GATC', 'GCGC', 'GCWGC', 'GGCC', 'GGNNCC', 'GGWCC', 'TCCGGA', 'GCCGGA', 'RGCGCY')
+invec=c('CAGAG','CCWGG', 'CMTCGAKG','CTCCAG', 'CTKVAG', 'GATC', 'GCGC', 'GCWGC', 'GGCC', 'GGNNCC', 'GGWCC', 'TCCGGA', 'GCCGGC', 'RGCGCY')
 methfreq=readRDS(file.path(datadir, 'methfreq.rds')) %>%
     rowwise() %>%
     filter(motif %in% invec)
@@ -51,10 +52,21 @@ rownames(matchrominfo)=chrominfo$chrom
 dend=matchrominfo %>%
     scale %>%
     dist %>%
+    ##diana %>%
     hclust %>%
     as.dendrogram
-dendfile=file.path(dbxdir, 'plaindend.tree')
+dendfile=file.path(dbxdir, 'plaindend.hclust.tree')
 write.tree(dend %>% as.phylo, dendfile)
+
+##try div instead of agg
+ddend=matchrominfo %>%
+    scale %>%
+    dist %>%
+    diana %>%
+    as.dendrogram
+ddendfile=file.path(dbxdir, 'plaindend.diana.tree')
+write.tree(ddend %>% as.phylo, ddendfile)
+
 
 mycolors=read_csv('~/Code/yfan_nanopore/mdr/paperfigs/figs/colors.csv')
 mycolors=rbind(mycolors, c('bin_10', '#000000'))
@@ -83,6 +95,21 @@ dev.off()
 plasnearbinscsv=file.path(dbxdir, 'plasmid_nearest.csv')
 plasnear=read_csv(plasnearbinscsv)
 labelinfo=labelinfo %>%
-    mutate(type=case <- when(label %in% unique(plasnear$chroms) ~ label,
+    mutate(type=case_when(label %in% unique(plasnear$chroms) ~ label,
                                                        TRUE ~ ''))
+dendlabeled=dend %>%
+    set('leaves_pch', 15) %>%
+    set('leaves_cex', 2) %>%
+    set('leaves_col', labelinfo$color) %>%
+    set('labels', labelinfo$type)
 
+labtreepdf=file.path(dbxdir, 'tree_labeled.pdf')
+pdf(labtreepdf, h=35, w=8)
+par(mar = c(3, 4, 2, 15) + 0.1)
+plot(dendlabeled, horiz=TRUE)
+dev.off()
+
+heatmappdf=file.path(dbxdir, 'heatmap.pdf')
+pdf(heatmappdf, h=18, w=18)
+heatmap(matchrominfo)
+dev.off()

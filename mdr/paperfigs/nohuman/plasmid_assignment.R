@@ -36,7 +36,7 @@ plasfreqs=freqs %>%
 plasnear=NULL
 for (i in tigplas$seq) {
     plasnearest=plascheck(freqs,i)
-    plasnear=bind_rows(plasnear, plasnearest[1:20,])
+    plasnear=bind_rows(plasnear, plasnearest[1:10,])
 }
 plasnear=unique(plasnear[complete.cases(plasnear),]) %>%
     select(-rounded)
