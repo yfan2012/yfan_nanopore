@@ -184,3 +184,16 @@ if [ $1 == mummer_hiC ] ; then
     mummerplot --filter --fat --png -p $datadir/clin_mummer/asm_hiC $datadir/clin_mummer/asm_hiC.delta
     dnadiff -p $datadir/clin_mummer/asm_hiC $asmpolished $projdir/mdr/hiC/200708_mdr_stool16native.hiC.fasta
 fi
+
+
+if [ $1 == amr ] ; then
+    mkdir -p $projdir/mdr/amr
+
+    for i in ecoh card ncbi resfinder plasmidfinder vfdb ecoli_vf megares argannot ;
+    do
+	abricate \
+	    --threads 36 \
+	    --db $i \
+	    $asmpolished > $projdir/mdr/amr/$prefix.$i.tsv
+    done
+fi
