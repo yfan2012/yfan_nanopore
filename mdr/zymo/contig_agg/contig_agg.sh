@@ -88,4 +88,12 @@ if [ $1 == filter_motifs ] ; then
 		 -u .8)
 fi
 
-	  
+fq=$projdir/fastq/$prefix/$prefix.fq.gz
+if [ $1 == align ] ; then
+    mkdir -p $datadir/align
+
+    minimap2 -t 36 -ax map-ont $ref $fq \
+	| samtools view -@ 36 -b \
+	| samtools sort -@ 36 -o $datadir/align/${prefix}.sorted.bam
+    samtools index $datadir/align/${prefix}.sorted.bam
+fi
