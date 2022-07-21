@@ -29,7 +29,8 @@ motifcounts=rebase %>%
     group_by(Specificity) %>%
     summarise(count=n(), type=Type[1]) %>%
     arrange(-count) %>%
-    filter(type!='I')
+    filter(type!='I') %>%
+    mutate(perc=count/sum(count))
 top10file=file.path(srcdir, 'barcodes10.txt')
 write_tsv(motifcounts[1:10,1], top10file, col_names=FALSE)
 top15file=file.path(srcdir, 'barcodes15.txt')
@@ -43,6 +44,15 @@ countsfile=file.path(dbxdir, 'motif_abundance.pdf')
 pdf(countsfile, h=9, w=15)
 motiforder=motifcounts$Specificity[1:20]
 ggplot(motifcounts[1:20,], aes(x=Specificity, y=count, colour=type, fill=type, alpha=.5)) +
+    geom_bar(stat='identity') +
+    ggtitle('Motif abundances') +
+    xlab('Motif') +
+    ylab('Abundance') +
+    scale_x_discrete(limits = motiforder) +
+    scale_fill_brewer(palette = 'Set2') +
+    scale_colour_brewer(palette = 'Set2') +
+    theme_bw()
+ggplot(motifcounts[1:20,], aes(x=Specificity, y=perc, colour=type, fill=type, alpha=.5)) +
     geom_bar(stat='identity') +
     ggtitle('Motif abundances') +
     xlab('Motif') +
