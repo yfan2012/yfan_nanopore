@@ -97,3 +97,9 @@ if [ $1 == align ] ; then
 	| samtools sort -@ 36 -o $datadir/align/${prefix}.sorted.bam
     samtools index $datadir/align/${prefix}.sorted.bam
 fi
+
+if [ $1 == coverage ] ; then
+    bedtools genomecov -d \
+	     -ibam $datadir/align/${prefix}.sorted.bam \
+	     > $datadir/align/${prefix}.sorted.cov
+fi
