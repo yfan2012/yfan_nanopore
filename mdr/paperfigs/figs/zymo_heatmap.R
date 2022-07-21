@@ -1,6 +1,8 @@
 library(tidyverse)
 library(multidplyr)
 library(pheatmap)
+library(GenomicRanges)
+library(Biostrings)
 source('~/Code/yfan_nanopore/mdr/paperfigs/contig_level/clinical_functions.R')
 
 cluster=new_cluster(12)
@@ -36,14 +38,19 @@ filter=read_csv(filterfile, col_names=filter_cols) %>%
     summarise(methnum=sum(meth=='m'), umethnum=sum(meth=='u')) %>%
     mutate(methfrac=methnum/(methnum+umethnum))
 
+##count motif occurences themselves
+reffile='/uru/Data/Nanopore/projects/read_class/zymo/ref/zymo_all.fa'
+ref=readDNAStringSet(reffile, format='fasta')
+refnames=sapply(strsplit(names(ref), ' '), function(x) x[1])
+names(ref)=refnames
 
 ##get idea of which tigs have which mtoifs represented
 motifcounts=filter %>%
     group_by(chrom, motif) %>%
     summarise(num=n())
 
-motifcountscsv=file.path(dbxdir, 'zymo_motifcounts.csv')
-write_csv(motifcounts, motifcountscsv)
+
+
 
 ####isolate bases that are supposed to be methylated
 ##don't bother with the small staph plasmids since they only ahave a couple of motif calls total
@@ -83,6 +90,26 @@ basemeth=speciesmeth %>%
     collect() %>%
     ungroup()
 
+motiflist=names(table(basemeth$label))
+chromslist=names(table(filter$chrom))
+motifcounts=tibble(chrom=rep(chromslist, each=length(motiflist)),
+                   motif=rep(motiflist, times=length(chromslist))) %>%
+    mutate(motif=substr(motif, start=1, stop=str_length(motif)-1)) %>%
+    rowwise() %>%
+    mutate(total=countPattern(motif, ref[[chrom]], fixed=FALSE)) %>%
+    distinct()
+coveredcounts=basemeth %>%
+    group_by(chrom, label) %>%
+    summarise(num=n()) %>%
+    mutate(motif=substr(label, start=1, stop=str_length(label)-1)) %>%
+    select(-label) %>%
+    distinct()
+allcounts=full_join(motifcounts, coveredcounts, by=c('chrom', 'motif')) %>%
+    mutate(frac=num/total)
+allcounts[is.na(allcounts)]=0
+
+motifcountscsv=file.path(dbxdir, 'zymo_motifcounts.csv')
+write_csv(allcounts, motifcountscsv)
 
 
 ##calculate dists and plot
