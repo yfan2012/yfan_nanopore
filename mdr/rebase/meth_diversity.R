@@ -4,7 +4,7 @@ library(RColorBrewer)
 srcdir='~/Code/yfan_nanopore/mdr/rebase'
 datadir='/uru/Data/Nanopore/projects/mdr'
 krakendir='/uru/Data/Nanopore/projects/mdr/MDRstool_16/kraken'
-dbxdir='~/Dropbox/yfan/methylation/rebase'
+dbxdir='~/gdrive/mdr/rebase'
 rebasefile=file.path(datadir, 'refs', 'rebase_report.csv')
 
 motifsbyname <- function(rebase, name) {
