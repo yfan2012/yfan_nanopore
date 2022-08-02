@@ -197,3 +197,10 @@ if [ $1 == amr ] ; then
 	    $asmpolished > $projdir/mdr/amr/$prefix.$i.tsv
     done
 fi
+
+
+if [ $1 == asm_assess ] ; then
+    python3 ~/Code/utils/qc/asm_assess.py \
+	    -i $asmpolished \
+	    -p mdr > ~/gdrive/mdr/paperfigs/figs/asmstats.csv
+fi

@@ -31,6 +31,9 @@ fullfreqs=methfreq %>%
     spread(key=motif, value=freq)
 fullnacount=colSums(is.na(fullfreqs))/dim(fullfreqs)[1]
 fullcounts=tibble(motifs=names(fullnacount), frac=1-fullnacount)
+fullcountcsv=file.path(dbxdir, 'motifcounts.csv')
+write_csv(fullcounts, fullcountcsv)
+
 
 freqs=methfreq %>%
     rowwise() %>%
