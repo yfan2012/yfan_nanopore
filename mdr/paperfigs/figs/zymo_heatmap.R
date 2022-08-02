@@ -16,6 +16,28 @@ filterfile=file.path(datadir, paste0(prefix,'.curate_filter.csv'))
 
 dbxdir='~/gdrive/mdr/paperfigs/figs'
 
+
+##check coverage frequencies for each contig
+covfile=file.path(projdir, 'contig_agg/align', paste0(prefix, '.sorted.cov'))
+cov=read_tsv(covfile, col_names=c('chrom', 'pos', 'cov')) %>%
+    filter(!grepl('tig', chrom, fixed=TRUE))
+covhistfile=file.path(dbxdir, 'zymo_covhists.pdf')
+pdf(covhistfile, w=25, h=8)
+plot=ggplot(cov, aes(x=cov, colour=chrom, fill=chrom, alpha=.2)) +
+    geom_histogram() +
+    ggtitle('Coverage') +
+    facet_wrap(~chrom, scales='free_y') +
+    theme_bw()
+print(plot)
+dev.off()
+
+meancovs=cov %>%
+    group_by(chrom) %>%
+    summarise(meancov=mean(cov))
+covstatsfile=file.path(dbxdir, 'zymo_covstats.csv')
+write_csv(meancovs, covstatsfile)
+
+
 ##read motif info
 cmethfile=file.path(projdir, 'truth/bisulfite/zymo_cmeth.csv')
 cmeth=read_csv(cmethfile)
@@ -90,6 +112,8 @@ basemeth=speciesmeth %>%
     collect() %>%
     ungroup()
 
+
+##print out number of motif occurences and number of 
 motiflist=names(table(basemeth$label))
 chromslist=names(table(filter$chrom))
 motifcounts=tibble(chrom=rep(chromslist, each=length(motiflist)),
