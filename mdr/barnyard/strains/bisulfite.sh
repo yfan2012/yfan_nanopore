@@ -52,11 +52,14 @@ if [ $1 == count ] ; then
     do
 	for seqname in PRW62 NC_007795.1 CP017100.1 ;
 	do
+	    touch $datadir/motifcalls/$i.clinbc2.csv
+	    rm $datadir/motifcalls/$i.clinbc2.csv
+	    touch $datadir/motifcalls/$i.clinbc2.csv
 	    python3 ~/Code/yfan_meth/utils/bismark_motif_finder.py \
 		    -c $datadir/bismark/$i/*$i*.CX_report.txt \
 		    -r $ref \
 		    -b $barcodes \
-		    -p .7 \
+		    -p .9 \
 		    -l 8 \
 		    -m 3 \
 		    -o $datadir/motifcalls/$i.$seqname.seqs.fasta \
@@ -80,4 +83,18 @@ if [ $1 == qc ] ; then
     bash ~/Code/utils/qc/basic_run_assess.sh $staph2 >> $dbxdir/yields_bisulf.csv
     bash ~/Code/utils/qc/basic_run_assess.sh $ecoli1 >> $dbxdir/yields_bisulf.csv
     bash ~/Code/utils/qc/basic_run_assess.sh $ecoli2 >> $dbxdir/yields_bisulf.csv
+fi
+
+if [ $1 == account ] ; then
+    prefix=220303_mdr_barnyard_
+    
+    label=st3689
+    motifs=CCWGG
+    methpos=2
+    
+    python3 ~/Code/yfan_meth/utils/bismark_motif_confirm.py \
+	   -c $datadir/bismark/$label/${prefix}${label}_S2_L001_R1_001_bismark_bt2_pe.CX_report.txt \
+	   -r $ref \
+	   -m $motifs \
+	   -p $methpos
 fi
