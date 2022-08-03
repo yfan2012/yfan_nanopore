@@ -66,4 +66,18 @@ if [ $1 == count ] ; then
     done
 fi
 
-	       
+dbxdir=~/gdrive/mdr/paperfigs/qc	       
+if [ $1 == qc ] ; then
+    prefix=220303_mdr_barnyard_
+    staph1=$datadir/raw/${prefix}st3294_S1_L001_R1_001.fastq.gz
+    staph2=$datadir/raw/${prefix}st3294_S1_L001_R2_001.fastq.gz
+    ecoli1=$datadir/raw/${prefix}st3689_S2_L001_R1_001.fastq.gz
+    ecoli2=$datadir/raw/${prefix}st3689_S2_L001_R2_001.fastq.gz
+
+
+    touch $dbxdir/yields_bisulf.csv
+    bash ~/Code/utils/qc/basic_run_assess.sh $staph1 >> $dbxdir/yields_bisulf.csv
+    bash ~/Code/utils/qc/basic_run_assess.sh $staph2 >> $dbxdir/yields_bisulf.csv
+    bash ~/Code/utils/qc/basic_run_assess.sh $ecoli1 >> $dbxdir/yields_bisulf.csv
+    bash ~/Code/utils/qc/basic_run_assess.sh $ecoli2 >> $dbxdir/yields_bisulf.csv
+fi
