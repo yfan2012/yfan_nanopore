@@ -104,6 +104,7 @@ splasloci=collapse_loci(splasmeth)
 eplasloci=collapse_loci(eplasmeth)
 aplasloci=collapse_loci(aplasmeth)
 
+
 cov_total <- function(plasloci) {
     testfreq=plasloci %>%
         ungroup() %>%
@@ -152,7 +153,10 @@ adists=getDists(afreqmat)
 combine_freqmat=rbind(sfreqmat, efreqmat[3,], afreqmat[3,])
 rownames(combine_freqmat)=c('ecoli_chr', 'staph_chr', 'staph_plas', 'ecoli_plas', 'all_plas')
 
-fewloci=unique(splasfreq$motif[splasfreq$numloci<10]) ##same for all samps
+barcode=c('GATC', 'CCWGG', 'CAGAG', 'CTKVAG', 'GTWWAC')
+
+##fewloci=unique(splasfreq$motif[splasfreq$numloci<10]) ##same for all samps
+fewloci=splasfreq$motif[!splasfreq$motif %in% barcode]
 tfreqmat=combine_freqmat[,-which(colnames(combine_freqmat) %in% fewloci)]
 tdists=getDists(tfreqmat)
 
@@ -167,7 +171,6 @@ tplot=ggplot(tdists, aes(x=chroms, y=chroms2)) +
     theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
 print(tplot)
 dev.off()
-
 
 
 
