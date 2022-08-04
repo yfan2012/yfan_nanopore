@@ -17,18 +17,6 @@ dbxdir='~/gdrive/mdr/paperfigs/figs'
 
 
 cluster_copy(cluster, 'findMethFreq')
-getFreqdf <- function(meth) {
-    methgrouped=meth %>%
-        filter(sum(methnum+umethnum)>5) %>%
-        ##filter(sum(methnum+umethnum)>1) %>%
-        group_by(chrom, motif) %>%
-        partition(cluster)
-    methfreq=methgrouped %>%
-        do(findMethFreq(.))  %>%
-        collect() %>%
-        summarise(freq=mean(methfrac), numloci=n())
-}
-
 getFreqMatrix <- function(freq) {
     chrominfo=freq %>%
         spread(key=motif, value=freq) %>%
