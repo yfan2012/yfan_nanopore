@@ -204,3 +204,33 @@ if [ $1 == asm_assess ] ; then
 	    -i $asmpolished \
 	    -p mdr > ~/gdrive/mdr/paperfigs/figs/asmstats.csv
 fi
+
+
+catdir=/atium/Data/ref/CATdb
+if [ $1 == cattigs ] ; then
+    mkdir -p $datadir/contig_id/CAT
+
+    CAT contigs \
+	-c $asmpolished \
+	-d $catdir/db \
+	-t $catdir/tax \
+	-o $datadir/contig_id/CAT/$prefix.CAT \
+	--force \
+	--sensitive
+
+    CAT add_names \
+	-i $datadir/contig_id/CAT/$prefix.CAT.contig2classification.txt \
+	-t $catdir/tax \
+	-o $datadir/contig_id/CAT/$prefix.CAT.names.txt
+
+    CAT add_names \
+	-i $datadir/contig_id/CAT/$prefix.CAT.contig2classification.txt \
+	-t $catdir/tax \
+	-o $datadir/contig_id/CAT/$prefix.CAT.names_official.txt \
+	--only_official
+    
+    CAT summarise \
+	-c $asmpolished \
+	-i $datadir/contig_id/CAT/$prefix.CAT.names_official.txt \
+	-o $datadir/contig_id/CAT/$prefix.CAT.summary.txt
+fi
