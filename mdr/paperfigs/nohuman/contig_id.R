@@ -32,3 +32,51 @@ multikeyfile=file.path(datadir, 'tigs2bins_multi.tsv')
 write_tsv(mummultiple, multikeyfile)
 
 
+CATfile=file.path(datadir, 'contig_id/CAT/200708_mdr_stool16native_nohuman.CAT.names_official.txt')
+phyloranks=c('superkingdom', 'phylum', 'class', 'order', 'family', 'genus', 'species')
+CATcols=c('tig', 'classification', 'reason', 'lineage', 'lineage_scores', phyloranks)
+CAT=read_tsv(CATfile)
+names(CAT)=CATcols
+
+BATfile=file.path(projdir, 'mdr/hiC/bin_id/BAT_single/200708_mdr_stool16native.BAT.names_official.txt')
+BAT=read_tsv(BATfile)
+names(BAT)=CATcols
+
+
+tiginfo=NULL
+for (i in 1:dim(mum)[1]) {
+    tig=mum$rname[i]
+    bin=mum$bin[i]
+
+    infobin=BAT[BAT$tig==paste0(bin, '.fasta'),][-(1:5)] %>% slice(1) %>% unlist(., use.names=FALSE)
+    infotig=CAT[CAT$tig==tig,][-(1:5)] %>% slice(1) %>% unlist(., use.names=FALSE)
+    allinfo=tibble(bin=infobin, tig=infotig) %>%
+        rowwise() %>%
+        mutate(bin=strsplit(bin, ':', fixed=TRUE)[[1]][1]) %>%
+        mutate(tig=strsplit(tig, ':', fixed=TRUE)[[1]][1])
+    allinfo[is.na(allinfo)]='not applicable'
+    
+    binindex=sum(!allinfo$bin=='no support')
+    tigindex=sum(!allinfo$tig=='no support')
+    
+    binleaf=allinfo$bin[binindex]
+    tigleaf=allinfo$tig[tigindex]
+
+    
+    if (length(tigleaf)==0){
+        tigleaf='none'
+    }
+    if (length(binleaf)==0){
+        binleaf='none'
+    }
+    
+    tiginfo=bind_rows(tiginfo, tibble(tig=tig, bin=bin, tigleaf=tigleaf, binleaf=binleaf))
+}
+
+names(mum)=c('tig', 'bin', 'rlen', 'total_rcov')
+
+fullinfo=full_join(mum, tiginfo, by=c('tig', 'bin')) %>%
+    arrange(bin)
+
+speciesfile=file.path(datadir, 'tigbin_species.tsv')
+write_tsv(fullinfo, speciesfile)
