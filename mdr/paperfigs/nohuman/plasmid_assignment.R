@@ -9,9 +9,12 @@ datadir=file.path(projdir, 'paperfigs/nohuman')
 dbxdir='~/gdrive/mdr/paperfigs/figs_nohuman'
 
 
-##chrom to bin info
+##chrom to bin info, species info
 chrombinsfile=file.path(datadir,'tigs2bins.tsv')
 chrombins=read_tsv(chrombinsfile)
+
+speciesfile=file.path(datadir, 'tigbin_species.tsv')
+speciesinfo=read_tsv(speciesfile)
 
 
 ##grab plasmid info
@@ -19,6 +22,21 @@ tigplasfile=file.path(projdir, 'mdr/amr/200708_mdr_stool16native_nohuman.plasmid
 plas_cols=c('file', 'seq', 'start', 'end', 'strand', 'gene', 'coverage', 'covmap', 'gaps', 'covfrac', 'ident', 'db', 'acc', 'prod', 'res')
 tigplas=read_tsv(tigplasfile, col_names=plas_cols, skip=1) %>%
     select(-file, -start, -end, -strand, -gaps, -coverage, -covmap, -covfrac, -db, -prod, -res, -acc)
+
+##match to bin plasmid info
+binplasfile=file.path(projdir, 'mdr/amr/200708_mdr_stool16native.hiC.plasmidfinder.tsv')
+binplas=read_tsv(binplasfile, col_names=plas_cols, skip=1) %>%
+    select(-file, -start, -end, -strand, -gaps, -coverage, -covmap, -covfrac, -db, -prod, -res, -acc)
+
+allplas=full_join(tigplas, binplas, by='gene') %>%
+    relocate(seq.x, .after=gene)
+names(allplas)=c('gene', 'contig', 'tig.ident', 'bin', 'bin.ident')
+plasinfo=rbind(allplas %>% na.omit, allplas %>% filter(is.na(contig)), allplas %>% filter(is.na(bin))) %>%
+    filter(bin.ident>95 | is.na(bin.ident)) %>%
+    filter(tig.ident>95 | is.na(tig.ident))
+plasinfofile=file.path(datadir, 'plas_tigsbins.tsv')
+write_tsv(plasinfo, plasinfofile)
+
 
 
 ##set up frequency info
