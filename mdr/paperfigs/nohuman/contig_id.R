@@ -31,6 +31,47 @@ write_tsv(mumkey, mumkeyfile)
 multikeyfile=file.path(datadir, 'tigs2bins_multi.tsv')
 write_tsv(mummultiple, multikeyfile)
 
+##include mcoords file stuff
+allOverlaps <- function(x) {
+    ##x is a block of mummer output grouped by rname and bin                                                                                                                                                                                                                  
+    ##returns one row tibble with [rname, bin, total cov]                                                                                                                                                                                                                     
+    coveredpos=c()
+    for (i in 1:dim(x)[1]) {
+        coveredpos=c(coveredpos, seq(x$rstart[i], x$rend[i], by=1))
+    }
+    totcov=length(unique(coveredpos))
+    return(tibble(rname=x$rname[1], bin=x$bin[1], rlen=x$rlen[1], total_rcov=100*totcov/x$rlen[1]))
+    ##return(totcov/x$rlen[1])                                                                                                                                                                                                                                                
+}
+
+mumfilem=file.path(datadir, 'clin_mummer', 'asm_hiC.mcoords')
+inclusive=read_tsv(mumfilem, col_names=mumcols) %>%
+    rowwise() %>%
+    mutate(bin=strsplit(qname, '.', fixed=TRUE)[[1]][1]) %>%
+    ungroup() %>%
+    group_by(rname, bin) %>%
+    do(allOverlaps(.)) %>%
+    filter(total_rcov>20) %>%
+    filter(!rname %in% mum$rname)
+
+mum.inclusive=rbind(mum, inclusive)
+mumkey.inclusive=mum.inclusive %>%
+    group_by(rname) %>%
+    filter(n()==1)
+
+mummultiple.inclusive=mum.inclusive %>%
+    group_by(rname) %>%
+    filter(n()>1) %>%
+    summarise(all_bins=paste0(bin, collapse=','), all_rcov=paste0(total_rcov, collapse=','))
+
+mumkeyfile=file.path(datadir, 'tigs2bins_inclusive.tsv')
+write_tsv(mumkey.inclusive, mumkeyfile)
+multikeyfile=file.path(datadir, 'tigs2bins_multi_inclusive.tsv')
+write_tsv(mummultiple.inclusive, multikeyfile)
+
+
+
+
 
 CATfile=file.path(datadir, 'contig_id/CAT/200708_mdr_stool16native_nohuman.CAT.names_official.txt')
 phyloranks=c('superkingdom', 'phylum', 'class', 'order', 'family', 'genus', 'species')

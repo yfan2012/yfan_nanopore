@@ -4,6 +4,7 @@ library(multidplyr)
 library(RColorBrewer)
 library(ggdendro)
 library(dendextend)
+library(cluster)
 source('~/Code/yfan_nanopore/mdr/paperfigs/contig_level/clinical_functions.R')
 
 projdir='/mithril/Data/Nanopore/projects/methbin'
@@ -34,7 +35,7 @@ rownames(matchrominfo)=chrominfo$chrom
 plaindend=matchrominfo %>%
     scale %>% 
     dist %>%
-    hclust %>%
+    diana %>%
     as.dendrogram
 
 truthbins=tibble(tig=labels(plaindend)) %>%
@@ -126,7 +127,7 @@ allroc=foreach(i=1:50, .combine=rbind) %dopar% {
     randodend=randchrominfo %>%
         scale %>% 
         dist %>%
-        hclust %>%
+        diana %>%
         as.dendrogram
     randroc=get_tree_roc(randodend, truthbins) %>%
         mutate(samp=i)
@@ -143,7 +144,7 @@ allrands=foreach(i=1:50, .combine=rbind) %dopar% {
     randodend=randchrominfo %>%
         scale %>% 
         dist %>%
-        hclust %>%
+        diana %>%
         as.dendrogram
     randroc=get_tree_roc(randodend, truthbins) %>%
         mutate(samp=i)
@@ -165,16 +166,16 @@ plotallrands=bind_rows(realroc, allrands) %>%
     mutate(numtogether=1-numtogether) %>%
     filter(samp<=20)
 
-plotallroccsv=file.path(dbxdir, 'plotallroc.csv')
+plotallroccsv=file.path(dbxdir, 'plotallroc_diana.csv')
 write_csv(plotallroc, plotallroccsv)
-plotallrandscsv=file.path(dbxdir, 'plotallrands.csv')
+plotallrandscsv=file.path(dbxdir, 'plotallrands_diana.csv')
 write_csv(plotallrands, plotallrandscsv)
 
 
-plotallroc=read_csv(file.path(dbxdir, 'plotallroc.csv')) %>%
+plotallroc=read_csv(file.path(dbxdir, 'plotallroc_diana.csv')) %>%
     mutate(randtype='leaf') %>%
     filter(samp<=5)
-plotallrands=read_csv(file.path(dbxdir, 'plotallrands.csv')) %>%
+plotallrands=read_csv(file.path(dbxdir, 'plotallrands_diana.csv')) %>%
     mutate(randtype='tree') %>%
     filter(samp<=5) %>%
     filter(label=='rando')
@@ -182,7 +183,7 @@ rocplot=bind_rows(plotallroc, plotallrands) %>%
     mutate(samp=as.character(samp))
 
 
-rocpdf=file.path(dbxdir, 'roc.pdf')
+rocpdf=file.path(dbxdir, 'roc_diana.pdf')
 pdf(rocpdf, h=8, w=11)
 seqplot=ggplot(rocplot %>% filter(label=='real'), aes(x=seqtogether, y=seqpure, colour=samp)) +
     geom_step() +

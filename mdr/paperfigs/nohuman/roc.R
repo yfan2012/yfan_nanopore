@@ -4,7 +4,6 @@ library(multidplyr)
 library(RColorBrewer)
 library(ggdendro)
 library(dendextend)
-library(cluster)
 source('~/Code/yfan_nanopore/mdr/paperfigs/contig_level/clinical_functions.R')
 
 projdir='/mithril/Data/Nanopore/projects/methbin'
@@ -35,7 +34,7 @@ rownames(matchrominfo)=chrominfo$chrom
 plaindend=matchrominfo %>%
     scale %>% 
     dist %>%
-    diana %>%
+    hclust %>%
     as.dendrogram
 
 truthbins=tibble(tig=labels(plaindend)) %>%
@@ -166,16 +165,16 @@ plotallrands=bind_rows(realroc, allrands) %>%
     mutate(numtogether=1-numtogether) %>%
     filter(samp<=20)
 
-plotallroccsv=file.path(dbxdir, 'plotallroc_diana.csv')
+plotallroccsv=file.path(dbxdir, 'plotallroc.csv')
 write_csv(plotallroc, plotallroccsv)
-plotallrandscsv=file.path(dbxdir, 'plotallrands_diana.csv')
+plotallrandscsv=file.path(dbxdir, 'plotallrands.csv')
 write_csv(plotallrands, plotallrandscsv)
 
 
-plotallroc=read_csv(file.path(dbxdir, 'plotallroc_diana.csv')) %>%
+plotallroc=read_csv(file.path(dbxdir, 'plotallroc.csv')) %>%
     mutate(randtype='leaf') %>%
     filter(samp<=5)
-plotallrands=read_csv(file.path(dbxdir, 'plotallrands_diana.csv')) %>%
+plotallrands=read_csv(file.path(dbxdir, 'plotallrands.csv')) %>%
     mutate(randtype='tree') %>%
     filter(samp<=5) %>%
     filter(label=='rando')
@@ -183,7 +182,7 @@ rocplot=bind_rows(plotallroc, plotallrands) %>%
     mutate(samp=as.character(samp))
 
 
-rocpdf=file.path(dbxdir, 'roc_diana.pdf')
+rocpdf=file.path(dbxdir, 'roc.pdf')
 pdf(rocpdf, h=8, w=11)
 seqplot=ggplot(rocplot %>% filter(label=='real'), aes(x=seqtogether, y=seqpure, colour=samp)) +
     geom_step() +
