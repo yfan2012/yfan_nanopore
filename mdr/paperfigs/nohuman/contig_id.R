@@ -113,7 +113,6 @@ for (i in 1:dim(mum)[1]) {
     
     tiginfo=bind_rows(tiginfo, tibble(tig=tig, bin=bin, tigleaf=tigleaf, binleaf=binleaf))
 }
-
 names(mum)=c('tig', 'bin', 'rlen', 'total_rcov')
 
 fullinfo=full_join(mum, tiginfo, by=c('tig', 'bin')) %>%
@@ -121,3 +120,44 @@ fullinfo=full_join(mum, tiginfo, by=c('tig', 'bin')) %>%
 
 speciesfile=file.path(datadir, 'tigbin_species.tsv')
 write_tsv(fullinfo, speciesfile)
+
+
+
+
+tiginfo.inclusive=NULL
+for (i in 1:dim(mum.inclusive)[1]) {
+    tig=mum.inclusive$rname[i]
+    bin=mum.inclusive$bin[i]
+
+    infobin=BAT[BAT$tig==paste0(bin, '.fasta'),][-(1:5)] %>% slice(1) %>% unlist(., use.names=FALSE)
+    infotig=CAT[CAT$tig==tig,][-(1:5)] %>% slice(1) %>% unlist(., use.names=FALSE)
+    allinfo=tibble(bin=infobin, tig=infotig) %>%
+        rowwise() %>%
+        mutate(bin=strsplit(bin, ':', fixed=TRUE)[[1]][1]) %>%
+        mutate(tig=strsplit(tig, ':', fixed=TRUE)[[1]][1])
+    allinfo[is.na(allinfo)]='not applicable'
+
+    binindex=sum(!allinfo$bin=='no support')
+    tigindex=sum(!allinfo$tig=='no support')
+
+    binleaf=allinfo$bin[binindex]
+    tigleaf=allinfo$tig[tigindex]
+
+
+    if (length(tigleaf)==0){
+        tigleaf='none'
+    }
+    if (length(binleaf)==0){
+        binleaf='none'
+    }
+
+    tiginfo.inclusive=bind_rows(tiginfo.inclusive, tibble(tig=tig, bin=bin, tigleaf=tigleaf, binleaf=binleaf))
+}
+
+names(mum.inclusive)=c('tig', 'bin', 'rlen', 'total_rcov')
+fullinfo.inclusive=full_join(mum.inclusive, tiginfo.inclusive, by=c('tig', 'bin')) %>%
+    arrange(bin)
+
+speciesfile.inclusive=file.path(datadir, 'tigbin_species_inclusive.tsv')
+write_tsv(fullinfo.inclusive, speciesfile.inclusive)
+
