@@ -22,7 +22,7 @@ mumkey=mum %>%
     filter(n()==1)
 
 mummultiple=mum %>%
-    group_by(rname) %>%
+    group_by(rname, rlen) %>%
     filter(n()>1) %>%
     summarise(all_bins=paste0(bin, collapse=','), all_rcov=paste0(total_rcov, collapse=','))
 
@@ -60,7 +60,7 @@ mumkey.inclusive=mum.inclusive %>%
     filter(n()==1)
 
 mummultiple.inclusive=mum.inclusive %>%
-    group_by(rname) %>%
+    group_by(rname, rlen) %>%
     filter(n()>1) %>%
     summarise(all_bins=paste0(bin, collapse=','), all_rcov=paste0(total_rcov, collapse=','))
 
