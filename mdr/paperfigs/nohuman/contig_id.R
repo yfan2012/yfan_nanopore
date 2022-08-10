@@ -161,3 +161,20 @@ fullinfo.inclusive=full_join(mum.inclusive, tiginfo.inclusive, by=c('tig', 'bin'
 speciesfile.inclusive=file.path(datadir, 'tigbin_species_inclusive.tsv')
 write_tsv(fullinfo.inclusive, speciesfile.inclusive)
 
+
+
+##try with kraken
+krakenfile=file.path(datadir, 'contig_id/kraken_standard/200708_mdr_stool16native_nohuman.out.txt')
+kraken_cols=c('class', 'tig', 'tigkraken', 'length', 'info')
+kraken=read_tsv(krakenfile, col_names=kraken_cols)[,2:3]
+
+fullinfo.inclusive.kraken=full_join(fullinfo.inclusive, kraken, by='tig') %>%
+    na.omit
+speciesfile.inclusive.kraken=file.path(datadir, 'tigbin_species_inclusive_kraken.tsv')
+write_tsv(fullinfo.inclusive.kraken, speciesfile.inclusive.kraken)
+
+
+fullinfo.kraken=full_join(fullinfo, kraken, by='tig') %>%
+    na.omit
+speciesfile.kraken=file.path(datadir, 'tigbin_species_kraken.tsv')
+write_tsv(fullinfo.kraken, speciesfile.kraken)

@@ -143,3 +143,13 @@ plot(distplot)
 dev.off()
 
 
+
+####add kraken stuff
+krakenfile=file.path(datadir, 'contig_id/kraken_standard/200708_mdr_stool16native_nohuman.out.short.txt')
+kraken=read_tsv(krakenfile, col_names=c('class', 'tig', 'species'))
+plasnear.kraken=plasnearbins %>%
+    rowwise() %>%
+    mutate(chroms2.kraken=kraken$species[kraken$tig==chroms2])
+
+plasnearkrakencsv=file.path(dbxdir, 'plasmid_nearest_kraken.csv')
+write_csv(plasnear.kraken, plasnearkrakencsv)

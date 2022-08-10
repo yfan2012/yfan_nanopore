@@ -116,3 +116,28 @@ heatmappdf=file.path(dbxdir, 'heatmap.pdf')
 pdf(heatmappdf, h=18, w=18)
 heatmap(matchrominfo)
 dev.off()
+
+
+
+####incorporating kraken analysis
+krakentigfile=file.path(datadir, 'tigbin_species_inclusive_kraken.tsv')
+krakentig=read_tsv(krakentigfile)
+
+krakenlabel=labelinfo %>%
+    rowwise() %>%
+    mutate(tigspecies=krakentig$tigkraken[krakentig$tig==label]) %>%
+    mutate(specieslab=strsplit(tigspecies, ' (', fixed=TRUE)[[1]][1]) %>%
+    mutate(fulllab=paste0(c(label, specieslab), collapse=' '))
+
+dendspecies=dend %>%
+    set('leaves_pch', 15) %>%
+    set('leaves_cex', 2) %>%
+    set('leaves_col', krakenlabel$color) %>%
+    set('labels', krakenlabel$fulllab)
+
+speciestreepdf=file.path(dbxdir, 'tree_labeled_species.pdf')
+pdf(speciestreepdf, h=35, w=12)
+par(mar = c(3, 4, 2, 23) + 0.1)
+plot(dendspecies, horiz=TRUE)
+dev.off()
+

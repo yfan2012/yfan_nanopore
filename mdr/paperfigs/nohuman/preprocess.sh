@@ -234,3 +234,33 @@ if [ $1 == cattigs ] ; then
 	-i $datadir/contig_id/CAT/$prefix.CAT.names_official.txt \
 	-o $datadir/contig_id/CAT/$prefix.CAT.summary.txt
 fi
+
+
+if [ $1 == kraken ] ; then
+    dbdir=/mithril/Data/Nanopore/ref/kraken2
+    
+    krakendir=$datadir/contig_id/kraken_standard
+    mkdir -p $krakendir
+    kraken2 \
+	--db $dbdir/standard \
+	--threads 36 \
+	--classified-out $krakendir/$prefix.class.txt \
+	--unclassified-out $krakendir/$prefix.unclass.txt \
+	--output $krakendir/$prefix.out.txt \
+	--report $krakendir/$prefix.report.txt \
+	--use-names \
+	$asmpolished
+
+    krakenont=$datadir/contig_id/kraken_standard_ont
+    mkdir -p $krakenont
+    kraken2 \
+	--db $dbdir/standard_ont \
+	--threads 36 \
+	--classified-out $krakenont/$prefix.class.txt \
+	--unclassified-out $krakenont/$prefix.unclass.txt \
+	--output $krakenont/$prefix.out.txt \
+	--report $krakenont/$prefix.report.txt \
+	--use-names \
+	$asmpolished
+
+fi
